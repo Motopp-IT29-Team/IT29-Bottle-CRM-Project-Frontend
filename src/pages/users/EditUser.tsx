@@ -31,6 +31,7 @@ import '../../styles/style.css'
 
 type FormErrors = {
     email?: string[];
+    password?: string[];
     role?: string[];
     phone?: string[];
     alternate_phone?: string[];
@@ -74,6 +75,7 @@ export function EditUser() {
     const [userErrors, setUserErrors] = useState<FormErrors>({});
     const [roleSelectOpen, setRoleSelectOpen] = useState(false)
     const [countrySelectOpen, setCountrySelectOpen] = useState(false)
+    const [password, setPassword] = useState<string>('');
     const [formData, setFormData] = useState<FormData>({
         email: '',
         role: 'ADMIN',
@@ -191,6 +193,7 @@ export function EditUser() {
             state: formData.state,
             pincode: formData.pincode,
             country: formData.country,
+            ...(password && password.trim().length > 0 ? { password: password.trim() } : {}),
             // profile_pic: formData.profile_pic,
             // has_sales_access: formData.has_sales_access,
             // has_marketing_access: formData.has_marketing_access,
@@ -278,6 +281,22 @@ export function EditUser() {
                                                     error={!!profileErrors?.email?.[0] || !!userErrors?.email?.[0]}
                                                     helperText={profileErrors?.email?.[0] || userErrors?.email?.[0] || ''}
                                                 />
+                                            </div>
+                                            <div className='fieldSubContainer'>
+                                                <div className='fieldTitle'>New Password (optional)</div>
+                                                <RequiredTextField
+                                                    required
+                                                    name="password"
+                                                    type="password"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    style={{ width: '70%' }}
+                                                    size="small"
+                                                    placeholder="Leave blank to keep current"
+                                                />
+                                                {userErrors?.password?.[0] && (
+                                                      <FormHelperText error>{userErrors.password[0]}</FormHelperText>
+                                                )}
                                             </div>
                                             <div className='fieldSubContainer'>
                                                 <div className='fieldTitle'>Role</div>

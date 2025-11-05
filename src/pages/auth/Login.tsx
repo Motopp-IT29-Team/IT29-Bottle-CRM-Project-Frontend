@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Grid, Stack, Typography } from '@mui/material'
+import { Grid, Stack, Typography,TextField,FormHelperText,Box,Button } from '@mui/material'
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import imgGoogle from '../../assets/images/auth/google.svg'
@@ -7,7 +7,7 @@ import imgLogo from '../../assets/images/auth/img_logo.png'
 import imgLogin from '../../assets/images/auth/img_login.png'
 import { GoogleButton } from '../../styles/CssStyled';
 import { fetchData } from '../../components/FetchData';
-import { AuthUrl } from '../../services/ApiUrls';
+import { AuthUrl,LoginUrl  } from '../../services/ApiUrls';
 import '../../styles/style.css'
 
 declare global {
@@ -20,13 +20,18 @@ declare global {
 export default function Login() {
     const navigate = useNavigate()
     const [token, setToken] = useState(false)
+      // local state for email/password flow
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [submitting, setSubmitting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         if (localStorage.getItem('Token')) {
             // navigate('/organization')
             navigate('/app')
         }
-    }, [token])
+    }, [token, navigate])
 
     const login = useGoogleLogin({
         onSuccess: tokenResponse => {
@@ -48,6 +53,44 @@ export default function Login() {
         },
 
     });
+    // NEW: Email + Password submit handler
+    const onEmailLoginSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setSubmitting(true)
+        setError(null)
+
+        const headers: Record<string, string> = {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        }
+        // If your backend expects org on auth, include it:
+        const org = localStorage.getItem('org')
+        if (org) headers['org'] = org
+        try {
+          const res: any = await fetchData(
+            `${LoginUrl}/`, // from ApiUrls.tsx (e.g. 'auth/login')
+            'POST',
+            JSON.stringify({ email: email.trim(), password }),
+            headers
+          )
+
+          // SimpleJWT-style response: { access, refresh }
+          if (res?.access) {
+            localStorage.setItem('Token', `Bearer ${res.access}`)
+            if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh)
+            localStorage.setItem('userEmail', email.trim())
+            setToken(true)
+            navigate('/app')
+          } else {
+            // DRF usually sends {detail: "..."} for auth errors
+            setError(res?.detail || 'Invalid email or password')
+          }
+        } catch {
+          setError('Unable to login. Please try again.')
+        } finally {
+          setSubmitting(false)
+        }
+    }
     return (
         <div>
             <Stack
@@ -70,6 +113,52 @@ export default function Login() {
                             <img src={imgLogo} alt='register_logo' className='register-logo' />
                         </Grid>
                         <Typography variant='h5' style={{ fontWeight: 'bolder' }}>Sign In</Typography>
+                        {/* Email + Password form */}
+                        <Box
+                          component="form"
+                          onSubmit={onEmailLoginSubmit}
+                          sx={{ mt: 3, width: 320 }}
+                        >
+                          <TextField
+                            label="Email"
+                            type="email"
+                            fullWidth
+                            size="small"
+                            margin="dense"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            autoComplete="username"
+                            required
+                          />
+
+                          <TextField
+                            label="Password"
+                            type="password"
+                            fullWidth
+                            size="small"
+                            margin="dense"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="current-password"
+                            required
+                          />
+
+                          {error && (
+                            <FormHelperText error sx={{ mt: 1 }}>
+                              {error}
+                            </FormHelperText>
+                          )}
+
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            fullWidth
+                            sx={{ mt: 2 }}
+                            disabled={submitting}
+                          >
+                            {submitting ? 'Signing in…' : 'Sign In'}
+                          </Button>
+                        </Box>
                         <Grid item sx={{ mt: 4 }}>
                             {/* <GoogleLogin
                                 onSuccess={credentialResponse => {

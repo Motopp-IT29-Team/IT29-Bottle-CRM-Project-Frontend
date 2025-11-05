@@ -1,5 +1,5 @@
-import styled from "@emotion/styled";
-import { Button, css, Fab, IconButton, ListItem, ListItemButton, ListItemText, Select, Switch, Tab, TableCell, tableCellClasses, TableRow, TextField, Toolbar } from "@mui/material";
+import styled from '@emotion/styled'
+import { Button, css, Fab, IconButton, ListItem, ListItemButton, ListItemText, Select, Switch, Tab, TableCell, tableCellClasses, TableRow, TextField, Toolbar } from '@mui/material'
 // import css from "styled-jsx/css";
 
 export const GoogleButton = styled(Button)`
@@ -7,7 +7,7 @@ export const GoogleButton = styled(Button)`
   text-transform: none;
   color: black;
   border: 1px solid #80808073
-`;
+`
 
 export const CustomToolbar = styled(Toolbar)`
   height: 50px !important;
@@ -16,7 +16,7 @@ export const CustomToolbar = styled(Toolbar)`
   display: flex;
   justify-content: space-between;
   background-color: #1A3353;
-`;
+`
 export const CustomTab = styled(Tab)`
   height: 36px !important;
   min-height: 36px !important;
@@ -26,7 +26,7 @@ export const CustomTab = styled(Tab)`
   font-size: 15px;
   padding: 0px 15px;
   border-radius: 5px 5px 0px 0px;
-`;
+`
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -91,7 +91,7 @@ export const AntSwitch = styled(Switch)(({ theme }) => ({
 }))
 export const StyledListItem = styled(ListItem)`
   
-`;
+`
 
 export const StyledListItemButton = styled(ListItemButton)`
   &.Mui-selected {
@@ -100,12 +100,12 @@ export const StyledListItemButton = styled(ListItemButton)`
   &:hover {
     background-color: #3e79f717;
   }
-`;
+`
 export const StyledListItemText = styled(ListItemText)`
   & .MuiListItemText-primary {
     font-weight: 500;
   }
-`;
+`
 export const textFieldStyledc = css`
   .root {
     border-left: 2px solid red;
@@ -118,7 +118,7 @@ export const textFieldStyledc = css`
     border-left: 2px solid red;
     height: 38px;
   }
-`;
+`
 export const TextFieldStyled = styled.div`
 .root {
   border-left: 2px solid red;
@@ -131,7 +131,7 @@ export const TextFieldStyled = styled.div`
   border-left: 2px solid red;
   height: 38px;
 }
-`;
+`
 
 export const RequiredTextField = styled(TextField)`
   fieldset {
@@ -140,7 +140,7 @@ export const RequiredTextField = styled(TextField)`
     border-top-left-radius: 0px;
     padding-left: 12px;
   }
-`;
+`
 export const RequiredSelect = styled(Select)`
   fieldset {
     border-left: 3px solid red;
@@ -148,7 +148,7 @@ export const RequiredSelect = styled(Select)`
     border-top-left-radius: 0px;
     padding-left: 12px;
   }
-`;
+`
 
 export const CustomSelectTextField = styled(TextField)`
   position: relative;
@@ -180,7 +180,7 @@ export const CustomSelectTextField = styled(TextField)`
     appearance: none;
     padding-right: 24px; /* Allow space for custom arrow */
   }
-`;
+`
 export const CustomSelectField = styled(TextField)`
 .MuiSelect-icon {
   background-color: #d3d3d34a;
@@ -189,7 +189,7 @@ export const CustomSelectField = styled(TextField)`
   margin-top: -7px;
   margin-right: -7px;
 }
-`;
+`
 export const CustomSelectField1 = styled(TextField)`
 .MuiSelect-icon {
   background-color: #d3d3d34a;
@@ -200,7 +200,7 @@ export const CustomSelectField1 = styled(TextField)`
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
 }
-`;
+`
 export const StyledSelect = styled(Select)`
   & .MuiSelect-icon {
     background-color: #d3d3d34a;
@@ -209,7 +209,7 @@ export const StyledSelect = styled(Select)`
     margin-top: -7px;
     margin-right: -7px;
   }
-`;
+`
 // const CustomTextField = styled(({ arrowIcon, ...rest }) => <TextField {...rest} />)`
 //   position: relative;
 //   height: 40px;
@@ -248,9 +248,9 @@ export const FabLeft = styled(Fab)({
   minWidth: '20px',
   borderRadius: '7px 0px 0px 7px',
   backgroundColor: 'whitesmoke',
-  marginRight:'7px',
-  boxShadow:`0px 1px 1px -1px rgba(0,0,0,0.2), 0px 0px 3px 0px rgba(0,0,0,0.14), 0px 1px 0px 0px rgba(0,0,0,0.12)`
-});
+  marginRight: '7px',
+  boxShadow: '0px 1px 1px -1px rgba(0,0,0,0.2), 0px 0px 3px 0px rgba(0,0,0,0.14), 0px 1px 0px 0px rgba(0,0,0,0.12)'
+})
 export const FabRight = styled(Fab)({
   height: '40px',
   minHeight: '40px',
@@ -258,9 +258,9 @@ export const FabRight = styled(Fab)({
   minWidth: '20px',
   borderRadius: '0px 7px 7px 0px',
   backgroundColor: 'whitesmoke',
-  marginLeft:'7px',
-  boxShadow:`0px 1px 1px -1px rgba(0,0,0,0.2), 0px 0px 3px 0px rgba(0,0,0,0.14), 0px 1px 0px 0px rgba(0,0,0,0.12)`
-});
+  marginLeft: '7px',
+  boxShadow: '0px 1px 1px -1px rgba(0,0,0,0.2), 0px 0px 3px 0px rgba(0,0,0,0.14), 0px 1px 0px 0px rgba(0,0,0,0.12)'
+})
 export const CustomPopupIcon = styled(IconButton)`
   cursor: pointer !important;
   border-top-right-radius: 7px;
@@ -276,16 +276,16 @@ export const CustomPopupIcon = styled(IconButton)`
     border-radius: 0 !important;
     background-color: whitesmoke;
   }
-`;
+`
 export const CustomInputBoxWrapper = styled('div')({
   // width: '200px',
-  borderBottom:'none',
+  borderBottom: 'none',
   height: '150px',
-  borderTopLeftRadius:'10px',
-  borderTopRightRadius:'10px',
+  borderTopLeftRadius: '10px',
+  borderTopRightRadius: '10px',
   border: '1px solid #ccc',
   overflowY: 'auto',
   padding: '8px',
   outline: 'none',
-  position: 'relative',
-});
+  position: 'relative'
+})

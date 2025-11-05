@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import Login from './pages/auth/Login';
-import { Home } from './pages/home/Home';
+import Login from './pages/auth/Login'
+import { Home } from './pages/home/Home'
 
-function App() {
-
+function App () {
   return (
     <>
       <Router>
@@ -30,7 +29,7 @@ function App() {
         </Routes>
       </Router>
     </>
-  );
+  )
 }
 
-export default App;
+export default App
