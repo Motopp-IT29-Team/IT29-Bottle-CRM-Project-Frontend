@@ -34,6 +34,7 @@ import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp'
 
 type FormErrors = {
     email?: string[];
+    password?: string[];
     role?: string[];
     phone?: string[];
     alternate_phone?: string[];
@@ -104,6 +105,7 @@ export function AddUsers() {
     const [errors, setErrors] = useState<FormErrors>({});
     const [profileErrors, setProfileErrors] = useState<FormErrors>({});
     const [userErrors, setUserErrors] = useState<FormErrors>({});
+    const [password, setPassword] = useState<string>('');
     const [formData, setFormData] = useState<FormData>({
         email: '',
         role: 'ADMIN',
@@ -156,8 +158,15 @@ export function AddUsers() {
             profile_pic: formData.profile_pic,
             has_sales_access: formData.has_sales_access,
             has_marketing_access: formData.has_marketing_access,
-            is_organization_admin: formData.is_organization_admin
+            is_organization_admin: formData.is_organization_admin,
+             ...(password && password.trim().length > 0
+                 ? { password: password.trim() }
+                  : {}),
         }
+
+        if (password && password.trim().length > 0) {
+            data.password = password.trim();
+            }
 
         fetchData(`${UsersUrl}/`, 'POST', JSON.stringify(data), Header)
             .then((res: any) => {
@@ -240,6 +249,22 @@ export function AddUsers() {
                                                     error={!!profileErrors?.email?.[0] || !!userErrors?.email?.[0]}
                                                     helperText={profileErrors?.email?.[0] || userErrors?.email?.[0] || ''}
                                                 />
+                                            </div>
+                                            <div className='fieldSubContainer'>
+                                                <div className='fieldTitle'>Password</div>
+                                                <RequiredTextField
+                                                    required
+                                                     name="password"
+                                                     type="password"
+                                                     value={password}
+                                                     onChange={(e) => setPassword(e.target.value)}
+                                                     style={{ width: '70%' }}
+                                                     size="small"
+                                                     placeholder="Min. 8 characters"
+                                                />
+                                                {userErrors?.password?.[0] && (
+                                                      <FormHelperText error>{userErrors.password[0]}</FormHelperText>
+                                                )}
                                             </div>
                                             <div className='fieldSubContainer'>
                                                 <div className='fieldTitle'>Role</div>
