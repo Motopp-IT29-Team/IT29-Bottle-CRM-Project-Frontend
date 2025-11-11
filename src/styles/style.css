@@ -68,7 +68,7 @@ body {
 .register-ad-bg-image {
     /* height: 600px; */
     width: 100%;
-    overflow: "hidden";
+    overflow: hidden;
     height: 170%;
     /* max-height: 160%; */
 
@@ -281,18 +281,18 @@ body {
 .fieldSubContainer {
     width: 40%;
     display: flex;
+    align-items: center;
     flex-direction: row;
     margin-top: 10px;
+    gap: 15px;
 }
 
 .fieldTitle {
-    margin-top: 5px;
-    margin-right: 15px;
     font-size: 15px;
     width: 29%;
     text-align: right;
     font-weight: 500;
-    color: "#1A3353";
+    color: #1A3353;
 }
 
 .assignTo {
@@ -537,27 +537,27 @@ input[type=number] {
 
 /* comment */
 .CustomInputBoxWrapper {
-    width: '200px';
-    height: '400px';
-    min-height: '400px';
-    border-radius: '4px';
-    border: '1px solid #ccc';
-    overflow-y: 'auto';
-    padding: '8px';
-    outline: 'none';
-    position: 'relative';
+    width: 200px;
+    height: 400px;
+    min-height: 400px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    overflow-y: auto;
+    padding: 8px;
+    outline: none;
+    position: relative;
 }
 .AttachedFilesList{
     list-style: 'none';
     padding: 0;
-    margin-top: '8px';
+    margin-top: 8px;
 }
 .AttachedFileItem{
-    margin-top: '4px';
+    margin-top: 4px;
 }
 .ActionButtonsWrapper{
-    border-top: '1px solid #ccc';
-    padding-top: '8px';
-    display: 'flex';
-    justify-content: 'space-between';
+    border-top: 1px solid #ccc;
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
 }

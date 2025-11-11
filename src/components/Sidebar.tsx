@@ -52,7 +52,7 @@ export default function Sidebar(props: any) {
     const [screen, setScreen] = useState('contacts')
     const [drawerWidth, setDrawerWidth] = useState(200)
     const [headerWidth, setHeaderWidth] = useState(drawerWidth)
-    const [userDetail, setUserDetail] = useState('')
+    const [userDetail, setUserDetail] = useState<any>('')
     const [organizationModal, setOrganizationModal] = useState(false)
     const organizationModalClose = () => { setOrganizationModal(false) }
 
@@ -93,14 +93,13 @@ export default function Sidebar(props: any) {
         }
     }
 
-    // useEffect(() => {
-    //     userProfile()
-    // }, [])
+    useEffect(() => {
+        userProfile()
+    }, [])
 
     const userProfile = () => {
         fetchData(`${ProfileUrl}/`, 'GET', null as any, Header1)
             .then((res: any) => {
-                // console.log(res, 'user')
                 if (res?.user_obj) {
                     setUserDetail(res?.user_obj)
                 }
@@ -147,8 +146,8 @@ export default function Sidebar(props: any) {
 
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
-    // console.log(screen, 'sidebar');
     const context = { drawerWidth: drawerWidth, screen: screen }
+
     return (
         <>
             <Box>
@@ -176,12 +175,19 @@ export default function Sidebar(props: any) {
                             </Typography>
                         </Toolbar>
                     </Box>
+
                     <Box style={{
                         marginRight: '10px',
                         display: 'flex',
                         flexDirection: 'row',
                         alignItems: 'center'
                     }}>
+                        <Box style={{
+                            color: 'black',
+                            marginRight: '10px',
+                        }}>
+                            {userDetail?.user_details?.email}
+                        </Box>
                         {/* <IconButton onClick={userProfile} sx={{ mr: 2 }}><FaCog /></IconButton> */}
                         <IconButton onClick={handleClick} sx={{ mr: 3 }}>
                             <Avatar
