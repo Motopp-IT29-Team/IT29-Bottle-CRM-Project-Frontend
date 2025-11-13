@@ -55,10 +55,44 @@ export default function Sidebar(props: any) {
     const [userDetail, setUserDetail] = useState('')
     const [organizationModal, setOrganizationModal] = useState(false)
     const organizationModalClose = () => { setOrganizationModal(false) }
+    const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
+
 
     useEffect(() => {
         toggleScreen()
     }, [navigate])
+
+    useEffect(() => {
+      const token = localStorage.getItem('Token');
+      const org = localStorage.getItem('org');
+
+      if (!token || !org) return;
+
+      // Fetch role
+      fetchData(`${ProfileUrl}`, 'GET', undefined, {
+        Authorization: token,
+        org,
+        Accept: 'application/json',
+      })
+        .then((profile: any) => {
+            console.log('Sidebar /profile/ response:', profile);
+            const newRole = profile?.user_obj?.role;
+//           const newRole =
+//             profile?.role ||
+//             profile?.profile_obj?.role ||
+//             profile?.data?.role ||
+//             profile?.data?.profile_obj?.role;
+//
+            if (newRole) {
+                localStorage.setItem('role', newRole);
+                setRole(newRole);
+                }
+        })
+        .catch((err) => {
+          console.error("Error fetching profile:", err);
+        });
+
+    }, []);
 
     // useEffect(() => {
     // navigate('/leads')
@@ -110,12 +144,14 @@ export default function Sidebar(props: any) {
             })
     }
 
-    //const navList = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases']
-    const isAdmin = (localStorage.getItem('role') || '').toUpperCase() === 'ADMIN';
+//     const navList = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases']
+
+    const rawRole = role || '';
+    const isAdmin = rawRole.toUpperCase() === 'ADMIN';
     const allNavItems = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases'];
     const navList = isAdmin
-        ? allNavItems
-        : allNavItems.filter((item) => item !== 'users');  // hide Users for non-admins
+      ? allNavItems
+      : allNavItems.filter((item) => item !== 'users');
 
     const navIcons = (text: any, screen: any): React.ReactNode => {
         switch (text) {

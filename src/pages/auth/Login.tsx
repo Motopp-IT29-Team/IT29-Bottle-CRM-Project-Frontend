@@ -52,77 +52,138 @@ export default function Login() {
 //                 })
 //        }
 //     });
-       const login = useGoogleLogin({
-           onSuccess: async (tokenResponse) => {
-               try {
-                   const apiToken = { token: tokenResponse.access_token };
-                   const head = {
-                       Accept: 'application/json',
-                               'Content-Type': 'application/json',
-                               };
-                           // 1) Log in with Google → get your app token
-                   const res: any = await fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head);
-                   // 2) Store token
-                   localStorage.setItem('Token', `Bearer ${res.access_token}`);
-                   // 3) Trigger redirect (via your useEffect on `token`)
-                   setToken(true);
-                   // 4) Fire-and-forget role fetch; do NOT block login on this
-                   try {
-                       const profile: any = await fetchData(`${ProfileUrl}/`, 'GET', undefined, {
-                           Authorization: localStorage.getItem('Token'),
-                           org: localStorage.getItem('org'),
-                           Accept: 'application/json',
-                       });
-                   if (profile && profile.role) {
-                       localStorage.setItem('role', profile.role);
-                       }
-                   } catch (profileErr) {
-                       console.error('Error fetching profile:', profileErr);
-                       }
-                   } catch (loginErr) {
-                       console.error('Error logging in with Google:', loginErr);
-                       }
-                   },
-               });
+//        const login = useGoogleLogin({
+//            onSuccess: async (tokenResponse) => {
+//                try {
+//                    const apiToken = { token: tokenResponse.access_token };
+//                    const head = {
+//                        Accept: 'application/json',
+//                                'Content-Type': 'application/json',
+//                                };
+//                            // 1) Log in with Google → get your app token
+//                    const res: any = await fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head);
+//                    // 2) Store token
+//                    localStorage.setItem('Token', `Bearer ${res.access_token}`);
+//                    // 3) Trigger redirect (via your useEffect on `token`)
+//                    setToken(true);
+//                    // 4) Fire-and-forget role fetch; do NOT block login on this
+//                    try {
+//                        const profile: any = await fetchData(`${ProfileUrl}/`, 'GET', undefined, {
+//                            Authorization: localStorage.getItem('Token'),
+//                            org: localStorage.getItem('org'),
+//                            Accept: 'application/json',
+//                        });
+//                    if (profile && profile.role) {
+//                        localStorage.setItem('role', profile.role);
+//                        }
+//                    } catch (profileErr) {
+//                        console.error('Error fetching profile:', profileErr);
+//                        }
+//                    } catch (loginErr) {
+//                        console.error('Error logging in with Google:', loginErr);
+//                        }
+//                    },
+//                });
 
-    // NEW: Email + Password submit handler
-    const onEmailLoginSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setSubmitting(true)
-        setError(null)
-
-        const headers: Record<string, string> = {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        }
-        // If your backend expects org on auth, include it:
-        const org = localStorage.getItem('org')
-        if (org) headers['org'] = org
+//     // NEW: Email + Password submit handler
+//     const onEmailLoginSubmit = async (e: React.FormEvent) => {
+//         e.preventDefault()
+//         setSubmitting(true)
+//         setError(null)
+//
+//         const headers: Record<string, string> = {
+//           Accept: 'application/json',
+//           'Content-Type': 'application/json',
+//         }
+//         // If your backend expects org on auth, include it:
+//         const org = localStorage.getItem('org')
+//         if (org) headers['org'] = org
+//         try {
+//           const res: any = await fetchData(
+//             `${LoginUrl}/`, // from ApiUrls.tsx (e.g. 'auth/login')
+//             'POST',
+//             JSON.stringify({ email: email.trim(), password }),
+//             headers
+//           )
+//
+//           // SimpleJWT-style response: { access, refresh }
+//           if (res?.access) {
+//             localStorage.setItem('Token', `Bearer ${res.access}`)
+//             if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh)
+//             localStorage.setItem('userEmail', email.trim())
+//             setToken(true)
+//             navigate('/app')
+//           } else {
+//             // DRF usually sends {detail: "..."} for auth errors
+//             setError(res?.detail || 'Invalid email or password')
+//           }
+//         } catch {
+//           setError('Unable to login. Please try again.')
+//         } finally {
+//           setSubmitting(false)
+//         }
+//     }
+    const login = useGoogleLogin({
+      onSuccess: async (tokenResponse) => {
         try {
-          const res: any = await fetchData(
-            `${LoginUrl}/`, // from ApiUrls.tsx (e.g. 'auth/login')
-            'POST',
-            JSON.stringify({ email: email.trim(), password }),
-            headers
-          )
+          const apiToken = { token: tokenResponse.access_token };
+          const head = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          };
 
-          // SimpleJWT-style response: { access, refresh }
-          if (res?.access) {
-            localStorage.setItem('Token', `Bearer ${res.access}`)
-            if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh)
-            localStorage.setItem('userEmail', email.trim())
-            setToken(true)
-            navigate('/app')
-          } else {
-            // DRF usually sends {detail: "..."} for auth errors
-            setError(res?.detail || 'Invalid email or password')
-          }
-        } catch {
-          setError('Unable to login. Please try again.')
-        } finally {
-          setSubmitting(false)
+          // 1) Log in to your backend using Google token
+          const res: any = await fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head);
+
+          // 2) Store JWT
+          localStorage.setItem('Token', `Bearer ${res.access_token}`);
+
+          // 3) Trigger redirect logic (your useEffect on token)
+          setToken(true);
+        } catch (loginErr) {
+          console.error('Error logging in with Google:', loginErr);
         }
-    }
+      },
+    });
+
+    const onEmailLoginSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSubmitting(true);
+      setError(null);
+
+      const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      };
+
+      const org = localStorage.getItem('org');
+      if (org) headers['org'] = org;
+
+      try {
+        const res: any = await fetchData(
+          `${LoginUrl}/`,
+          'POST',
+          JSON.stringify({ email: email.trim(), password }),
+          headers
+        );
+
+        if (res?.access) {
+          localStorage.setItem('Token', `Bearer ${res.access}`);
+          if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh);
+          localStorage.setItem('userEmail', email.trim());
+
+          // 🔹 No /profile/ call here anymore
+          setToken(true);
+          navigate('/app');
+        } else {
+          setError(res?.detail || 'Invalid email or password');
+        }
+      } catch {
+        setError('Unable to login. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
+    };
     return (
         <div>
             <Stack
