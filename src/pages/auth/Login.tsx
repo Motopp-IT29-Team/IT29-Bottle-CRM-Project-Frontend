@@ -7,7 +7,7 @@ import imgLogo from '../../assets/images/auth/img_logo.png'
 import imgLogin from '../../assets/images/auth/img_login.png'
 import { GoogleButton } from '../../styles/CssStyled';
 import { fetchData } from '../../components/FetchData';
-import { AuthUrl,LoginUrl  } from '../../services/ApiUrls';
+import { AuthUrl,LoginUrl,ProfileUrl   } from '../../services/ApiUrls';
 import '../../styles/style.css'
 
 declare global {
@@ -33,26 +33,58 @@ export default function Login() {
         }
     }, [token, navigate])
 
-    const login = useGoogleLogin({
-        onSuccess: tokenResponse => {
-            const apiToken = { token: tokenResponse.access_token }
-            // const formData = new FormData()
-            // formData.append('token', tokenResponse.access_token)
-            const head = {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-            fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head)
-                .then((res: any) => {
-                    localStorage.setItem('Token', `Bearer ${res.access_token}`)
-                    setToken(true)
-                })
-                .catch((error: any) => {
-                    console.error('Error:', error)
-                })
-        },
+//     const login = useGoogleLogin({
+//         onSuccess:  tokenResponse => {
+//             const apiToken = { token: tokenResponse.access_token }
+//             // const formData = new FormData()
+//             // formData.append('token', tokenResponse.access_token)
+//             const head = {
+//                 'Accept': 'application/json',
+//                 'Content-Type': 'application/json'
+//             }
+//             fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head)
+//                 .then((res: any) => {
+//                     localStorage.setItem('Token', `Bearer ${res.access_token}`)
+//                     setToken(true)
+//                 })
+//                 .catch((error: any) => {
+//                     console.error('Error:', error)
+//                 })
+//        }
+//     });
+       const login = useGoogleLogin({
+           onSuccess: async (tokenResponse) => {
+               try {
+                   const apiToken = { token: tokenResponse.access_token };
+                   const head = {
+                       Accept: 'application/json',
+                               'Content-Type': 'application/json',
+                               };
+                           // 1) Log in with Google → get your app token
+                   const res: any = await fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head);
+                   // 2) Store token
+                   localStorage.setItem('Token', `Bearer ${res.access_token}`);
+                   // 3) Trigger redirect (via your useEffect on `token`)
+                   setToken(true);
+                   // 4) Fire-and-forget role fetch; do NOT block login on this
+                   try {
+                       const profile: any = await fetchData(`${ProfileUrl}/`, 'GET', undefined, {
+                           Authorization: localStorage.getItem('Token'),
+                           org: localStorage.getItem('org'),
+                           Accept: 'application/json',
+                       });
+                   if (profile && profile.role) {
+                       localStorage.setItem('role', profile.role);
+                       }
+                   } catch (profileErr) {
+                       console.error('Error fetching profile:', profileErr);
+                       }
+                   } catch (loginErr) {
+                       console.error('Error logging in with Google:', loginErr);
+                       }
+                   },
+               });
 
-    });
     // NEW: Email + Password submit handler
     const onEmailLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

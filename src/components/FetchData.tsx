@@ -13,10 +13,32 @@ export const Header1 = {
   Authorization: localStorage.getItem('Token')
 }
 
-export function fetchData(url: any, method: any, data = '', header: any) {
-  return fetch(`${SERVER}${url}`, {
-    method,
+// export function fetchData(url: any, method: any, data = '', header: any) {
+//   return fetch(`${SERVER}${url}`, {
+//     method,
+//     headers: header,
+//     body: data
+//   }).then((response) => response.json())
+// }
+
+export function fetchData(url: any, method: any, data: any = '', header: any) {
+  const upperMethod = (method || '').toString().toUpperCase();
+
+  const options: any = {
+    method: upperMethod,
     headers: header,
-    body: data
-  }).then((response) => response.json())
+  };
+
+  // Only attach body for non-GET methods
+  if (upperMethod !== 'GET' && data !== undefined && data !== null && data !== '') {
+    options.body = data;
+  }
+
+  return fetch(`${SERVER}${url}`, options)
+    .then((response) => {
+      // optional: help debug bad responses
+      // console.log('fetchData', `${SERVER}${url}`, response.status);
+      return response.json();
+    });
 }
+
