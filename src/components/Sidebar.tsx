@@ -69,7 +69,7 @@ export default function Sidebar(props: any) {
       if (!token || !org) return;
 
       // Fetch role
-      fetchData(`${ProfileUrl}`, 'GET', undefined, {
+      fetchData(`${ProfileUrl}/`, 'GET', undefined, {
         Authorization: token,
         org,
         Accept: 'application/json',
