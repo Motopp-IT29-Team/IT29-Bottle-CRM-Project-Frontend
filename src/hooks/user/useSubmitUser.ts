@@ -6,7 +6,7 @@ import { UserFormData } from './useUserFormData';
 export const useSubmitUser = (resetForm: () => void) => {
   const navigate = useNavigate();
 
-  const submitForm = async (formData: UserFormData, password: string) => {
+  const submitForm = async (formData: UserFormData) => {
     const Header = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -16,7 +16,6 @@ export const useSubmitUser = (resetForm: () => void) => {
 
     const data = {
       ...formData,
-      ...(password?.trim() && { password: password.trim() }),
     };
 
     try {

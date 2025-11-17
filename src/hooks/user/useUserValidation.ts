@@ -4,7 +4,7 @@ import { UserFormData } from './useUserFormData';
 export const useUserValidation = () => {
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
 
-  const validateForm = (data: UserFormData, password: string) => {
+  const validateForm = (data: UserFormData) => {
     const errors: { [key: string]: string } = {};
 
     if (!data.email.trim()) errors.email = 'Email is required';
