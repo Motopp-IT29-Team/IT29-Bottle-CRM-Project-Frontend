@@ -18,8 +18,13 @@ import {
   Tooltip,
   Divider,
   Select,
-  Button
+  Button,
+  SelectChangeEvent,
+  Switch,
+  FormControlLabel
 } from '@mui/material'
+import { TITLE_OPTIONS, BUDGET_RANGE_OPTIONS, DECISION_TIMEFRAME_OPTIONS, LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS, INDUSTRY_OPTIONS } from '../../constants/dropdownOptions'
+import { CustomDropdown } from '../../components/common/CustomDropdown'
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
 import '../../styles/style.css'
@@ -98,8 +103,13 @@ type FormErrors = {
   industry?: string[],
   skype_ID?: string[],
   file?: string[],
+  budget_range?: string[],
+  decision_timeframe?: string[],
+  salutation?: string[],
+  do_not_call?: string[],
 };
 interface FormData {
+  salutation: string,
   title: string,
   first_name: string,
   last_name: string,
@@ -126,7 +136,10 @@ interface FormData {
   probability: number,
   industry: string,
   skype_ID: string,
-  file: string | null
+  file: string | null,
+  budget_range: string,
+  decision_timeframe: string,
+  do_not_call: boolean
 }
 
 export function AddLeads() {
@@ -147,6 +160,7 @@ export function AddLeads() {
   const [industrySelectOpen, setIndustrySelectOpen] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({});
   const [formData, setFormData] = useState<FormData>({
+    salutation: '',
     title: '',
     first_name: '',
     last_name: '',
@@ -160,8 +174,8 @@ export function AddLeads() {
     teams: '',
     assigned_to: [],
     contacts: [],
-    status: 'assigned',
-    source: 'call',
+    status: 'NEW',
+    source: 'WEBSITE',
     address_line: '',
     street: '',
     city: '',
@@ -171,9 +185,12 @@ export function AddLeads() {
     tags: [],
     company: '',
     probability: 1,
-    industry: 'ADVERTISING',
+    industry: 'TECHNOLOGY',
     skype_ID: '',
-    file: null
+    file: null,
+    budget_range: '',
+    decision_timeframe: '',
+    do_not_call: false
   })
 
   useEffect(() => {
@@ -248,6 +265,7 @@ export function AddLeads() {
   const submitForm = () => {
     // console.log('Form data:', formData.lead_attachment,'sfs', formData.file);
     const data = {
+      salutation: formData.salutation,
       title: formData.title,
       first_name: formData.first_name,
       last_name: formData.last_name,
@@ -274,7 +292,10 @@ export function AddLeads() {
       company: formData.company,
       probability: formData.probability,
       industry: formData.industry,
-      skype_ID: formData.skype_ID
+      skype_ID: formData.skype_ID,
+      budget_range: formData.budget_range,
+      decision_timeframe: formData.decision_timeframe,
+      do_not_call: formData.do_not_call
     }
 
     fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), Header)
@@ -295,6 +316,7 @@ export function AddLeads() {
 
   const resetForm = () => {
     setFormData({
+      salutation: '',
       title: '',
       first_name: '',
       last_name: '',
@@ -308,8 +330,8 @@ export function AddLeads() {
       teams: '',
       assigned_to: [],
       contacts: [],
-      status: 'assigned',
-      source: 'call',
+      status: 'NEW',
+      source: 'WEBSITE',
       address_line: '',
       street: '',
       city: '',
@@ -319,9 +341,12 @@ export function AddLeads() {
       tags: [],
       company: '',
       probability: 1,
-      industry: 'ADVERTISING',
+      industry: 'TECHNOLOGY',
       skype_ID: '',
-      file: null
+      file: null,
+      budget_range: '',
+      decision_timeframe: '',
+      do_not_call: false
     });
     setErrors({})
     setSelectedContacts([]);
@@ -355,7 +380,144 @@ export function AddLeads() {
             <div className='leadContainer'>
               <Accordion defaultExpanded style={{ width: '98%' }}>
                 <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                  <Typography className='accordion-header'>Lead Information</Typography>
+                  <Typography className='accordion-header'>Basic Information</Typography>
+                </AccordionSummary>
+                <Divider className='divider' />
+                <AccordionDetails>
+                  <Box
+                    sx={{ width: '98%', color: '#1A3353', mb: 1 }}
+                    component='form'
+                    noValidate
+                    autoComplete='off'
+                  >
+                    <div className='fieldContainer'>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Salutation</div>
+                        <div style={{ width: '70%' }}>
+                          <CustomDropdown
+                            label="Salutation"
+                            value={formData.salutation}
+                            options={TITLE_OPTIONS}
+                            onChange={(e: SelectChangeEvent) => handleChange({ target: { name: 'salutation', value: e.target.value } })}
+                            error={!!errors?.salutation?.[0]}
+                            helperText={errors?.salutation?.[0] || ''}
+                          />
+                        </div>
+                      </div>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>First Name</div>
+                        <RequiredTextField
+                          name='first_name'
+                          required
+                          value={formData.first_name}
+                          onChange={handleChange}
+                          style={{ width: '70%' }}
+                          size='small'
+                          helperText={errors?.first_name?.[0] ? errors?.first_name[0] : ''}
+                          error={!!errors?.first_name?.[0]}
+                        />
+                      </div>
+                    </div>
+                    <div className='fieldContainer2'>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Last Name</div>
+                        <RequiredTextField
+                          name='last_name'
+                          required
+                          value={formData.last_name}
+                          onChange={handleChange}
+                          style={{ width: '70%' }}
+                          size='small'
+                          helperText={errors?.last_name?.[0] ? errors?.last_name[0] : ''}
+                          error={!!errors?.last_name?.[0]}
+                        />
+                      </div>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Job Title</div>
+                        <RequiredTextField
+                          name='title'
+                          value={formData.title}
+                          onChange={handleChange}
+                          style={{ width: '70%' }}
+                          size='small'
+                          helperText={errors?.title?.[0] ? errors?.title[0] : ''}
+                          error={!!errors?.title?.[0]}
+                        />
+                      </div>
+                    </div>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+            {/* contact details */}
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '20px' }}>
+              <Accordion defaultExpanded style={{ width: '98%' }}>
+                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
+                  <Typography className='accordion-header'>Contact Details</Typography>
+                </AccordionSummary>
+                <Divider className='divider' />
+                <AccordionDetails>
+                  <Box
+                    sx={{ width: '98%', color: '#1A3353', mb: 1 }}
+                    component='form'
+                    noValidate
+                    autoComplete='off'
+                  >
+                    <div className='fieldContainer'>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Email Address</div>
+                        <TextField
+                          name='email'
+                          type='email'
+                          value={formData.email}
+                          onChange={handleChange}
+                          style={{ width: '70%' }}
+                          size='small'
+                          helperText={errors?.email?.[0] ? errors?.email[0] : ''}
+                          error={!!errors?.email?.[0]}
+                        />
+                      </div>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Phone Number</div>
+                        <Tooltip title="Number must starts with +91">
+                          <TextField
+                            name='phone'
+                            value={formData.phone}
+                            onChange={handleChange}
+                            style={{ width: '70%' }}
+                            size='small'
+                            helperText={errors?.phone?.[0] ? errors?.phone[0] : ''}
+                            error={!!errors?.phone?.[0]}
+                          />
+                        </Tooltip>
+                      </div>
+                    </div>
+                    <div className='fieldContainer2'>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Do Not Call</div>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              name='do_not_call'
+                              checked={formData.do_not_call}
+                              onChange={handleChange}
+                              color="primary"
+                            />
+                          }
+                          label={formData.do_not_call ? "Yes" : "No"}
+                          style={{ width: '70%' }}
+                        />
+                      </div>
+                    </div>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+            {/* business information */}
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '20px' }}>
+              <Accordion defaultExpanded style={{ width: '98%' }}>
+                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
+                  <Typography className='accordion-header'>Business Information</Typography>
                 </AccordionSummary>
                 <Divider className='divider' />
                 <AccordionDetails>
@@ -379,6 +541,48 @@ export function AddLeads() {
                         />
                       </div>
                       <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Website</div>
+                        <TextField
+                          name='website'
+                          value={formData.website}
+                          onChange={handleChange}
+                          style={{ width: '70%' }}
+                          size='small'
+                          helperText={errors?.website?.[0] ? errors?.website[0] : ''}
+                          error={!!errors?.website?.[0]}
+                        />
+                      </div>
+                    </div>
+                    <div className='fieldContainer2'>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Industry</div>
+                        <div style={{ width: '70%' }}>
+                          <CustomDropdown
+                            label="Industry"
+                            value={formData.industry}
+                            options={INDUSTRY_OPTIONS}
+                            onChange={(e: SelectChangeEvent) => handleChange({ target: { name: 'industry', value: e.target.value } })}
+                            error={!!errors?.industry?.[0]}
+                            helperText={errors?.industry?.[0] || ''}
+                          />
+                        </div>
+                      </div>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Budget Range</div>
+                        <div style={{ width: '70%' }}>
+                          <CustomDropdown
+                            label="Budget Range"
+                            value={formData.budget_range || ''}
+                            options={BUDGET_RANGE_OPTIONS}
+                            onChange={(e: SelectChangeEvent) => handleChange({ target: { name: 'budget_range', value: e.target.value } })}
+                            error={!!errors?.budget_range?.[0]}
+                            helperText={errors?.budget_range?.[0] || ''}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className='fieldContainer2'>
+                      <div className='fieldSubContainer'>
                         <div className='fieldTitle'>Amount</div>
                         <TextField
                           type={'number'}
@@ -391,35 +595,99 @@ export function AddLeads() {
                           error={!!errors?.opportunity_amount?.[0]}
                         />
                       </div>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Probability</div>
+                        <TextField
+                          name='probability'
+                          value={formData.probability}
+                          onChange={handleChange}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position='end'>
+                                <IconButton disableFocusRipple disableTouchRipple
+                                  sx={{ backgroundColor: '#d3d3d34a', width: '45px', borderRadius: '0px', mr: '-12px' }}>
+                                  <FaPercent style={{ width: "12px" }} />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                          style={{ width: '70%' }}
+                          size='small'
+                          helperText={errors?.probability?.[0] ? errors?.probability[0] : ''}
+                          error={!!errors?.probability?.[0]}
+                        />
+                      </div>
+                    </div>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+            {/* qualification */}
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '20px' }}>
+              <Accordion defaultExpanded style={{ width: '98%' }}>
+                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
+                  <Typography className='accordion-header'>Qualification</Typography>
+                </AccordionSummary>
+                <Divider className='divider' />
+                <AccordionDetails>
+                  <Box
+                    sx={{ width: '98%', color: '#1A3353', mb: 1 }}
+                    component='form'
+                    noValidate
+                    autoComplete='off'
+                  >
+                    <div className='fieldContainer'>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Status</div>
+                        <div style={{ width: '70%' }}>
+                          <CustomDropdown
+                            label="Status"
+                            value={formData.status}
+                            options={LEAD_STATUS_OPTIONS}
+                            onChange={(e: SelectChangeEvent) => handleChange({ target: { name: 'status', value: e.target.value } })}
+                            error={!!errors?.status?.[0]}
+                            helperText={errors?.status?.[0] || ''}
+                          />
+                        </div>
+                      </div>
+                      <div className='fieldSubContainer'>
+                        <div className='fieldTitle'>Source</div>
+                        <div style={{ width: '70%' }}>
+                          <CustomDropdown
+                            label="Source"
+                            value={formData.source}
+                            options={LEAD_SOURCE_OPTIONS}
+                            onChange={(e: SelectChangeEvent) => handleChange({ target: { name: 'source', value: e.target.value } })}
+                            error={!!errors?.source?.[0]}
+                            helperText={errors?.source?.[0] || ''}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className='fieldContainer2'>
                       <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Website</div>
-                        <TextField
-                          name='website'
-                          value={formData.website}
-                          onChange={handleChange}
-                          style={{ width: '70%' }}
-                          size='small'
-                          helperText={errors?.website?.[0] ? errors?.website[0] : ''}
-                          error={!!errors?.website?.[0]}
-                        />
+                        <div className='fieldTitle'>Decision Timeframe</div>
+                        <div style={{ width: '70%' }}>
+                          <CustomDropdown
+                            label="Decision Timeframe"
+                            value={formData.decision_timeframe || ''}
+                            options={DECISION_TIMEFRAME_OPTIONS}
+                            onChange={(e: SelectChangeEvent) => handleChange({ target: { name: 'decision_timeframe', value: e.target.value } })}
+                            error={!!errors?.decision_timeframe?.[0]}
+                            helperText={errors?.decision_timeframe?.[0] || ''}
+                          />
+                        </div>
                       </div>
                       <div className='fieldSubContainer'>
                         <div className='fieldTitle'>Contact Name</div>
                         <FormControl error={!!errors?.contacts?.[0]} sx={{ width: '70%' }}>
                           <Autocomplete
-                            // ref={autocompleteRef}
                             multiple
                             value={selectedContacts}
                             limitTags={2}
                             options={state?.contacts || []}
-                            // options={state.contacts ? state.contacts.map((option: any) => option) : ['']}
                             getOptionLabel={(option: any) => state?.contacts ? option?.first_name : option}
-                            // value={formData.contacts}
-                            // onChange={handleChange}
                             onChange={(e: any, value: any) => handleChange2('contacts', value)}
-                            // style={{ width: '80%' }}
                             size='small'
                             filterSelectedOptions
                             renderTags={(value: any, getTagProps: any) =>
@@ -506,87 +774,50 @@ export function AddLeads() {
                         </FormControl>
                       </div>
                       <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Industry</div>
-                        <FormControl sx={{ width: '70%' }}>
-                          <Select
-                            name='industry'
-                            value={formData.industry}
-                            open={industrySelectOpen}
-                            onClick={() => setIndustrySelectOpen(!industrySelectOpen)}
-                            IconComponent={() => (
-                              <div onClick={() => setIndustrySelectOpen(!industrySelectOpen)} className="select-icon-background">
-                                {industrySelectOpen ? <FiChevronUp className='select-icon' /> : <FiChevronDown className='select-icon' />}
-                              </div>
-                            )}
-                            className={'select'}
-                            onChange={handleChange}
-                            error={!!errors?.industry?.[0]}
-                            MenuProps={{
-                              PaperProps: {
-                                style: {
-                                  height: '200px'
-                                }
-                              }
-                            }}
-                          >
-                            {state?.industries?.length ? state?.industries.map((option: any) => (
-                              <MenuItem key={option[0]} value={option[1]}>
-                                {option[1]}
-                              </MenuItem>
-                            )) : ''}
-                          </Select>
-                          <FormHelperText>{errors?.industry?.[0] ? errors?.industry[0] : ''}</FormHelperText>
-                        </FormControl>
-                        {/* <CustomSelectField
-                          name='industry'
-                          select
-                          value={formData.industry}
-                          InputProps={{
-                            style: {
-                              height: '40px',
-                              maxHeight: '40px'
+                        <div className='fieldTitle'>Tags</div>
+                        <FormControl error={!!errors?.tags?.[0]} sx={{ width: '70%' }}>
+                          <Autocomplete
+                            value={selectedTags}
+                            multiple
+                            limitTags={5}
+                            options={state?.tags || []}
+                            getOptionLabel={(option: any) => option}
+                            onChange={(e: any, value: any) => handleChange2('tags', value)}
+                            size='small'
+                            filterSelectedOptions
+                            renderTags={(value, getTagProps) =>
+                              value.map((option, index) => (
+                                <Chip
+                                  deleteIcon={<FaTimes style={{ width: '9px' }} />}
+                                  sx={{ backgroundColor: 'rgba(0, 0, 0, 0.08)', height: '18px' }}
+                                  variant='outlined'
+                                  label={option}
+                                  {...getTagProps({ index })}
+                                />
+                              ))
                             }
-                          }}
-                          onChange={handleChange}
-                          sx={{ width: '70%' }}
-                          helperText={errors?.industry?.[0] ? errors?.industry[0] : ''}
-                          error={!!errors?.industry?.[0]}
-                        >
-                          {state?.industries?.length && state?.industries.map((option: any) => (
-                            <MenuItem key={option[0]} value={option[1]}>
-                              {option[1]}
-                            </MenuItem>
-                          ))}
-                        </CustomSelectField> */}
+                            popupIcon={<CustomPopupIcon><FaPlus className='input-plus-icon' /></CustomPopupIcon>}
+                            renderInput={(params) => (
+                              <TextField {...params}
+                                placeholder='Add Tags'
+                                InputProps={{
+                                  ...params.InputProps,
+                                  sx: {
+                                    '& .MuiAutocomplete-popupIndicator': { '&:hover': { backgroundColor: 'white' } },
+                                    '& .MuiAutocomplete-endAdornment': {
+                                      mt: '-8px',
+                                      mr: '-8px',
+                                    }
+                                  }
+                                }}
+                              />
+                            )}
+                          />
+                          <FormHelperText>{errors?.tags?.[0] || ''}</FormHelperText>
+                        </FormControl>
                       </div>
                     </div>
                     <div className='fieldContainer2'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Status</div>
-                        <FormControl sx={{ width: '70%' }}>
-                          <Select
-                            name='status'
-                            value={formData.status}
-                            open={statusSelectOpen}
-                            onClick={() => setStatusSelectOpen(!statusSelectOpen)}
-                            IconComponent={() => (
-                              <div onClick={() => setStatusSelectOpen(!statusSelectOpen)} className="select-icon-background">
-                                {statusSelectOpen ? <FiChevronUp className='select-icon' /> : <FiChevronDown className='select-icon' />}
-                              </div>
-                            )}
-                            className={'select'}
-                            onChange={handleChange}
-                            error={!!errors?.status?.[0]}
-                          >
-                            {state?.status?.length ? state?.status.map((option: any) => (
-                              <MenuItem key={option[0]} value={option[1]}>
-                                {option[1]}
-                              </MenuItem>
-                            )) : ''}
-                          </Select>
-                          <FormHelperText>{errors?.status?.[0] ? errors?.status[0] : ''}</FormHelperText>
-                        </FormControl>
-                      </div>
                       <div className='fieldSubContainer'>
                         <div className='fieldTitle'>SkypeID</div>
                         <TextField
@@ -598,34 +829,6 @@ export function AddLeads() {
                           helperText={errors?.skype_ID?.[0] ? errors?.skype_ID[0] : ''}
                           error={!!errors?.skype_ID?.[0]}
                         />
-                      </div>
-                    </div>
-                    <div className='fieldContainer2'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Lead Source</div>
-                        <FormControl sx={{ width: '70%' }}>
-                          <Select
-                            name='source'
-                            value={formData.source}
-                            open={sourceSelectOpen}
-                            onClick={() => setSourceSelectOpen(!sourceSelectOpen)}
-                            IconComponent={() => (
-                              <div onClick={() => setSourceSelectOpen(!sourceSelectOpen)} className="select-icon-background">
-                                {sourceSelectOpen ? <FiChevronUp className='select-icon' /> : <FiChevronDown className='select-icon' />}
-                              </div>
-                            )}
-                            className={'select'}
-                            onChange={handleChange}
-                            error={!!errors?.source?.[0]}
-                          >
-                            {state?.source?.length ? state?.source.map((option: any) => (
-                              <MenuItem key={option[0]} value={option[0]}>
-                                {option[1]}
-                              </MenuItem>
-                            )) : ''}
-                          </Select>
-                          <FormHelperText>{errors?.source?.[0] ? errors?.source[0] : ''}</FormHelperText>
-                        </FormControl>
                       </div>
                       <div className='fieldSubContainer'>
                         <div className='fieldTitle'>Lead Attachment</div>
@@ -664,212 +867,6 @@ export function AddLeads() {
                         />
                       </div>
                     </div>
-                    <div className='fieldContainer2'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Tags</div>
-                        <FormControl error={!!errors?.tags?.[0]} sx={{ width: '70%' }}>
-                          <Autocomplete
-                            // ref={autocompleteRef}
-                            value={selectedTags}
-                            multiple
-                            limitTags={5}
-                            options={state?.tags || []}
-                            // options={state.contacts ? state.contacts.map((option: any) => option) : ['']}
-                            getOptionLabel={(option: any) => option}
-                            onChange={(e: any, value: any) => handleChange2('tags', value)}
-                            size='small'
-                            filterSelectedOptions
-                            renderTags={(value, getTagProps) =>
-                              value.map((option, index) => (
-                                <Chip
-                                  deleteIcon={<FaTimes style={{ width: '9px' }} />}
-                                  sx={{ backgroundColor: 'rgba(0, 0, 0, 0.08)', height: '18px' }}
-                                  variant='outlined'
-                                  label={option}
-                                  {...getTagProps({ index })}
-                                />
-                              ))
-                            }
-                            popupIcon={<CustomPopupIcon><FaPlus className='input-plus-icon' /></CustomPopupIcon>}
-                            renderInput={(params) => (
-                              <TextField {...params}
-                                placeholder='Add Tags'
-                                InputProps={{
-                                  ...params.InputProps,
-                                  sx: {
-                                    '& .MuiAutocomplete-popupIndicator': { '&:hover': { backgroundColor: 'white' } },
-                                    '& .MuiAutocomplete-endAdornment': {
-                                      mt: '-8px',
-                                      mr: '-8px',
-                                    }
-                                  }
-                                }}
-                              />
-                            )}
-                          />
-                          <FormHelperText>{errors?.tags?.[0] || ''}</FormHelperText>
-                        </FormControl>
-                      </div>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Probability</div>
-                        <TextField
-                          name='probability'
-                          value={formData.probability}
-                          onChange={handleChange}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position='end'>
-                                <IconButton disableFocusRipple disableTouchRipple
-                                  sx={{ backgroundColor: '#d3d3d34a', width: '45px', borderRadius: '0px', mr: '-12px' }}>
-                                  <FaPercent style={{ width: "12px" }} />
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                          style={{ width: '70%' }}
-                          size='small'
-                          helperText={errors?.probability?.[0] ? errors?.probability[0] : ''}
-                          error={!!errors?.probability?.[0]}
-                        />
-
-                      </div>
-                    </div>
-                    {/* <div className='fieldContainer2'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'> Close Date</div>
-                        <TextField
-                          name='account_name'
-                          type='date'
-                          value={formData.account_name}
-                          onChange={handleChange}
-                          style={{ width: '70%' }}
-                          size='small'
-                          helperText={errors?.account_name?.[0] ? errors?.account_name[0] : ''}
-                          error={!!errors?.account_name?.[0]}
-                        />
-                      </div>
-                    </div> */}
-                    {/* <div className='fieldContainer2'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Pipeline</div>
-                        <TextField
-                          error={!!(msg === 'pipeline' || msg === 'required')}
-                          name='pipeline'
-                          id='outlined-error-helper-text'
-                          // InputProps={{
-                          //   classes: {
-                          //     root: textFieldClasses.fieldHeight
-                          //   }
-                          // }}
-                          onChange={onChange} style={{ width: '80%' }}
-                          size='small'
-                          helperText={
-                            (error && msg === 'pipeline') || msg === 'required'
-                              ? error
-                              : ''
-                          }
-                        />
-                      </div>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Lost Reason </div>
-                        <TextareaAutosize
-                          aria-label='minimum height'
-                          name='lost_reason'
-                          minRows={2}
-                          // onChange={onChange} 
-                          style={{ width: '80%' }}
-                        />
-                      </div>
-                    </div> */}
-                  </Box>
-                </AccordionDetails>
-              </Accordion>
-            </div>
-            {/* contact details */}
-            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '20px' }}>
-              <Accordion defaultExpanded style={{ width: '98%' }}>
-                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                  <Typography className='accordion-header'>Contact</Typography>
-                </AccordionSummary>
-                <Divider className='divider' />
-                <AccordionDetails>
-                  <Box
-                    sx={{ width: '98%', color: '#1A3353', mb: 1 }}
-                    component='form'
-                    noValidate
-                    autoComplete='off'
-                  >
-                    <div className='fieldContainer'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>First Name</div>
-                        <RequiredTextField
-                          name='first_name'
-                          required
-                          value={formData.first_name}
-                          onChange={handleChange}
-                          style={{ width: '70%' }}
-                          size='small'
-                          helperText={errors?.first_name?.[0] ? errors?.first_name[0] : ''}
-                          error={!!errors?.first_name?.[0]}
-                        />
-                      </div>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Last Name</div>
-                        <RequiredTextField
-                          name='last_name'
-                          required
-                          value={formData.last_name}
-                          onChange={handleChange}
-                          style={{ width: '70%' }}
-                          size='small'
-                          helperText={errors?.last_name?.[0] ? errors?.last_name[0] : ''}
-                          error={!!errors?.last_name?.[0]}
-                        />
-                      </div>
-                    </div>
-                    <div className='fieldContainer2'>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Job Title</div>
-                        <RequiredTextField
-                          name='title'
-                          value={formData.title}
-                          onChange={handleChange}
-                          style={{ width: '70%' }}
-                          size='small'
-                          helperText={errors?.title?.[0] ? errors?.title[0] : ''}
-                          error={!!errors?.title?.[0]}
-                        />
-                      </div>
-                      <div className='fieldSubContainer'>
-                        <div className='fieldTitle'>Phone Number</div>
-                        <Tooltip title="Number must starts with +91">
-                          <TextField
-                            name='phone'
-                            value={formData.phone}
-                            onChange={handleChange}
-                            style={{ width: '70%' }}
-                            size='small'
-                            helperText={errors?.phone?.[0] ? errors?.phone[0] : ''}
-                            error={!!errors?.phone?.[0]}
-                          />
-                        </Tooltip>
-                      </div>
-                    </div>
-                    <div className='fieldSubContainer' style={{ marginLeft: '5%', marginTop: '19px' }}>
-                      <div className='fieldTitle'>Email Address</div>
-                      {/* <div style={{ width: '40%', display: 'flex', flexDirection: 'row', marginTop: '19px', marginLeft: '6.6%' }}>
-                      <div style={{ marginRight: '10px', fontSize: '13px', width: '22%', textAlign: 'right', fontWeight: 'bold' }}>Email Address</div> */}
-                      <TextField
-                        name='email'
-                        type='email'
-                        value={formData.email}
-                        onChange={handleChange}
-                        style={{ width: '70%' }}
-                        size='small'
-                        helperText={errors?.email?.[0] ? errors?.email[0] : ''}
-                        error={!!errors?.email?.[0]}
-                      />
-                    </div>
                   </Box>
                 </AccordionDetails>
               </Accordion>
@@ -878,7 +875,7 @@ export function AddLeads() {
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '20px' }}>
               <Accordion defaultExpanded style={{ width: '98%' }}>
                 <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                  <Typography className='accordion-header'>Address</Typography>
+                  <Typography className='accordion-header'>Address Information</Typography>
                 </AccordionSummary>
                 <Divider className='divider' />
                 <AccordionDetails>
@@ -890,9 +887,7 @@ export function AddLeads() {
                   >
                     <div className='fieldContainer'>
                       <div className='fieldSubContainer'>
-                        <div className='fieldTitle'
-                        // style={{ marginRight: '10px', fontSize: '13px', width: '22%', textAlign: 'right', fontWeight: 'bold' }}
-                        >Address Lane</div>
+                        <div className='fieldTitle'>Address Lane</div>
                         <TextField
                           name='address_line'
                           value={formData.address_line}
