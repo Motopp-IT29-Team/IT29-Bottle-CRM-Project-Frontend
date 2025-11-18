@@ -77,12 +77,6 @@ export default function Sidebar(props: any) {
         .then((profile: any) => {
             console.log('Sidebar /profile/ response:', profile);
             const newRole = profile?.user_obj?.role;
-//           const newRole =
-//             profile?.role ||
-//             profile?.profile_obj?.role ||
-//             profile?.data?.role ||
-//             profile?.data?.profile_obj?.role;
-//
             if (newRole) {
                 localStorage.setItem('role', newRole);
                 setRole(newRole);
@@ -127,9 +121,6 @@ export default function Sidebar(props: any) {
         }
     }
 
-    // useEffect(() => {
-    //     userProfile()
-    // }, [])
 
     const userProfile = () => {
         fetchData(`${ProfileUrl}/`, 'GET', null as any, Header1)
@@ -188,7 +179,6 @@ export default function Sidebar(props: any) {
 
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
-    // console.log(screen, 'sidebar');
     const context = { drawerWidth: drawerWidth, screen: screen }
     return (
         <>
