@@ -55,10 +55,38 @@ export default function Sidebar(props: any) {
     const [userDetail, setUserDetail] = useState<any>('')
     const [organizationModal, setOrganizationModal] = useState(false)
     const organizationModalClose = () => { setOrganizationModal(false) }
+    const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
+
 
     useEffect(() => {
         toggleScreen()
     }, [navigate])
+
+    useEffect(() => {
+      const token = localStorage.getItem('Token');
+      const org = localStorage.getItem('org');
+
+      if (!token || !org) return;
+
+      // Fetch role
+      fetchData(`${ProfileUrl}/`, 'GET', null as any, {
+        Authorization: token,
+        org,
+        Accept: 'application/json',
+      })
+        .then((profile: any) => {
+            const newRole = profile?.user_obj?.role;
+            console.log(newRole)
+            if (newRole) {
+                localStorage.setItem('role', newRole);
+                setRole(newRole);
+                }
+        })
+        .catch((err) => {
+          console.error("Error fetching profile:", err);
+        });
+
+    }, []);
 
     // useEffect(() => {
     // navigate('/leads')
@@ -109,7 +137,14 @@ export default function Sidebar(props: any) {
             })
     }
 
-    const navList = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases']
+
+    const rawRole = role || '';
+    const isAdmin = rawRole.toUpperCase() === 'ADMIN';
+    const allNavItems = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases'];
+    const navList = isAdmin
+      ? allNavItems
+      : allNavItems.filter((item) => item !== 'users');
+
     const navIcons = (text: any, screen: any): React.ReactNode => {
         switch (text) {
             case 'leads':
@@ -297,10 +332,14 @@ export default function Sidebar(props: any) {
                             <Route path='/app/accounts/add-account' element={<AddAccount />} />
                             <Route path='/app/accounts/account-details' element={<AccountDetails />} />
                             <Route path='/app/accounts/edit-account' element={<EditAccount />} />
-                            <Route path='/app/users' element={<Users />} />
-                            <Route path='/app/users/add-users' element={<AddUsers />} />
-                            <Route path='/app/users/edit-user' element={<EditUser />} />
-                            <Route path='/app/users/user-details' element={<UserDetails />} />
+                            {isAdmin && (
+                                <>
+                                    <Route path='/app/users' element={<Users />} />
+                                    <Route path='/app/users/add-users' element={<AddUsers />} />
+                                    <Route path='/app/users/edit-user' element={<EditUser />} />
+                                    <Route path='/app/users/user-details' element={<UserDetails />} />
+                                </>
+                            )}
                             <Route path='/app/opportunities' element={<Opportunities />} />
                             <Route path='/app/opportunities/add-opportunity' element={<AddOpportunity />} />
                             <Route path='/app/opportunities/opportunity-details' element={<OpportunityDetails />} />

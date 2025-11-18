@@ -7,7 +7,7 @@ import imgLogo from '../../assets/images/auth/img_logo.png'
 import imgLogin from '../../assets/images/auth/img_login.png'
 import { GoogleButton } from '../../styles/CssStyled';
 import { fetchData } from '../../components/FetchData';
-import { AuthUrl,LoginUrl  } from '../../services/ApiUrls';
+import { AuthUrl,LoginUrl,ProfileUrl   } from '../../services/ApiUrls';
 import '../../styles/style.css'
 
 declare global {
@@ -34,10 +34,8 @@ export default function Login() {
     }, [token, navigate])
 
     const login = useGoogleLogin({
-        onSuccess: tokenResponse => {
+        onSuccess:  tokenResponse => {
             const apiToken = { token: tokenResponse.access_token }
-            // const formData = new FormData()
-            // formData.append('token', tokenResponse.access_token)
             const head = {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -50,47 +48,45 @@ export default function Login() {
                 .catch((error: any) => {
                     console.error('Error:', error)
                 })
-        },
-
+       }
     });
-    // NEW: Email + Password submit handler
+
     const onEmailLoginSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setSubmitting(true)
-        setError(null)
+      e.preventDefault();
+      setSubmitting(true);
+      setError(null);
 
-        const headers: Record<string, string> = {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        }
-        // If your backend expects org on auth, include it:
-        const org = localStorage.getItem('org')
-        if (org) headers['org'] = org
-        try {
-          const res: any = await fetchData(
-            `${LoginUrl}/`, // from ApiUrls.tsx (e.g. 'auth/login')
-            'POST',
-            JSON.stringify({ email: email.trim(), password }),
-            headers
-          )
+      const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      };
 
-          // SimpleJWT-style response: { access, refresh }
-          if (res?.access) {
-            localStorage.setItem('Token', `Bearer ${res.access}`)
-            if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh)
-            localStorage.setItem('userEmail', email.trim())
-            setToken(true)
-            navigate('/app')
-          } else {
-            // DRF usually sends {detail: "..."} for auth errors
-            setError(res?.detail || 'Invalid email or password')
-          }
-        } catch {
-          setError('Unable to login. Please try again.')
-        } finally {
-          setSubmitting(false)
+      const org = localStorage.getItem('org');
+      if (org) headers['org'] = org;
+
+      try {
+        const res: any = await fetchData(
+          `${LoginUrl}/`,
+          'POST',
+          JSON.stringify({ email: email.trim(), password }),
+          headers
+        );
+
+        if (res?.access) {
+          localStorage.setItem('Token', `Bearer ${res.access}`);
+          if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh);
+          localStorage.setItem('userEmail', email.trim());
+          setToken(true);
+          navigate('/app');
+        } else {
+          setError(res?.detail || 'Invalid email or password');
         }
-    }
+      } catch {
+        setError('Unable to login. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
+    };
     return (
         <div>
             <Stack
