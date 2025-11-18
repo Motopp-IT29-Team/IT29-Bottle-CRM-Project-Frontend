@@ -144,7 +144,6 @@ export default function Sidebar(props: any) {
             })
     }
 
-//     const navList = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases']
 
     const rawRole = role || '';
     const isAdmin = rawRole.toUpperCase() === 'ADMIN';
