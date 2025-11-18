@@ -69,14 +69,14 @@ export default function Sidebar(props: any) {
       if (!token || !org) return;
 
       // Fetch role
-      fetchData(`${ProfileUrl}/`, 'GET', undefined, {
+      fetchData(`${ProfileUrl}/`, 'GET', null as any, {
         Authorization: token,
         org,
         Accept: 'application/json',
       })
         .then((profile: any) => {
-            console.log('Sidebar /profile/ response:', profile);
             const newRole = profile?.user_obj?.role;
+            console.log(newRole)
             if (newRole) {
                 localStorage.setItem('role', newRole);
                 setRole(newRole);
@@ -121,11 +121,13 @@ export default function Sidebar(props: any) {
         }
     }
 
+    useEffect(() => {
+        userProfile()
+    }, [])
 
     const userProfile = () => {
         fetchData(`${ProfileUrl}/`, 'GET', null as any, Header1)
             .then((res: any) => {
-                // console.log(res, 'user')
                 if (res?.user_obj) {
                     setUserDetail(res?.user_obj)
                 }
