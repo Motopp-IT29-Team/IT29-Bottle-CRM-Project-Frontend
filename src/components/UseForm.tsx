@@ -18,19 +18,24 @@
 // ===============
 import { useState, ChangeEvent, FormEvent } from 'react';
 
-export const useForm = (submitCallBack: () => void): [Record<string, string>, (e: ChangeEvent<HTMLInputElement>) => void, (e: FormEvent<HTMLFormElement>) => void] => {
-  const [state, setState] = useState<Record<string, string>>({});
+export const useForm = (
+    submitCallBack: () => void
+): [Record<string, string>, (e: ChangeEvent<HTMLInputElement>) => void, (e: FormEvent<HTMLFormElement>) => void] => {
+    const [state, setState] = useState<Record<string, string>>({});
 
-  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    setState((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
-  };
+    const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        setState((prevState) => ({
+            ...prevState,
+            [e.target.name]: e.target.value,
+        }));
+    };
 
-  const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    submitCallBack();
-  };
+    const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        submitCallBack();
+    };
 
-  return [state, onChangeHandler, onSubmitHandler];
+    return [state, onChangeHandler, onSubmitHandler];
 };
 // ====================
 // import { useState, ChangeEvent, FormEvent } from 'react';

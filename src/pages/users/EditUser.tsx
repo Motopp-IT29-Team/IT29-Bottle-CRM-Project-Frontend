@@ -1,5 +1,5 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     TextField,
     AccordionDetails,
@@ -18,16 +18,16 @@ import {
     Divider,
     Select,
     FormControl,
-    FormHelperText
-} from '@mui/material'
-import { UserUrl } from '../../services/ApiUrls'
-import { fetchData } from '../../components/FetchData'
-import { CustomAppBar } from '../../components/CustomAppBar'
-import { FaArrowDown, FaTimes, FaUpload } from 'react-icons/fa'
-import { AntSwitch, RequiredTextField } from '../../styles/CssStyled'
-import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown'
-import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp'
-import '../../styles/style.css'
+    FormHelperText,
+} from '@mui/material';
+import { UserUrl } from '../../services/ApiUrls';
+import { fetchData } from '../../components/FetchData';
+import { CustomAppBar } from '../../components/CustomAppBar';
+import { FaArrowDown, FaTimes, FaUpload } from 'react-icons/fa';
+import { AntSwitch, RequiredTextField } from '../../styles/CssStyled';
+import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
+import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
+import '../../styles/style.css';
 
 type FormErrors = {
     email?: string[];
@@ -47,34 +47,32 @@ type FormErrors = {
     // is_organization_admin?: string[];
 };
 interface FormData {
-    email: string,
-    role: string,
-    phone: string,
-    alternate_phone: string,
-    address_line: string,
-    street: string,
-    city: string,
-    state: string,
-    pincode: string,
-    country: string,
+    email: string;
+    role: string;
+    phone: string;
+    alternate_phone: string;
+    address_line: string;
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
     // profile_pic: string | null,
     // has_sales_access: boolean,
     // has_marketing_access: boolean,
     // is_organization_admin: boolean
-
-
 }
 export function EditUser() {
-    const { state } = useLocation()
-    const navigate = useNavigate()
+    const { state } = useLocation();
+    const navigate = useNavigate();
 
-    const [reset, setReset] = useState(false)
-    const [error, setError] = useState(false)
+    const [reset, setReset] = useState(false);
+    const [error, setError] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
     const [profileErrors, setProfileErrors] = useState<FormErrors>({});
     const [userErrors, setUserErrors] = useState<FormErrors>({});
-    const [roleSelectOpen, setRoleSelectOpen] = useState(false)
-    const [countrySelectOpen, setCountrySelectOpen] = useState(false)
+    const [roleSelectOpen, setRoleSelectOpen] = useState(false);
+    const [countrySelectOpen, setCountrySelectOpen] = useState(false);
     const [password, setPassword] = useState<string>('');
     const [formData, setFormData] = useState<FormData>({
         email: '',
@@ -91,21 +89,19 @@ export function EditUser() {
         // has_sales_access: false,
         // has_marketing_access: false,
         // is_organization_admin: false
-
-    })
+    });
     useEffect(() => {
-        setFormData(state?.value)
-    }, [state?.id])
-
+        setFormData(state?.value);
+    }, [state?.id]);
 
     useEffect(() => {
         if (reset) {
-            setFormData(state?.value)
+            setFormData(state?.value);
         }
         return () => {
-            setReset(false)
-        }
-    }, [reset])
+            setReset(false);
+        };
+    }, [reset]);
 
     const handleChange = (e: any) => {
         const { name, value, files, type, checked } = e.target;
@@ -114,23 +110,24 @@ export function EditUser() {
         }
         if (type === 'checkbox') {
             setFormData({ ...formData, [name]: checked });
-        }
-        else {
+        } else {
             setFormData({ ...formData, [name]: value });
         }
     };
 
     const backbtnHandle = () => {
         if (state?.edit) {
-            navigate('/app/users')
+            navigate('/app/users');
         } else {
-            navigate('/app/users/user-details', { state: { userId: state?.id, detail: true } })
+            navigate('/app/users/user-details', {
+                state: { userId: state?.id, detail: true },
+            });
         }
-    }
+    };
     const handleSubmit = (e: any) => {
         e.preventDefault();
         submitForm();
-    }
+    };
 
     // const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     //     const file = event.target.files?.[0] || null;
@@ -142,7 +139,6 @@ export function EditUser() {
     //         reader.readAsDataURL(file);
     //     }
     // };
-
 
     // const getEditDetail = (id: any) => {
     //     fetchData(`${UserUrl}/${id}/`, 'GET', null as any, headers)
@@ -179,8 +175,8 @@ export function EditUser() {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org')
-          }
+            org: localStorage.getItem('org'),
+        };
         // console.log('Form data:', data);
         const data = {
             email: formData.email,
@@ -198,23 +194,22 @@ export function EditUser() {
             // has_sales_access: formData.has_sales_access,
             // has_marketing_access: formData.has_marketing_access,
             // is_organization_admin: formData.is_organization_admin
-        }
+        };
 
         fetchData(`${UserUrl}/${state?.id}/`, 'PUT', JSON.stringify(data), Header)
             .then((res: any) => {
                 // console.log('editsubmit:', res);
                 if (!res.error) {
-                    resetForm()
-                    navigate('/app/users')
+                    resetForm();
+                    navigate('/app/users');
                 }
                 if (res.error) {
-                    setError(true)
-                    setProfileErrors(res?.errors?.profile_errors || res?.profile_errors[0])
-                    setUserErrors(res?.errors?.user_errors || res?.user_errors[0])
+                    setError(true);
+                    setProfileErrors(res?.errors?.profile_errors || res?.profile_errors[0]);
+                    setUserErrors(res?.errors?.user_errors || res?.user_errors[0]);
                 }
             })
-            .catch(() => {
-            })
+            .catch(() => {});
     };
     const resetForm = () => {
         setFormData({
@@ -227,22 +222,22 @@ export function EditUser() {
             city: '',
             state: '',
             pincode: '',
-            country: ''
+            country: '',
             // profile_pic: null,
             // has_sales_access: false,
             // has_marketing_access: false,
             // is_organization_admin: false
         });
-        setProfileErrors({})
-        setUserErrors({})
-    }
+        setProfileErrors({});
+        setUserErrors({});
+    };
     const onCancel = () => {
-        setReset(true)
+        setReset(true);
         // resetForm()
-    }
-    const module = 'Users'
-    const crntPage = 'Edit User'
-    const backBtn = state?.edit ? 'Back To Users' : 'Back To UserDetails'
+    };
+    const module = 'Users';
+    const crntPage = 'Edit User';
+    const backBtn = state?.edit ? 'Back To Users' : 'Back To UserDetails';
 
     const inputStyles = {
         display: 'none',
@@ -251,39 +246,52 @@ export function EditUser() {
     // console.log(formData, 'as', state?.value);
     return (
         <Box sx={{ mt: '60px' }}>
-            <CustomAppBar backbtnHandle={backbtnHandle} module={module} backBtn={backBtn} crntPage={crntPage} onCancel={onCancel} onSubmit={handleSubmit} />
-            <Box sx={{ mt: "120px" }}>
+            <CustomAppBar
+                backbtnHandle={backbtnHandle}
+                module={module}
+                backBtn={backBtn}
+                crntPage={crntPage}
+                onCancel={onCancel}
+                onSubmit={handleSubmit}
+            />
+            <Box sx={{ mt: '120px' }}>
                 <form onSubmit={handleSubmit}>
                     <div style={{ padding: '10px' }}>
-                        <div className='leadContainer'>
+                        <div className="leadContainer">
                             <Accordion defaultExpanded style={{ width: '98%' }}>
                                 <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                    <Typography className='accordion-header'>User Information</Typography>
+                                    <Typography className="accordion-header">User Information</Typography>
                                 </AccordionSummary>
-                                <Divider className='divider' />
+                                <Divider className="divider" />
                                 <AccordionDetails>
                                     <Box
-                                        sx={{ width: '98%', color: '#1A3353', mb: 1 }}
-                                        component='form'
+                                        sx={{
+                                            width: '98%',
+                                            color: '#1A3353',
+                                            mb: 1,
+                                        }}
+                                        component="form"
                                         noValidate
-                                        autoComplete='off'
+                                        autoComplete="off"
                                     >
-                                        <div className='fieldContainer'>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Email</div>
+                                        <div className="fieldContainer">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Email</div>
                                                 <RequiredTextField
                                                     required
-                                                    name='email'
+                                                    name="email"
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
+                                                    size="small"
                                                     error={!!profileErrors?.email?.[0] || !!userErrors?.email?.[0]}
-                                                    helperText={profileErrors?.email?.[0] || userErrors?.email?.[0] || ''}
+                                                    helperText={
+                                                        profileErrors?.email?.[0] || userErrors?.email?.[0] || ''
+                                                    }
                                                 />
                                             </div>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>New Password (optional)</div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">New Password (optional)</div>
                                                 <RequiredTextField
                                                     required
                                                     name="password"
@@ -295,20 +303,27 @@ export function EditUser() {
                                                     placeholder="Leave blank to keep current"
                                                 />
                                                 {userErrors?.password?.[0] && (
-                                                      <FormHelperText error>{userErrors.password[0]}</FormHelperText>
+                                                    <FormHelperText error>{userErrors.password[0]}</FormHelperText>
                                                 )}
                                             </div>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Role</div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Role</div>
                                                 <FormControl sx={{ width: '70%' }}>
                                                     <Select
-                                                        name='role'
+                                                        name="role"
                                                         value={formData.role}
                                                         open={roleSelectOpen}
                                                         onClick={() => setRoleSelectOpen(!roleSelectOpen)}
                                                         IconComponent={() => (
-                                                            <div onClick={() => setRoleSelectOpen(!roleSelectOpen)} className="select-icon-background">
-                                                                {roleSelectOpen ? <FiChevronUp className='select-icon' /> : <FiChevronDown className='select-icon' />}
+                                                            <div
+                                                                onClick={() => setRoleSelectOpen(!roleSelectOpen)}
+                                                                className="select-icon-background"
+                                                            >
+                                                                {roleSelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
                                                             </div>
                                                         )}
                                                         className={'select'}
@@ -325,34 +340,43 @@ export function EditUser() {
                                                 </FormControl>
                                             </div>
                                         </div>
-                                        <div className='fieldContainer2'>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Phone Number</div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Phone Number</div>
                                                 <Tooltip title="Number must starts with +91">
                                                     <RequiredTextField
-                                                        name='phone'
+                                                        name="phone"
                                                         value={formData.phone}
                                                         onChange={handleChange}
                                                         required
                                                         style={{ width: '70%' }}
-                                                        size='small'
+                                                        size="small"
                                                         error={!!profileErrors?.phone?.[0] || !!userErrors?.phone?.[0]}
-                                                        helperText={profileErrors?.phone?.[0] || userErrors?.phone?.[0] || ''}
+                                                        helperText={
+                                                            profileErrors?.phone?.[0] || userErrors?.phone?.[0] || ''
+                                                        }
                                                     />
                                                 </Tooltip>
                                             </div>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Alternate Phone</div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Alternate Phone</div>
                                                 <Tooltip title="Number must starts with +91">
                                                     <RequiredTextField
                                                         required
-                                                        name='alternate_phone'
+                                                        name="alternate_phone"
                                                         value={formData.alternate_phone}
                                                         onChange={handleChange}
                                                         style={{ width: '70%' }}
-                                                        size='small'
-                                                        error={!!profileErrors?.alternate_phone?.[0] || !!userErrors?.alternate_phone?.[0]}
-                                                        helperText={profileErrors?.alternate_phone?.[0] || userErrors?.alternate_phone?.[0] || ''}
+                                                        size="small"
+                                                        error={
+                                                            !!profileErrors?.alternate_phone?.[0] ||
+                                                            !!userErrors?.alternate_phone?.[0]
+                                                        }
+                                                        helperText={
+                                                            profileErrors?.alternate_phone?.[0] ||
+                                                            userErrors?.alternate_phone?.[0] ||
+                                                            ''
+                                                        }
                                                     />
                                                 </Tooltip>
                                             </div>
@@ -427,113 +451,140 @@ export function EditUser() {
                             </Accordion>
                         </div>
                         {/* Address Details */}
-                        <div className='leadContainer'>
+                        <div className="leadContainer">
                             <Accordion defaultExpanded style={{ width: '98%' }}>
                                 <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                    <Typography className='accordion-header'>Address</Typography>
+                                    <Typography className="accordion-header">Address</Typography>
                                 </AccordionSummary>
-                                <Divider className='divider' />
+                                <Divider className="divider" />
                                 <AccordionDetails>
                                     <Box
-                                        sx={{ width: '98%', color: '#1A3353', mb: 1 }}
-                                        component='form'
+                                        sx={{
+                                            width: '98%',
+                                            color: '#1A3353',
+                                            mb: 1,
+                                        }}
+                                        component="form"
                                         noValidate
-                                        autoComplete='off'
+                                        autoComplete="off"
                                     >
-                                        <div className='fieldContainer'>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Address Lane</div>
+                                        <div className="fieldContainer">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Address Lane</div>
                                                 <TextField
                                                     required
-                                                    name='address_line'
+                                                    name="address_line"
                                                     value={formData.address_line}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
-                                                    error={!!profileErrors?.address_line?.[0] || !!userErrors?.address_line?.[0]}
-                                                    helperText={profileErrors?.address_line?.[0] || userErrors?.address_line?.[0] || ''}
+                                                    size="small"
+                                                    error={
+                                                        !!profileErrors?.address_line?.[0] ||
+                                                        !!userErrors?.address_line?.[0]
+                                                    }
+                                                    helperText={
+                                                        profileErrors?.address_line?.[0] ||
+                                                        userErrors?.address_line?.[0] ||
+                                                        ''
+                                                    }
                                                 />
                                             </div>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Street</div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Street</div>
                                                 <TextField
                                                     required
-                                                    name='street'
+                                                    name="street"
                                                     value={formData.street}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
+                                                    size="small"
                                                     error={!!profileErrors?.street?.[0] || !!userErrors?.street?.[0]}
-                                                    helperText={profileErrors?.street?.[0] || userErrors?.street?.[0] || ''}
+                                                    helperText={
+                                                        profileErrors?.street?.[0] || userErrors?.street?.[0] || ''
+                                                    }
                                                 />
                                             </div>
                                         </div>
-                                        <div className='fieldContainer2'>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>City</div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">City</div>
                                                 <TextField
                                                     required
-                                                    name='city'
+                                                    name="city"
                                                     value={formData.city}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
+                                                    size="small"
                                                     error={!!profileErrors?.city?.[0] || !!userErrors?.city?.[0]}
                                                     helperText={profileErrors?.city?.[0] || userErrors?.city?.[0] || ''}
                                                 />
                                             </div>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>State</div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">State</div>
                                                 <TextField
                                                     required
-                                                    name='state'
+                                                    name="state"
                                                     value={formData.state}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
+                                                    size="small"
                                                     error={!!profileErrors?.state?.[0] || !!userErrors?.state?.[0]}
-                                                    helperText={profileErrors?.state?.[0] || userErrors?.state?.[0] || ''}
+                                                    helperText={
+                                                        profileErrors?.state?.[0] || userErrors?.state?.[0] || ''
+                                                    }
                                                 />
                                             </div>
                                         </div>
-                                        <div className='fieldContainer2'>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Pincode</div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Pincode</div>
                                                 <TextField
                                                     required
-                                                    name='pincode'
+                                                    name="pincode"
                                                     value={formData.pincode}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
+                                                    size="small"
                                                     error={!!profileErrors?.pincode?.[0] || !!userErrors?.pincode?.[0]}
-                                                    helperText={profileErrors?.pincode?.[0] || userErrors?.pincode?.[0] || ''}
+                                                    helperText={
+                                                        profileErrors?.pincode?.[0] || userErrors?.pincode?.[0] || ''
+                                                    }
                                                 />
                                             </div>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Country</div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Country</div>
                                                 <FormControl sx={{ width: '70%' }}>
                                                     <Select
-                                                        name='country'
+                                                        name="country"
                                                         value={formData.country}
                                                         open={countrySelectOpen}
                                                         onClick={() => setCountrySelectOpen(!countrySelectOpen)}
                                                         IconComponent={() => (
-                                                            <div onClick={() => setCountrySelectOpen(!countrySelectOpen)} className="select-icon-background">
-                                                                {countrySelectOpen ? <FiChevronUp className='select-icon' /> : <FiChevronDown className='select-icon' />}
+                                                            <div
+                                                                onClick={() => setCountrySelectOpen(!countrySelectOpen)}
+                                                                className="select-icon-background"
+                                                            >
+                                                                {countrySelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
                                                             </div>
                                                         )}
                                                         className={'select'}
                                                         onChange={handleChange}
                                                         error={!!profileErrors?.country?.[0]}
                                                     >
-                                                        {state?.countries?.length && state?.countries.map((option: any) => (
-                                                            <MenuItem key={option[0]} value={option[0]}>
-                                                                {option[1]}
-                                                            </MenuItem>
-                                                        ))}
+                                                        {state?.countries?.length &&
+                                                            state?.countries.map((option: any) => (
+                                                                <MenuItem key={option[0]} value={option[0]}>
+                                                                    {option[1]}
+                                                                </MenuItem>
+                                                            ))}
                                                     </Select>
-                                                    <FormHelperText>{profileErrors?.country?.[0] ? profileErrors?.country?.[0] : ''}</FormHelperText>
+                                                    <FormHelperText>
+                                                        {profileErrors?.country?.[0] ? profileErrors?.country?.[0] : ''}
+                                                    </FormHelperText>
                                                 </FormControl>
                                             </div>
                                         </div>
@@ -791,5 +842,5 @@ export function EditUser() {
                 </form>
             </Box>
         </Box>
-    )
+    );
 }

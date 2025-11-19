@@ -1,13 +1,48 @@
-import { Box, Button, Card, Stack, Tab, Table, TableBody, TableContainer, TableHead, TablePagination, TableRow, Tabs, Toolbar, Typography, Paper, Select, MenuItem, MenuProps, FormControl, InputLabel, InputBase, styled, TableCell, TableSortLabel, Container, Skeleton } from '@mui/material'
-import React, { SyntheticEvent, useEffect, useState } from 'react'
-import { FiPlus } from "@react-icons/all-files/fi/FiPlus";
-import { FiChevronLeft } from "@react-icons/all-files/fi/FiChevronLeft";
-import { FiChevronRight } from "@react-icons/all-files/fi/FiChevronRight";
+import {
+    Box,
+    Button,
+    Card,
+    Stack,
+    Tab,
+    Table,
+    TableBody,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    Tabs,
+    Toolbar,
+    Typography,
+    Paper,
+    Select,
+    MenuItem,
+    MenuProps,
+    FormControl,
+    InputLabel,
+    InputBase,
+    styled,
+    TableCell,
+    TableSortLabel,
+    Container,
+    Skeleton,
+} from '@mui/material';
+import React, { SyntheticEvent, useEffect, useState } from 'react';
+import { FiPlus } from '@react-icons/all-files/fi/FiPlus';
+import { FiChevronLeft } from '@react-icons/all-files/fi/FiChevronLeft';
+import { FiChevronRight } from '@react-icons/all-files/fi/FiChevronRight';
 import { getComparator, stableSort } from '../../components/Sorting';
 import { Spinner } from '../../components/Spinner';
 import { fetchData, Header } from '../../components/FetchData';
 import { ContactUrl } from '../../services/ApiUrls';
-import { AntSwitch, CustomTab, CustomToolbar, FabLeft, FabRight, StyledTableCell, StyledTableRow } from '../../styles/CssStyled';
+import {
+    AntSwitch,
+    CustomTab,
+    CustomToolbar,
+    FabLeft,
+    FabRight,
+    StyledTableCell,
+    StyledTableRow,
+} from '../../styles/CssStyled';
 import { useNavigate } from 'react-router-dom';
 import { FaTrashAlt } from 'react-icons/fa';
 import { DeleteModal } from '../../components/DeleteModal';
@@ -28,7 +63,7 @@ const headCells: readonly HeadCell[] = [
         id: 'first_name',
         numeric: false,
         disablePadding: false,
-        label: 'Name'
+        label: 'Name',
     },
     // {
     //     id: 'first_name',
@@ -47,39 +82,40 @@ const headCells: readonly HeadCell[] = [
         id: 'primary_email',
         numeric: true,
         disablePadding: false,
-        label: 'Email Address'
-    }, {
+        label: 'Email Address',
+    },
+    {
         id: 'mobile_number',
         numeric: true,
         disablePadding: false,
-        label: 'Phone Number'
+        label: 'Phone Number',
     },
     {
         id: '',
         numeric: true,
         disablePadding: false,
-        label: 'Action'
-    }
-]
+        label: 'Action',
+    },
+];
 
 export default function Contacts() {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     // const context = useMyContext();
 
     const [value, setValue] = useState('Open');
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(0)
-    const [rowsPerPage, setRowsPerPage] = useState(10)
-    const [contactList, setContactList] = useState([])
-    const [countries, setCountries] = useState([])
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [contactList, setContactList] = useState([]);
+    const [countries, setCountries] = useState([]);
 
-    const [deleteRowModal, setDeleteRowModal] = useState(false)
+    const [deleteRowModal, setDeleteRowModal] = useState(false);
 
     const [selected, setSelected] = useState<string[]>([]);
-    const [selectedId, setSelectedId] = useState('')
-    const [isSelectedId, setIsSelectedId] = useState([])
-    const [order, setOrder] = useState('asc')
-    const [orderBy, setOrderBy] = useState('first_name')
+    const [selectedId, setSelectedId] = useState('');
+    const [isSelectedId, setIsSelectedId] = useState([]);
+    const [order, setOrder] = useState('asc');
+    const [orderBy, setOrderBy] = useState('first_name');
 
     const [selectOpen, setSelectOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -115,8 +151,8 @@ export default function Contacts() {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org')
-          }
+            org: localStorage.getItem('org'),
+        };
         try {
             const offset = (currentPage - 1) * recordsPerPage;
             await fetchData(`${ContactUrl}/?offset=${offset}&limit=${recordsPerPage}`, 'GET', null as any, Header)
@@ -126,10 +162,10 @@ export default function Contacts() {
                         // console.log(data.contact_obj_list, 'contact')
                         // if (initial) {
                         setContactList(data.contact_obj_list);
-                        setCountries(data?.countries)
+                        setCountries(data?.countries);
                         // setTotalPages(data?.contacts_count)
                         setTotalPages(Math.ceil(data?.contacts_count / recordsPerPage));
-                        setLoading(false)
+                        setLoading(false);
                         // setTotalPages(Math.ceil(result.total / recordsPerPage));
                         // setInitial(false)
                         // } else {
@@ -139,50 +175,48 @@ export default function Contacts() {
                         // setLoading(false)
                         // }
                     }
-                })
-        }
-        catch (error) {
+                });
+        } catch (error) {
             console.error('Error fetching data:', error);
         }
-    }
+    };
 
     const handleRequestSort = (event: any, property: any) => {
-        const isAsc = orderBy === property && order === 'asc'
-        setOrder(isAsc ? 'desc' : 'asc')
-        setOrderBy(property)
-    }
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    };
 
     const DeleteItem = () => {
         const Header = {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org')
-          }
+            org: localStorage.getItem('org'),
+        };
         fetchData(`${ContactUrl}/${selectedId}/`, 'DELETE', null as any, Header)
             .then((res: any) => {
                 // console.log('delete:', res);
                 if (!res.error) {
-                    deleteRowModalClose()
-                    getContacts()
+                    deleteRowModalClose();
+                    getContacts();
                 }
             })
-            .catch(() => {
-            })
-    }
+            .catch(() => {});
+    };
 
     const handlePreviousPage = () => {
-        setLoading(true)
+        setLoading(true);
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
     };
 
     const handleNextPage = () => {
-        setLoading(true)
+        setLoading(true);
         setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
     };
 
     const handleRecordsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setLoading(true)
+        setLoading(true);
         setRecordsPerPage(parseInt(event.target.value));
         setCurrentPage(1);
     };
@@ -216,34 +250,44 @@ export default function Contacts() {
 
     const onAddContact = () => {
         if (!loading) {
-            navigate('/app/contacts/add-contacts', { state: { countries } })
+            navigate('/app/contacts/add-contacts', { state: { countries } });
         }
         // navigate('/contacts/add-contacts?page=add-contacts')
-    }
+    };
 
     const contactHandle = (contactId: any) => {
-        navigate(`/app/contacts/contact-details`, { state: { contactId, detail: true, countries } })
-    }
+        navigate(`/app/contacts/contact-details`, {
+            state: { contactId, detail: true, countries },
+        });
+    };
 
     const deleteRow = (deleteId: any) => {
-        setDeleteRowModal(true)
-        setSelectedId(deleteId)
-    }
+        setDeleteRowModal(true);
+        setSelectedId(deleteId);
+    };
     const deleteRowModalClose = () => {
-        setDeleteRowModal(false)
-        setSelectedId('')
-    }
-    const modalDialog = 'Are You Sure you want to delete this contact?'
-    const modalTitle = 'Delete Contact'
+        setDeleteRowModal(false);
+        setSelectedId('');
+    };
+    const modalDialog = 'Are You Sure you want to delete this contact?';
+    const modalTitle = 'Delete Contact';
 
-    const recordsList = [[10, '10 Records per page'], [20, '20 Records per page'], [30, '30 Records per page'], [40, '40 Records per page'], [50, '50 Records per page']]
+    const recordsList = [
+        [10, '10 Records per page'],
+        [20, '20 Records per page'],
+        [30, '30 Records per page'],
+        [40, '40 Records per page'],
+        [50, '50 Records per page'],
+    ];
     // console.log(contactList, 'cccc')
     // console.log(context, 'cc');
     return (
-        <Box sx={{
-            mt: '60px'
-            // , width: '1376px' 
-        }}>
+        <Box
+            sx={{
+                mt: '60px',
+                // , width: '1376px'
+            }}
+        >
             <CustomToolbar sx={{ flexDirection: 'row-reverse' }}>
                 {/* <Tabs defaultValue={value} onChange={handleChangeTab} sx={{ mt: '27px' }}>
                     <CustomTab value="Open" label="Open"
@@ -259,7 +303,13 @@ export default function Contacts() {
                         }}
                     ></CustomTab>
                 </Tabs> */}
-                <Stack sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                <Stack
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}
+                >
                     <Select
                         value={recordsPerPage}
                         // onChange={(e: any) => setRecordsPerPage(e.target.value)}
@@ -271,22 +321,52 @@ export default function Contacts() {
                         onClick={() => setSelectOpen(!selectOpen)}
                         IconComponent={() => (
                             <div onClick={() => setSelectOpen(!selectOpen)} className="custom-select-icon">
-                                {selectOpen ? <FiChevronUp style={{ marginTop: '12px' }} /> : <FiChevronDown style={{ marginTop: '12px' }} />}
+                                {selectOpen ? (
+                                    <FiChevronUp style={{ marginTop: '12px' }} />
+                                ) : (
+                                    <FiChevronDown style={{ marginTop: '12px' }} />
+                                )}
                             </div>
                         )}
-                        sx={{ '& .MuiSelect-select': { overflow: 'visible !important' } }}
+                        sx={{
+                            '& .MuiSelect-select': {
+                                overflow: 'visible !important',
+                            },
+                        }}
                     >
-                        {recordsList?.length && recordsList.map((item: any, i: any) => (
-                            <MenuItem key={i} value={item[0]} >
-                                {item[1]}
-                            </MenuItem>
-                        ))}
+                        {recordsList?.length &&
+                            recordsList.map((item: any, i: any) => (
+                                <MenuItem key={i} value={item[0]}>
+                                    {item[1]}
+                                </MenuItem>
+                            ))}
                     </Select>
-                    <Box sx={{ borderRadius: '7px', backgroundColor: 'white', height: '40px', minHeight: '40px', maxHeight: '40px', display: 'flex', flexDirection: 'row', alignItems: 'center', mr: 1, p: '0px' }}>
+                    <Box
+                        sx={{
+                            borderRadius: '7px',
+                            backgroundColor: 'white',
+                            height: '40px',
+                            minHeight: '40px',
+                            maxHeight: '40px',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            mr: 1,
+                            p: '0px',
+                        }}
+                    >
                         <FabLeft onClick={handlePreviousPage} disabled={currentPage === 1}>
                             <FiChevronLeft style={{ height: '15px' }} />
                         </FabLeft>
-                        <Typography sx={{ mt: 0, textTransform: 'lowercase', fontSize: '15px', color: '#1A3353', textAlign: 'center' }}>
+                        <Typography
+                            sx={{
+                                mt: 0,
+                                textTransform: 'lowercase',
+                                fontSize: '15px',
+                                color: '#1A3353',
+                                textAlign: 'center',
+                            }}
+                        >
                             {currentPage} to {totalPages}
                             {/* {renderPageNumbers()} */}
                         </Typography>
@@ -295,8 +375,8 @@ export default function Contacts() {
                         </FabRight>
                     </Box>
                     <Button
-                        variant='contained'
-                        startIcon={<FiPlus className='plus-icon' />}
+                        variant="contained"
+                        startIcon={<FiPlus className="plus-icon" />}
                         onClick={onAddContact}
                         className={'add-button'}
                     >
@@ -306,8 +386,20 @@ export default function Contacts() {
             </CustomToolbar>
 
             <Container sx={{ width: '100%', maxWidth: '100%', minWidth: '100%' }}>
-                <Box sx={{ width: '100%', minWidth: '100%', m: '15px 0px 0px 0px' }}>
-                    <Paper sx={{ width: 'cal(100%-15px)', mb: 2, p: '0px 15px 15px 15px' }}>
+                <Box
+                    sx={{
+                        width: '100%',
+                        minWidth: '100%',
+                        m: '15px 0px 0px 0px',
+                    }}
+                >
+                    <Paper
+                        sx={{
+                            width: 'cal(100%-15px)',
+                            mb: 2,
+                            p: '0px 15px 15px 15px',
+                        }}
+                    >
                         <TableContainer>
                             <Table>
                                 <EnhancedTableHead
@@ -332,40 +424,59 @@ export default function Contacts() {
                     </TableRow>
                 </TableHead> */}
                                 <TableBody>
-                                    {
-                                        contactList?.length
-
-                                            ? stableSort(contactList, getComparator(order, orderBy))
-                                                // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item: any, index: any) => {
-                                                .map((item: any, index: any) => {
-                                                    return (
-                                                        <TableRow
-                                                            tabIndex={-1}
-                                                            key={index}
-                                                            sx={{ border: 0, '&:nth-of-type(even)': { backgroundColor: 'whitesmoke' }, color: 'rgb(26, 51, 83)', textTransform: 'capitalize' }}>
-                                                            <TableCell
-                                                                className='tableCell-link'
-                                                                onClick={() => contactHandle(item)}>{item.first_name + ' ' + item.last_name}</TableCell>
-                                                            <TableCell className='tableCell'>{item.primary_email}</TableCell>
-                                                            <TableCell className='tableCell'>{item.mobile_number ? item.mobile_number : '---'}</TableCell>
-                                                            {/* <StyledTableCell align='left'>
+                                    {contactList?.length
+                                        ? stableSort(contactList, getComparator(order, orderBy))
+                                              // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item: any, index: any) => {
+                                              .map((item: any, index: any) => {
+                                                  return (
+                                                      <TableRow
+                                                          tabIndex={-1}
+                                                          key={index}
+                                                          sx={{
+                                                              border: 0,
+                                                              '&:nth-of-type(even)': {
+                                                                  backgroundColor: 'whitesmoke',
+                                                              },
+                                                              color: 'rgb(26, 51, 83)',
+                                                              textTransform: 'capitalize',
+                                                          }}
+                                                      >
+                                                          <TableCell
+                                                              className="tableCell-link"
+                                                              onClick={() => contactHandle(item)}
+                                                          >
+                                                              {item.first_name + ' ' + item.last_name}
+                                                          </TableCell>
+                                                          <TableCell className="tableCell">
+                                                              {item.primary_email}
+                                                          </TableCell>
+                                                          <TableCell className="tableCell">
+                                                              {item.mobile_number ? item.mobile_number : '---'}
+                                                          </TableCell>
+                                                          {/* <StyledTableCell align='left'>
                                                 <AntSwitch checked={item.do_not_call} inputProps={{ 'aria-label': 'ant design' }} />
                                             </StyledTableCell> */}
-                                                            <TableCell className='tableCell'><FaTrashAlt style={{ cursor: 'pointer' }} onClick={() => deleteRow(item.id)} /></TableCell>
-                                                        </TableRow>
-                                                    )
-                                                })
-                                            : ''
-                                    }
+                                                          <TableCell className="tableCell">
+                                                              <FaTrashAlt
+                                                                  style={{
+                                                                      cursor: 'pointer',
+                                                                  }}
+                                                                  onClick={() => deleteRow(item.id)}
+                                                              />
+                                                          </TableCell>
+                                                      </TableRow>
+                                                  );
+                                              })
+                                        : ''}
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        {loading &&
-                            // <Skeleton variant="rectangular" 
-                            // width={210} height={118} 
+                        {loading && (
+                            // <Skeleton variant="rectangular"
+                            // width={210} height={118}
                             // />
                             <Spinner />
-                        }
+                        )}
                     </Paper>
                 </Box>
             </Container>
@@ -386,6 +497,6 @@ export default function Contacts() {
                 //     onDelete={onDelete}
                 // />
             }
-        </Box >
-    )
+        </Box>
+    );
 }

@@ -1,8 +1,19 @@
 body {
     background-color: #fafafb;
-    font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-family:
+        'Roboto',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        'Helvetica Neue',
+        Arial,
+        'Noto Sans',
+        sans-serif,
+        'Apple Color Emoji',
+        'Segoe UI Emoji',
+        'Segoe UI Symbol',
+        'Noto Color Emoji';
 }
 
 .list {
@@ -23,11 +34,37 @@ body {
 }
 
 * {
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+    font-family:
+        'Roboto',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        'Helvetica Neue',
+        Arial,
+        'Noto Sans',
+        sans-serif,
+        'Apple Color Emoji',
+        'Segoe UI Emoji',
+        'Segoe UI Symbol',
+        'Noto Color Emoji' !important;
 }
 
 .MuiTypography-h5 {
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-family:
+        'Roboto',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        'Helvetica Neue',
+        Arial,
+        'Noto Sans',
+        sans-serif,
+        'Apple Color Emoji',
+        'Segoe UI Emoji',
+        'Segoe UI Symbol',
+        'Noto Color Emoji';
     line-height: 1.5 !important;
     color: #1a3353 !important;
     font-size: 30px !important;
@@ -71,7 +108,6 @@ body {
     overflow: hidden;
     height: 170%;
     /* max-height: 160%; */
-
 }
 
 .register-ad-text {
@@ -110,7 +146,7 @@ body {
     bottom: 2%;
     top: 110%;
     color: #fff;
-    align-items: "right";
+    align-items: 'right';
 }
 
 /* auth */
@@ -130,10 +166,9 @@ body {
 .register-ad-bg-image {
     /* height: 600px; */
     width: 100%;
-    overflow: "hidden";
+    overflow: 'hidden';
     height: 170%;
     /* max-height: 160%; */
-
 }
 
 .register-ad-text {
@@ -172,12 +207,12 @@ body {
     bottom: 2%;
     top: 110%;
     color: #fff;
-    align-items: "right";
+    align-items: 'right';
 }
 
 /* === */
 .container {
-    background-color: #1A3353;
+    background-color: #1a3353;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -269,7 +304,7 @@ body {
 .typography {
     border-bottom: 1px solid lightgray;
     width: 100%;
-    color: #1A3353;
+    color: #1a3353;
 }
 
 .fieldContainer {
@@ -292,7 +327,7 @@ body {
     width: 29%;
     text-align: right;
     font-weight: 500;
-    color: #1A3353;
+    color: #1a3353;
 }
 
 .assignTo {
@@ -334,7 +369,7 @@ body {
 
 .open {
     color: blue;
-    background-color: #EBF7F5;
+    background-color: #ebf7f5;
     text-transform: lowercase;
     border-radius: 8px 8px 0px 0px;
 }
@@ -345,7 +380,7 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
-input[type=number] {
+input[type='number'] {
     -moz-appearance: textfield;
 }
 
@@ -444,7 +479,7 @@ input[type=number] {
 .accordion-header {
     font-size: 18px !important;
     font-weight: 600 !important;
-    color: #1A3353;
+    color: #1a3353;
 }
 
 /* helpertext */
@@ -479,7 +514,7 @@ input[type=number] {
 .tableCell-link {
     text-align: left;
     cursor: pointer;
-    color: #3E79F7 !important;
+    color: #3e79f7 !important;
     text-transform: none;
     border: 0 !important;
 }
@@ -547,15 +582,15 @@ input[type=number] {
     outline: none;
     position: relative;
 }
-.AttachedFilesList{
+.AttachedFilesList {
     list-style: 'none';
     padding: 0;
     margin-top: 8px;
 }
-.AttachedFileItem{
+.AttachedFileItem {
     margin-top: 4px;
 }
-.ActionButtonsWrapper{
+.ActionButtonsWrapper {
     border-top: 1px solid #ccc;
     padding-top: 8px;
     display: flex;

@@ -1,6 +1,18 @@
-import React, { useEffect, useState } from 'react'
-import { Box, Button, Card, Container, Link, List, ListItem, ListItemButton, Stack, TextField, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import {
+    Box,
+    Button,
+    Card,
+    Container,
+    Link,
+    List,
+    ListItem,
+    ListItemButton,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { fetchData } from '../../components/FetchData';
 import { OrgUrl } from '../../services/ApiUrls';
 // import '../../styles/company.css'
@@ -15,40 +27,40 @@ interface Item {
 }
 
 export default function Organization() {
-    const [organization, setOrganization] = useState<Item[]>([])
-    const [newOrganization, setNewOrganization] = useState('')
-    const [loading, setLoading] = useState(true)
+    const [organization, setOrganization] = useState<Item[]>([]);
+    const [newOrganization, setNewOrganization] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const headers = {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Token')
+        Authorization: localStorage.getItem('Token'),
         //   Authorization: `jwt ${localStorage.getItem('Token')}`,
         //   org: localStorage.getItem('org')
-    }
+    };
     const getOrganization = () => {
         fetchData(`${OrgUrl}/`, 'GET', null as any, headers)
             .then((res: any) => {
                 // console.log(res, 'org')
                 if (res?.profile_org_list) {
-                    setLoading(false)
-                    setOrganization(res?.profile_org_list)
-                    setNewOrganization('')
+                    setLoading(false);
+                    setOrganization(res?.profile_org_list);
+                    setNewOrganization('');
                 }
             })
             .catch((error) => {
-                console.error('Error:', error)
-            })
-    }
+                console.error('Error:', error);
+            });
+    };
     useEffect(() => {
         if (!localStorage.getItem('Token')) {
-            navigate('/login')
+            navigate('/login');
         } else {
-            getOrganization()
+            getOrganization();
         }
-    }, [])
+    }, []);
     // useEffect(() => {
     //     const token = localStorage.getItem('Token');
     //     if (!token) {
@@ -69,37 +81,41 @@ export default function Organization() {
     //         }
     //     }, [])
     const selectedOrganization = (id: any) => {
-        localStorage.setItem('org', id)
+        localStorage.setItem('org', id);
         // navigate('/')
-        navigate('/contacts')
-    }
+        navigate('/contacts');
+    };
 
     const addCompany = () => {
-        const organizationName = { name: newOrganization }
+        const organizationName = { name: newOrganization };
         fetchData(`${OrgUrl}/`, 'POST', JSON.stringify(organizationName), headers)
-            .then(res => {
-                console.log(res)
+            .then((res) => {
+                console.log(res);
                 if (res.status === 201) {
-                    getOrganization()
+                    getOrganization();
                 }
             })
-            .catch(err => console.error(err))
-    }
+            .catch((err) => console.error(err));
+    };
 
     return (
         <Box>
-            <Container sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <Typography variant='h5'>Organization</Typography>
+            <Container
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                <Typography variant="h5">Organization</Typography>
                 <Card>
                     <List>
-                        {
-                            organization?.length > 0 &&
+                        {organization?.length > 0 &&
                             organization.map((item, i) => (
                                 <ListItem key={i}>
                                     <StyledListItemButton onClick={() => selectedOrganization(item?.org?.id)}>
-                                        <StyledListItemText>
-                                            {item?.org?.name}
-                                        </StyledListItemText>
+                                        <StyledListItemText>{item?.org?.name}</StyledListItemText>
                                     </StyledListItemButton>
                                 </ListItem>
                             ))}
@@ -154,6 +170,5 @@ export default function Organization() {
                 }
             </Container> */}
         </Box>
-
-    )
+    );
 }

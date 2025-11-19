@@ -1,20 +1,12 @@
-import React, { useState } from 'react'
-import {
-    TextField,
-    AccordionDetails,
-    Accordion,
-    AccordionSummary,
-    Typography,
-    Box,
-    Divider
-} from '@mui/material'
+import React, { useState } from 'react';
+import { TextField, AccordionDetails, Accordion, AccordionSummary, Typography, Box, Divider } from '@mui/material';
 import { FaArrowDown } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CompaniesUrl, CompanyUrl, ContactUrl } from '../../services/ApiUrls';
 import { CustomAppBar } from '../../components/CustomAppBar';
 import { fetchData, Header } from '../../components/FetchData';
 import { AntSwitch, CustomSelectField, RequiredTextField } from '../../styles/CssStyled';
-import '../../styles/style.css'
+import '../../styles/style.css';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 
 type FormErrors = {
@@ -22,12 +14,12 @@ type FormErrors = {
 };
 
 function AddCompany() {
-    const navigate = useNavigate()
-    const { state } = useLocation()
-    const [error, setError] = useState(false)
+    const navigate = useNavigate();
+    const { state } = useLocation();
+    const [error, setError] = useState(false);
     const [formData, setFormData] = useState({
-        name: ''
-    })
+        name: '',
+    });
     const [errors, setErrors] = useState<FormErrors>({});
 
     const handleChange = (e: any) => {
@@ -45,75 +37,82 @@ function AddCompany() {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org')
-          }
+            org: localStorage.getItem('org'),
+        };
         // console.log('Form data:', data);
-        const data = { name: formData.name }
+        const data = { name: formData.name };
         fetchData(`${CompaniesUrl}`, 'POST', JSON.stringify(data), Header)
             .then((res: any) => {
                 // console.log('Form data:', res);
                 if (!res.error) {
-                    resetForm()
-                    navigate('/app/companies')
+                    resetForm();
+                    navigate('/app/companies');
                 }
                 if (res.error) {
                     // console.log(res);
-                    setError(true)
+                    setError(true);
                     //   setErrors(res?.errors?.contact_errors)
                 }
             })
-            .catch(() => {
-            })
+            .catch(() => {});
     };
 
     const resetForm = () => {
         setFormData({ name: '' });
         setErrors({});
-    }
+    };
     const backbtnHandle = () => {
-        navigate('/app/companies')
-    }
-    const module = 'Companies'
-    const crntPage = 'Add Company'
-    const backBtn = 'Back To Companies'
+        navigate('/app/companies');
+    };
+    const module = 'Companies';
+    const crntPage = 'Add Company';
+    const backBtn = 'Back To Companies';
 
     const onCancel = () => {
-        resetForm()
-    }
+        resetForm();
+    };
     // console.log(errors, 'err')
     return (
         <Box sx={{ mt: '60px' }}>
-            <CustomAppBar backbtnHandle={backbtnHandle} module={module} backBtn={backBtn} crntPage={crntPage} onCancel={onCancel} onSubmit={handleSubmit} />
-            <Box sx={{ mt: "120px" }}>
+            <CustomAppBar
+                backbtnHandle={backbtnHandle}
+                module={module}
+                backBtn={backBtn}
+                crntPage={crntPage}
+                onCancel={onCancel}
+                onSubmit={handleSubmit}
+            />
+            <Box sx={{ mt: '120px' }}>
                 <form onSubmit={handleSubmit}>
                     <div style={{ padding: '10px' }}>
-                        <div className='leadContainer'>
-                            <Accordion style={{ width: '98%' }}
-                                defaultExpanded
-                            >
+                        <div className="leadContainer">
+                            <Accordion style={{ width: '98%' }} defaultExpanded>
                                 <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                    <Typography className='accordion-header'>Company Information</Typography>
+                                    <Typography className="accordion-header">Company Information</Typography>
                                 </AccordionSummary>
-                                <Divider className='divider' />
+                                <Divider className="divider" />
                                 <AccordionDetails>
                                     <Box
-                                        sx={{ width: '98%', color: '#1A3353',mb:1 }}
-                                        component='form'
+                                        sx={{
+                                            width: '98%',
+                                            color: '#1A3353',
+                                            mb: 1,
+                                        }}
+                                        component="form"
                                         // noValidate
-                                        autoComplete='off'
+                                        autoComplete="off"
                                     >
-                                        <div className='fieldContainer'>
-                                            <div className='fieldSubContainer'>
-                                                <div className='fieldTitle'>Name</div>
+                                        <div className="fieldContainer">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Name</div>
                                                 <RequiredTextField
-                                                    name='name'
+                                                    name="name"
                                                     value={formData.name}
                                                     onChange={handleChange}
                                                     style={{ width: '70%' }}
-                                                    size='small'
+                                                    size="small"
                                                     helperText={errors?.name?.[0] ? errors?.name[0] : ''}
                                                     error={!!errors?.name?.[0]}
-
                                                 />
                                             </div>
                                         </div>
@@ -124,9 +123,8 @@ function AddCompany() {
                     </div>
                 </form>
             </Box>
-
         </Box>
-    )
+    );
 }
 
-export default AddCompany
+export default AddCompany;

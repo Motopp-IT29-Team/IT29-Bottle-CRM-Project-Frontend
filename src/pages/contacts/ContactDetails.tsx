@@ -1,20 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import {
-    Card,
-    Link,
-    Button,
-    Avatar,
-    Divider,
-    TextField,
-    Box,
-    AvatarGroup
-} from '@mui/material'
-import { Fa500Px, FaAccusoft, FaAd, FaAddressCard, FaEnvelope, FaRegAddressCard, FaStar } from 'react-icons/fa'
-import { CustomAppBar } from '../../components/CustomAppBar'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { AntSwitch } from '../../styles/CssStyled'
-import { ContactUrl } from '../../services/ApiUrls'
-import { fetchData } from '../../components/FetchData'
+import React, { useEffect, useState } from 'react';
+import { Card, Link, Button, Avatar, Divider, TextField, Box, AvatarGroup } from '@mui/material';
+import { Fa500Px, FaAccusoft, FaAd, FaAddressCard, FaEnvelope, FaRegAddressCard, FaStar } from 'react-icons/fa';
+import { CustomAppBar } from '../../components/CustomAppBar';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AntSwitch } from '../../styles/CssStyled';
+import { ContactUrl } from '../../services/ApiUrls';
+import { fetchData } from '../../components/FetchData';
 
 type response = {
     created_by: string;
@@ -51,38 +42,40 @@ type response = {
 };
 
 export const formatDate = (dateString: any) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
-    return new Date(dateString).toLocaleDateString(undefined, options)
-}
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+};
 
 export default function ContactDetails() {
-    const navigate = useNavigate()
-    const { state } = useLocation()
-    const [contactDetails, setContactDetails] = useState<response | null>(null)
-    const [addressDetails, setAddressDetails] = useState<response | null>(null)
-    const [org, setOrg] = useState<response | null>(null)
+    const navigate = useNavigate();
+    const { state } = useLocation();
+    const [contactDetails, setContactDetails] = useState<response | null>(null);
+    const [addressDetails, setAddressDetails] = useState<response | null>(null);
+    const [org, setOrg] = useState<response | null>(null);
 
     useEffect(() => {
-        getContactDetail(state.contactId.id)
-    }, [state.contactId.id])
+        getContactDetail(state.contactId.id);
+    }, [state.contactId.id]);
 
     const getContactDetail = (id: any) => {
         const Header = {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org')
-          }
-        fetchData(`${ContactUrl}/${id}/`, 'GET', null as any, Header)
-            .then((res) => {
-                // console.log(res, 'res');
-                if (!res.error) {
-                    setContactDetails(res?.contact_obj)
-                    setAddressDetails(res?.address_obj)
-                    setOrg(res?.org)
-                }
-            })
-    }
+            org: localStorage.getItem('org'),
+        };
+        fetchData(`${ContactUrl}/${id}/`, 'GET', null as any, Header).then((res) => {
+            if (!res.error) {
+                setContactDetails(res?.contact_obj);
+                setAddressDetails(res?.address_obj);
+                setOrg(res?.org);
+            }
+        });
+    };
 
     //   useEffect(() => {
     // navigate(-1)
@@ -105,8 +98,8 @@ export default function ContactDetails() {
     //   }, [])
 
     const backbtnHandle = () => {
-        navigate('/app/contacts')
-    }
+        navigate('/app/contacts');
+    };
 
     const editHandle = () => {
         // navigate('/contacts/edit-contacts', { state: { value: contactDetails, address: newAddress } })
@@ -135,52 +128,126 @@ export default function ContactDetails() {
                     description: contactDetails?.description,
                     linked_in_url: contactDetails?.linked_in_url,
                     facebook_url: contactDetails?.facebook_url,
-                    twitter_username: contactDetails?.twitter_username
-                }, id: state?.contactId?.id, countries: state?.countries
-            }
-        })
-    }
+                    twitter_username: contactDetails?.twitter_username,
+                },
+                id: state?.contactId?.id,
+                countries: state?.countries,
+            },
+        });
+    };
 
-    const module = 'Contacts'
-    const crntPage = 'Contact Detail'
-    const backBtn = 'Back To Contacts'
+    const module = 'Contacts';
+    const crntPage = 'Contact Detail';
+    const backBtn = 'Back To Contacts';
     // console.log(state, 'contact');
 
     return (
         <Box sx={{ mt: '60px' }}>
             <div>
-                <CustomAppBar backbtnHandle={backbtnHandle} module={module} backBtn={backBtn} crntPage={crntPage} editHandle={editHandle} />
-                <Box sx={{ mt: '110px', p: '20px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <CustomAppBar
+                    backbtnHandle={backbtnHandle}
+                    module={module}
+                    backBtn={backBtn}
+                    crntPage={crntPage}
+                    editHandle={editHandle}
+                />
+                <Box
+                    sx={{
+                        mt: '110px',
+                        p: '20px',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
                     <Box sx={{ width: '65%' }}>
                         <Card sx={{ borderRadius: '7px' }}>
-                            <div style={{ padding: '20px', borderBottom: '1px solid lightgray', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 600, fontSize: '18px', color: '#1a3353f0' }}>
+                            <div
+                                style={{
+                                    padding: '20px',
+                                    borderBottom: '1px solid lightgray',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        fontWeight: 600,
+                                        fontSize: '18px',
+                                        color: '#1a3353f0',
+                                    }}
+                                >
                                     Contact Information
                                 </div>
-                                <div style={{ color: 'gray', fontSize: '16px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginRight: '15px', textTransform: 'capitalize' }}>
+                                <div
+                                    style={{
+                                        color: 'gray',
+                                        fontSize: '16px',
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end',
+                                            alignItems: 'center',
+                                            marginRight: '15px',
+                                            textTransform: 'capitalize',
+                                        }}
+                                    >
                                         created on
                                         {formatDate(contactDetails?.created_on)}
                                         &nbsp;by &nbsp;&nbsp;
-                                        <span style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
+                                        <span
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
                                             <Avatar
-                                                src='/broken-image.jpg'
+                                                src="/broken-image.jpg"
                                                 style={{
                                                     height: '24px',
-                                                    width: '24px'
+                                                    width: '24px',
                                                 }}
                                             />
-                                        </span> &nbsp;&nbsp;
+                                        </span>{' '}
+                                        &nbsp;&nbsp;
                                         {contactDetails?.first_name}
                                         {contactDetails?.last_name}
                                     </div>
-                                    <div>Last update&nbsp;{contactDetails?.created_on_arrow}</div>
+                                    <div>
+                                        Last update&nbsp;
+                                        {contactDetails?.created_on_arrow}
+                                    </div>
                                 </div>
                             </div>
-                            <div style={{ padding: '20px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <div
+                                style={{
+                                    padding: '20px',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Account Title</div>
-                                    <div style={{ fontSize: '16px', color: 'gray', display: 'flex', flexDirection: 'row', marginTop: '5%' }}>
+                                    <div className="title2">Account Title</div>
+                                    <div
+                                        style={{
+                                            fontSize: '16px',
+                                            color: 'gray',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            marginTop: '5%',
+                                        }}
+                                    >
                                         <div style={{ display: 'flex' }}>
                                             {/* <AvatarGroup
                                                 total={2}
@@ -195,191 +262,330 @@ export default function ContactDetails() {
                                     </div>
                                 </div>
                             </div>
-                            <div style={{ padding: '20px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <div
+                                style={{
+                                    padding: '20px',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>First Name</div>
-                                    <div className='title3'>
-                                        {contactDetails?.first_name || '----'}
-                                    </div>
+                                    <div className="title2">First Name</div>
+                                    <div className="title3">{contactDetails?.first_name || '----'}</div>
                                 </div>
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Last Name</div>
-                                    <div className='title3'>
-                                        {contactDetails?.last_name || '----'}
-                                    </div>
+                                    <div className="title2">Last Name</div>
+                                    <div className="title3">{contactDetails?.last_name || '----'}</div>
                                 </div>
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Organization Name</div>
-                                    <div className='title3'>
-                                        {org?.name || '----'}
-                                    </div>
+                                    <div className="title2">Organization Name</div>
+                                    <div className="title3">{org?.name || '----'}</div>
                                 </div>
                             </div>
-                            <div style={{ padding: '20px', marginTop: '15px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <div
+                                style={{
+                                    padding: '20px',
+                                    marginTop: '15px',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Email Address</div>
-                                    <div style={{ fontSize: '16px', color: '#1E90FF', marginTop: '5%' }}>
+                                    <div className="title2">Email Address</div>
+                                    <div
+                                        style={{
+                                            fontSize: '16px',
+                                            color: '#1E90FF',
+                                            marginTop: '5%',
+                                        }}
+                                    >
                                         <div>
-                                            {contactDetails?.primary_email ? <div><Link>{contactDetails?.primary_email}</Link><FaStar style={{ fontSize: '16px', fill: 'yellow' }} /></div> : '----'}<br />
-                                            {contactDetails?.secondary_email ? <Link>{contactDetails?.secondary_email}</Link> : ''}
+                                            {contactDetails?.primary_email ? (
+                                                <div>
+                                                    <Link>{contactDetails?.primary_email}</Link>
+                                                    <FaStar
+                                                        style={{
+                                                            fontSize: '16px',
+                                                            fill: 'yellow',
+                                                        }}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                '----'
+                                            )}
+                                            <br />
+                                            {contactDetails?.secondary_email ? (
+                                                <Link>{contactDetails?.secondary_email}</Link>
+                                            ) : (
+                                                ''
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Mobile Number</div>
-                                    <div className='title3'>
+                                    <div className="title2">Mobile Number</div>
+                                    <div className="title3">
                                         <div>
-                                            {contactDetails?.mobile_number ? <div>{contactDetails?.mobile_number}{<FaStar style={{ fontSize: '16px', fill: 'yellow' }} />}</div> : '----'}<br />
+                                            {contactDetails?.mobile_number ? (
+                                                <div>
+                                                    {contactDetails?.mobile_number}
+                                                    {
+                                                        <FaStar
+                                                            style={{
+                                                                fontSize: '16px',
+                                                                fill: 'yellow',
+                                                            }}
+                                                        />
+                                                    }
+                                                </div>
+                                            ) : (
+                                                '----'
+                                            )}
+                                            <br />
                                             {contactDetails?.secondary_number ? contactDetails?.secondary_number : ''}
                                         </div>
                                     </div>
                                 </div>
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>website</div>
-                                    <div className='title3'>
+                                    <div className="title2">website</div>
+                                    <div className="title3">
                                         {contactDetails?.website ? <Link>{contactDetails?.website}</Link> : '----'}
                                     </div>
                                 </div>
                             </div>
-                            <div style={{ padding: '20px', marginTop: '15px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <div
+                                style={{
+                                    padding: '20px',
+                                    marginTop: '15px',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Department</div>
-                                    <div className='title3'>
-                                        {contactDetails?.department || '----'}
-                                    </div>
+                                    <div className="title2">Department</div>
+                                    <div className="title3">{contactDetails?.department || '----'}</div>
                                 </div>
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Language</div>
-                                    <div className='title3'>
-                                        {contactDetails?.language || '----'}
-                                    </div>
+                                    <div className="title2">Language</div>
+                                    <div className="title3">{contactDetails?.language || '----'}</div>
                                 </div>
                                 <div style={{ width: '32%' }}>
-                                    <div className='title2'>Do Not Call</div>
-                                    <div className='title3'>
+                                    <div className="title2">Do Not Call</div>
+                                    <div className="title3">
                                         <AntSwitch
                                             checked={contactDetails?.do_not_call}
-                                            inputProps={{ 'aria-label': 'ant design' }} />
+                                            inputProps={{
+                                                'aria-label': 'ant design',
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             </div>
                             {/* Address details */}
                             <div style={{ marginTop: '15px' }}>
-                                <div style={{ padding: '20px', borderBottom: '1px solid lightgray', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <div style={{ fontWeight: 600, fontSize: '18px', color: '#1a3353f0' }}>
+                                <div
+                                    style={{
+                                        padding: '20px',
+                                        borderBottom: '1px solid lightgray',
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            fontWeight: 600,
+                                            fontSize: '18px',
+                                            color: '#1a3353f0',
+                                        }}
+                                    >
                                         Address Details
                                     </div>
                                 </div>
-                                <div style={{ padding: '20px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <div
+                                    style={{
+                                        padding: '20px',
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
                                     <div style={{ width: '32%' }}>
-                                        <div className='title2'>Address Lane</div>
-                                        <div className='title3'>
-                                            {addressDetails?.address_line || '----'}
-                                        </div>
+                                        <div className="title2">Address Lane</div>
+                                        <div className="title3">{addressDetails?.address_line || '----'}</div>
                                     </div>
                                     <div style={{ width: '32%' }}>
-                                        <div className='title2'>Street</div>
-                                        <div className='title3'>
-                                            {addressDetails?.street || '----'}
-                                        </div>
+                                        <div className="title2">Street</div>
+                                        <div className="title3">{addressDetails?.street || '----'}</div>
                                     </div>
                                     <div style={{ width: '32%' }}>
-                                        <div className='title2'>City</div>
-                                        <div className='title3'>
-                                            {addressDetails?.city || '----'}
-                                        </div>
+                                        <div className="title2">City</div>
+                                        <div className="title3">{addressDetails?.city || '----'}</div>
                                     </div>
                                 </div>
-                                <div style={{ padding: '20px', marginTop: '15px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <div
+                                    style={{
+                                        padding: '20px',
+                                        marginTop: '15px',
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
                                     <div style={{ width: '32%' }}>
-                                        <div className='title2'>Pincode</div>
-                                        <div className='title3'>
-                                            {addressDetails?.postcode || '----'}
-                                        </div>
+                                        <div className="title2">Pincode</div>
+                                        <div className="title3">{addressDetails?.postcode || '----'}</div>
                                     </div>
                                     <div style={{ width: '32%' }}>
-                                        <div className='title2'>State</div>
-                                        <div className='title3'>
-                                            {addressDetails?.state || '----'}
-                                        </div>
+                                        <div className="title2">State</div>
+                                        <div className="title3">{addressDetails?.state || '----'}</div>
                                     </div>
                                     <div style={{ width: '32%' }}>
-                                        <div className='title2'>Country</div>
-                                        <div className='title3'>
-                                            {contactDetails?.country || '----'}
-                                        </div>
+                                        <div className="title2">Country</div>
+                                        <div className="title3">{contactDetails?.country || '----'}</div>
                                     </div>
                                 </div>
                             </div>
                             {/* Description */}
                             <div style={{ marginTop: '15px' }}>
-                                <div style={{ padding: '20px', borderBottom: '1px solid lightgray', display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <div style={{ fontWeight: 600, fontSize: '18px', color: '#1a3353f0' }}>
+                                <div
+                                    style={{
+                                        padding: '20px',
+                                        borderBottom: '1px solid lightgray',
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            fontWeight: 600,
+                                            fontSize: '18px',
+                                            color: '#1a3353f0',
+                                        }}
+                                    >
                                         Description
                                     </div>
                                 </div>
                                 <Box sx={{ p: '15px' }}>
-                                    {contactDetails?.description ? <div dangerouslySetInnerHTML={{ __html: contactDetails?.description }} /> : '---'}
+                                    {contactDetails?.description ? (
+                                        <div
+                                            dangerouslySetInnerHTML={{
+                                                __html: contactDetails?.description,
+                                            }}
+                                        />
+                                    ) : (
+                                        '---'
+                                    )}
                                 </Box>
                             </div>
                         </Card>
                     </Box>
                     <Box sx={{ width: '34%' }}>
                         <Card sx={{ borderRadius: '7px', p: '20px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <div style={{ fontWeight: 600, fontSize: '16px', color: '#1a3353f0' }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        fontWeight: 600,
+                                        fontSize: '16px',
+                                        color: '#1a3353f0',
+                                    }}
+                                >
                                     Social
                                 </div>
-                                <div style={{ color: '#3E79F7', fontSize: '16px', fontWeight: 600 }}>
+                                <div
+                                    style={{
+                                        color: '#3E79F7',
+                                        fontSize: '16px',
+                                        fontWeight: 600,
+                                    }}
+                                >
                                     {/* Add Social #1E90FF */}
                                     <Button
-                                        type='submit'
-                                        variant='text'
-                                        size='small'
+                                        type="submit"
+                                        variant="text"
+                                        size="small"
                                         startIcon={<FaEnvelope style={{ fill: '#3E79F7' }} />}
-                                        style={{ textTransform: 'capitalize', fontWeight: 600, fontSize: '16px' }}
+                                        style={{
+                                            textTransform: 'capitalize',
+                                            fontWeight: 600,
+                                            fontSize: '16px',
+                                        }}
                                     >
                                         Add Socials
                                     </Button>
                                 </div>
                             </div>
-                            <div style={{ fontSize: '16px', marginTop: '15px' }}>
-                                LinkedIn URL
-                            </div>
-                            <div style={{ paddingBottom: '10px', width: '80%', marginBottom: '10px' }}>
+                            <div style={{ fontSize: '16px', marginTop: '15px' }}>LinkedIn URL</div>
+                            <div
+                                style={{
+                                    paddingBottom: '10px',
+                                    width: '80%',
+                                    marginBottom: '10px',
+                                }}
+                            >
                                 <TextField
-                                    variant='outlined'
-                                    size='small'
+                                    variant="outlined"
+                                    size="small"
                                     value={contactDetails?.linked_in_url || '----'}
-                                    sx={{ height: '40px', width: '100%', mt: 1 }}
+                                    sx={{
+                                        height: '40px',
+                                        width: '100%',
+                                        mt: 1,
+                                    }}
                                 />
                             </div>
-                            <div style={{ fontSize: '16px' }}>
-                                Facebook URL
-                            </div>
-                            <div style={{ paddingBottom: '10px', width: '80%', marginBottom: '10px' }}>
+                            <div style={{ fontSize: '16px' }}>Facebook URL</div>
+                            <div
+                                style={{
+                                    paddingBottom: '10px',
+                                    width: '80%',
+                                    marginBottom: '10px',
+                                }}
+                            >
                                 <TextField
-                                    variant='outlined'
-                                    size='small'
+                                    variant="outlined"
+                                    size="small"
                                     value={contactDetails?.facebook_url || '----'}
-                                    sx={{ height: '40px', width: '100%', mt: 1 }}
+                                    sx={{
+                                        height: '40px',
+                                        width: '100%',
+                                        mt: 1,
+                                    }}
                                 />
                             </div>
-                            <div style={{ fontSize: '16px', marginTop: '15px' }}>
-                                Twitter URL
-                            </div>
-                            <div style={{ paddingBottom: '10px', width: '80%', marginBottom: '10px' }}>
+                            <div style={{ fontSize: '16px', marginTop: '15px' }}>Twitter URL</div>
+                            <div
+                                style={{
+                                    paddingBottom: '10px',
+                                    width: '80%',
+                                    marginBottom: '10px',
+                                }}
+                            >
                                 <TextField
-                                    variant='outlined'
-                                    size='small'
+                                    variant="outlined"
+                                    size="small"
                                     value={contactDetails?.twitter_username || '----'}
-                                    sx={{ height: '40px', width: '100%', mt: 1 }}
+                                    sx={{
+                                        height: '40px',
+                                        width: '100%',
+                                        mt: 1,
+                                    }}
                                 />
                             </div>
                         </Card>
                     </Box>
                 </Box>
-            </div >
-        </Box >
-    )
+            </div>
+        </Box>
+    );
 }
