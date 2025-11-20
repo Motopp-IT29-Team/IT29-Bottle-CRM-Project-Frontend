@@ -16,7 +16,7 @@ interface Address {
 }
 
 interface UserAddressSectionProps {
-    address: Address;
+    address?: Address;
 }
 
 export const UserAddressSection: React.FC<UserAddressSectionProps> = ({ address }) => {
@@ -46,22 +46,32 @@ export const UserAddressSection: React.FC<UserAddressSectionProps> = ({ address 
                 <UserInfoCard
                     icon={<FiHome size={20} />}
                     label="Address Line"
-                    value={address.address_line}
+                    value={address?.address_line || ''}
                     color="#ec4899"
                 />
-                <UserInfoCard icon={<FiNavigation size={20} />} label="Street" value={address.street} color="#8b5cf6" />
-                <UserInfoCard icon={<FiMapPin size={20} />} label="City" value={address.city} color="#06b6d4" />
-                <UserInfoCard icon={<FiMapPin size={20} />} label="State" value={address.state} color="#3b82f6" />
+                <UserInfoCard
+                    icon={<FiNavigation size={20} />}
+                    label="Street"
+                    value={address?.street || ''}
+                    color="#8b5cf6"
+                />
+                <UserInfoCard icon={<FiMapPin size={20} />} label="City" value={address?.city || ''} color="#06b6d4" />
+                <UserInfoCard
+                    icon={<FiMapPin size={20} />}
+                    label="State"
+                    value={address?.state || ''}
+                    color="#3b82f6"
+                />
                 <UserInfoCard
                     icon={<FiMapPin size={20} />}
                     label="Postal Code"
-                    value={address.postcode}
+                    value={address?.postcode || ''}
                     color="#f59e0b"
                 />
                 <UserInfoCard
                     icon={<FiMapPin size={20} />}
                     label="Country"
-                    value={getCountryNameByCode(address.country)}
+                    value={getCountryNameByCode(address?.country || '')}
                     color="#10b981"
                 />
             </Box>

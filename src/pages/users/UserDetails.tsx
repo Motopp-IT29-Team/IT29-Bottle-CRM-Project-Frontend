@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, CircularProgress, Typography, Snackbar, Alert } from '@mui/material';
-import { CustomAppBar } from '../../components/CustomAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     USER_DETAILS_PAGE_STYLES,
@@ -21,8 +21,8 @@ export default function UserDetails() {
 
     const { loading, userDetails, isResending, snackbar, resendInvitation, closeSnackbar } = useUserDetails(userId);
 
-    const backbtnHandle = () => navigate('/app/users');
-    const editHandle = () => navigate(`/app/users/edit-user?id=${userId}`);
+    const handleBack = () => navigate('/app/users');
+    const handleEdit = () => navigate(`/app/users/edit-user?id=${userId}`);
 
     if (!userId) {
         navigate('/app/users');
@@ -43,15 +43,17 @@ export default function UserDetails() {
         return null;
     }
 
+    const actions: AppBarAction[] = [{ type: 'back', label: 'Back To Users', onClick: handleBack }];
+
+    actions.push({
+        type: 'edit',
+        onClick: handleEdit,
+    });
+
     return (
         <Box sx={USER_DETAILS_PAGE_STYLES}>
-            <CustomAppBar
-                backbtnHandle={backbtnHandle}
-                module="Users"
-                backBtn="Back To Users"
-                crntPage="User Detail"
-                editHandle={editHandle}
-            />
+            <ModernAppBar module="Users" crntPage="User Details" actions={actions} />
+
             <Box sx={USER_DETAILS_CONTAINER_STYLES}>
                 <UserProfileHeader
                     email={userDetails.user_details.email}

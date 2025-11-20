@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { UserUrl } from '../../services/ApiUrls';
 import { fetchData } from '../../components/FetchData';
-import { CustomAppBar } from '../../components/CustomAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { EditUserInfoSection } from '../../components/users/edit/EditUserInfoSection';
 import { EditUserAddressSection } from '../../components/users/edit/EditUserAddressSection';
 
@@ -36,6 +36,7 @@ export function EditUser() {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [password, setPassword] = useState('');
@@ -104,7 +105,7 @@ export function EditUser() {
         }
     };
 
-    const backbtnHandle = () => {
+    const handleBack = () => {
         navigate('/app/users');
     };
 
@@ -114,6 +115,7 @@ export function EditUser() {
             ...(password && password.trim().length > 0 ? { password: password.trim() } : {}),
         };
 
+        setIsSubmitting(true);
         try {
             const res = await fetchData(`${UserUrl}/${userId}/`, 'PUT', JSON.stringify(data), getAuthHeaders());
 
@@ -129,15 +131,18 @@ export function EditUser() {
             }
         } catch (error) {
             console.error('Error updating user:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    const onCancel = () => {
+    const handleCancel = () => {
         if (initialData) {
             setFormData(initialData);
             setPassword('');
             setFormErrors({});
         }
+        navigate(-1);
     };
 
     if (loading) {
@@ -170,16 +175,16 @@ export function EditUser() {
         );
     }
 
+    const actions: AppBarAction[] = [
+        { type: 'back', label: 'Back To Users', onClick: handleBack },
+        { type: 'cancel', onClick: handleCancel, disabled: isSubmitting },
+        { type: 'save', onClick: handleSubmit, loading: isSubmitting },
+    ];
+
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
-            <CustomAppBar
-                backbtnHandle={backbtnHandle}
-                module="Users"
-                backBtn="Back To Users"
-                crntPage="Edit User"
-                onCancel={onCancel}
-                onSubmit={handleSubmit}
-            />
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
+            <ModernAppBar module="Users" crntPage="Edit User" actions={actions} />
+
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <EditUserInfoSection
                     formData={{ email: formData.email, role: formData.role }}
