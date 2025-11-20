@@ -29,12 +29,8 @@ export function CustomAppBar(props: any) {
             position="fixed"
         >
             <div className="breadcomContainer">
-                <div role="presentation" style={{ marginLeft: '10px' }}>
-                    <Breadcrumbs
-                        aria-label="breadcrumb"
-                        sx={{ '.MuiBreadcrumbs-separator': { color: 'white' } }}
-                        //   className={classes.breadcrumbs}
-                    >
+                <div role="presentation" style={{ marginLeft: '190px' }}>
+                    <Breadcrumbs aria-label="breadcrumb" sx={{ '.MuiBreadcrumbs-separator': { color: 'white' } }}>
                         <Link
                             underline="hover"
                             color="lightgray"
@@ -124,7 +120,6 @@ export function CustomAppBar(props: any) {
                         </div>
                         <div style={{ marginRight: '10px' }}>
                             <Button
-                                // onClick={backbtnHandle}
                                 className="header-button"
                                 onClick={onCancel}
                                 size="small"
@@ -148,7 +143,6 @@ export function CustomAppBar(props: any) {
                         </div>
                         <div>
                             <Button
-                                // type='submit'
                                 className="header-button"
                                 onClick={onSubmit}
                                 variant="contained"

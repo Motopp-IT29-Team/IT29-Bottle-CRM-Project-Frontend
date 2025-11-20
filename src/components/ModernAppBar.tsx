@@ -175,7 +175,7 @@ export function ModernAppBar({ module, crntPage, actions = [] }: ModernAppBarPro
                 marginTop: '-5px',
                 boxShadow: 'none',
                 top: '64px',
-                left: sharedData.drawerWidth === 200 ? '200px' : '66px',
+                left: '240px',
                 width: '-webkit-fill-available',
             }}
             position="fixed"
