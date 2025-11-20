@@ -8,8 +8,9 @@ interface DeleteModalProps {
     onClose: () => void;
     modalTitle: string;
     modalDialog: string;
-    DeleteItem: () => void;
-    isDeleting?: boolean;
+    buttonName?: string;
+    onClick: () => void;
+    isLoading?: boolean;
 }
 
 export const DeleteModal: React.FC<DeleteModalProps> = ({
@@ -18,14 +19,15 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
     onClose,
     modalTitle,
     modalDialog,
-    DeleteItem,
-    isDeleting = false,
+    buttonName = 'Delete',
+    onClick,
+    isLoading = false,
 }) => {
     return (
         <Dialog
             id={id}
             open={open}
-            onClose={isDeleting ? undefined : onClose}
+            onClose={isLoading ? undefined : onClose}
             maxWidth="sm"
             fullWidth
             PaperProps={{
@@ -99,7 +101,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
             >
                 <Button
                     onClick={onClose}
-                    disabled={isDeleting}
+                    disabled={isLoading}
                     variant="outlined"
                     sx={{
                         textTransform: 'none',
@@ -123,8 +125,8 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
                     Cancel
                 </Button>
                 <Button
-                    onClick={DeleteItem}
-                    disabled={isDeleting}
+                    onClick={onClick}
+                    disabled={isLoading}
                     variant="contained"
                     sx={{
                         textTransform: 'none',
@@ -142,7 +144,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
                         },
                     }}
                 >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
+                    {isLoading ? 'Loading...' : buttonName}
                 </Button>
             </DialogActions>
         </Dialog>

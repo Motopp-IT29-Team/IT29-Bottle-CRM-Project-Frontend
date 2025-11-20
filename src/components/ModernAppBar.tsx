@@ -172,10 +172,10 @@ export function ModernAppBar({ module, crntPage, actions = [] }: ModernAppBarPro
                 height: '50px',
                 display: 'flex',
                 justifyContent: 'center',
-                marginTop: '-3px',
+                marginTop: '-5px',
                 boxShadow: 'none',
                 top: '64px',
-                left: sharedData.drawerWidth === 200 ? '200px' : '60px',
+                left: sharedData.drawerWidth === 200 ? '200px' : '66px',
                 width: '-webkit-fill-available',
             }}
             position="fixed"

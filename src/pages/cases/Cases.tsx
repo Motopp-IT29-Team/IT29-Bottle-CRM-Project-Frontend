@@ -600,7 +600,7 @@ export default function Cases(props: any) {
                 id={selectedId}
                 modalDialog={modalDialog}
                 modalTitle={modalTitle}
-                DeleteItem={deleteItem}
+                onClick={deleteItem}
             />
         </Box>
     );

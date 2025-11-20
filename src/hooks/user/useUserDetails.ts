@@ -20,21 +20,10 @@ interface UserDetailsResponse {
     is_active: boolean;
 }
 
-type SnackbarState = {
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info';
-};
-
 export const useUserDetails = (userId: string | null) => {
     const [loading, setLoading] = useState(true);
     const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
     const [isResending, setIsResending] = useState(false);
-    const [snackbar, setSnackbar] = useState<SnackbarState>({
-        open: false,
-        message: '',
-        severity: 'success',
-    });
 
     const getAuthHeaders = () => ({
         Accept: 'application/json',
@@ -73,34 +62,15 @@ export const useUserDetails = (userId: string | null) => {
             );
 
             if (!response.error) {
-                setSnackbar({
-                    open: true,
-                    message: 'Invitation sent successfully!',
-                    severity: 'success',
-                });
                 return true;
             } else {
-                setSnackbar({
-                    open: true,
-                    message: response.message || 'Failed to send invitation. Please try again.',
-                    severity: 'error',
-                });
                 return false;
             }
         } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Failed to send invitation. Please try again.',
-                severity: 'error',
-            });
             return false;
         } finally {
             setIsResending(false);
         }
-    };
-
-    const closeSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
     };
 
     useEffect(() => {
@@ -113,9 +83,7 @@ export const useUserDetails = (userId: string | null) => {
         loading,
         userDetails,
         isResending,
-        snackbar,
         resendInvitation,
-        closeSnackbar,
         refreshUser: () => userId && getUserDetail(userId),
     };
 };

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { UserUrl } from '../../services/ApiUrls';
-import { fetchData } from '../../components/FetchData';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { EditUserInfoSection } from '../../components/users/edit/EditUserInfoSection';
 import { EditUserAddressSection } from '../../components/users/edit/EditUserAddressSection';
+import { useEditUser } from '../../hooks/user/useEditUser';
+import { useNotification } from '../../context/NotificationContext';
+import { fetchData } from '../../components/FetchData';
+import { ProfileUrl } from '../../services/ApiUrls';
 
 interface FormErrors {
     email?: string[];
@@ -34,12 +36,16 @@ export function EditUser() {
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('id');
     const navigate = useNavigate();
+    const { addNotification } = useNotification();
+    const { getUserData, updateUser, toggleUserStatus, isSubmitting } = useEditUser();
 
     const [loading, setLoading] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isTogglingStatus, setIsTogglingStatus] = useState(false);
     const [error, setError] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [password, setPassword] = useState('');
+    const [isActive, setIsActive] = useState(true);
+    const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
     const [formData, setFormData] = useState<FormData>({
         email: '',
         role: 'ADMIN',
@@ -50,15 +56,15 @@ export function EditUser() {
         pincode: '',
         country: '',
     });
-    const [initialData, setInitialData] = useState<FormData | null>(null);
 
     useEffect(() => {
         if (userId) {
-            getUserData();
+            fetchUserData();
+            fetchCurrentUser();
         } else {
             navigate('/app/users');
         }
-    }, [userId]);
+    }, [userId, navigate]);
 
     const getAuthHeaders = () => ({
         Accept: 'application/json',
@@ -67,33 +73,39 @@ export function EditUser() {
         org: localStorage.getItem('org'),
     });
 
-    const getUserData = async () => {
-        setLoading(true);
+    const fetchCurrentUser = async () => {
         try {
-            const res = await fetchData(`${UserUrl}/${userId}/`, 'GET', null as any, getAuthHeaders());
-            if (!res.error) {
-                const data = res?.data?.profile_obj;
-                const userData = {
-                    email: data?.user_details?.email || '',
-                    role: data?.role || 'ADMIN',
-                    address_line: data?.address?.address_line || '',
-                    street: data?.address?.street || '',
-                    city: data?.address?.city || '',
-                    state: data?.address?.state || '',
-                    pincode: data?.address?.postcode || '',
-                    country: data?.address?.country || '',
-                };
-                setFormData(userData);
-                setInitialData(userData);
-            } else {
-                setError(true);
+            const res = await fetchData(`${ProfileUrl}/`, 'GET', null as any, getAuthHeaders());
+            if (res?.user_obj?.user_details?.email) {
+                setCurrentUserEmail(res.user_obj.user_details.email);
             }
         } catch (error) {
-            console.error('Error fetching user:', error);
-            setError(true);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching current user:', error);
         }
+    };
+
+    const fetchUserData = async () => {
+        if (!userId) return;
+
+        setLoading(true);
+        const result = await getUserData(userId);
+
+        if (result.success && result.data) {
+            setFormData({
+                email: result.data.email,
+                role: result.data.role,
+                address_line: result.data.address_line,
+                street: result.data.street,
+                city: result.data.city,
+                state: result.data.state,
+                pincode: result.data.pincode,
+                country: result.data.country,
+            });
+            setIsActive(result.data.is_active);
+        } else {
+            setError(true);
+        }
+        setLoading(false);
     };
 
     const handleChange = (e: any) => {
@@ -110,38 +122,46 @@ export function EditUser() {
     };
 
     const handleSubmit = async () => {
-        const data = {
-            ...formData,
-            ...(password && password.trim().length > 0 ? { password: password.trim() } : {}),
-        };
+        if (!userId) return;
 
-        setIsSubmitting(true);
-        try {
-            const res = await fetchData(`${UserUrl}/${userId}/`, 'PUT', JSON.stringify(data), getAuthHeaders());
+        const result = await updateUser(userId, formData, password);
 
-            if (!res.error) {
-                navigate('/app/users');
-            } else {
-                const allErrors = {
-                    ...res?.errors?.profile_errors,
-                    ...res?.errors?.user_errors,
-                    ...res?.errors?.address_errors,
-                };
-                setFormErrors(allErrors);
+        if (result.success) {
+            addNotification('success', 'User updated successfully');
+            navigate('/app/users');
+        } else {
+            if (result.fieldErrors) {
+                setFormErrors(result.fieldErrors);
             }
-        } catch (error) {
-            console.error('Error updating user:', error);
-        } finally {
-            setIsSubmitting(false);
+            addNotification('error', 'Failed to update user', result.error);
         }
     };
 
-    const handleCancel = () => {
-        if (initialData) {
-            setFormData(initialData);
-            setPassword('');
-            setFormErrors({});
+    const handleToggleStatus = async () => {
+        if (!userId) return;
+
+        if (formData.email === currentUserEmail) {
+            addNotification('warning', 'Cannot deactivate your own account', 'You cannot deactivate yourself');
+            return;
         }
+
+        setIsTogglingStatus(true);
+        const result = await toggleUserStatus(userId, isActive);
+
+        if (result.success) {
+            setIsActive(!isActive);
+            addNotification(
+                'success',
+                `User ${isActive ? 'deactivated' : 'activated'} successfully`,
+                `The user has been ${isActive ? 'deactivated' : 'activated'}`
+            );
+        } else {
+            addNotification('error', 'Failed to change user status', result.error);
+        }
+        setIsTogglingStatus(false);
+    };
+
+    const handleCancel = () => {
         navigate(-1);
     };
 
@@ -175,22 +195,28 @@ export function EditUser() {
         );
     }
 
+    const isCurrentUser = formData.email === currentUserEmail;
+
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },
-        { type: 'cancel', onClick: handleCancel, disabled: isSubmitting },
-        { type: 'save', onClick: handleSubmit, loading: isSubmitting },
+        { type: 'cancel', onClick: handleCancel, disabled: isSubmitting || isTogglingStatus },
+        { type: 'save', onClick: handleSubmit, loading: isSubmitting, disabled: isTogglingStatus },
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
             <ModernAppBar module="Users" crntPage="Edit User" actions={actions} />
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <EditUserInfoSection
                     formData={{ email: formData.email, role: formData.role }}
                     password={password}
+                    isActive={isActive}
+                    isTogglingStatus={isTogglingStatus}
+                    isCurrentUser={isCurrentUser}
                     onChange={handleChange}
                     onPasswordChange={setPassword}
+                    onToggleStatus={handleToggleStatus}
                     errors={{
                         email: formErrors.email,
                         role: formErrors.role,

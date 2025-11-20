@@ -8,7 +8,7 @@ interface User {
     role: string;
 }
 
-export const useUsers = (tab: 'active' | 'inactive') => {
+export const useUsers = (tab?: 'active' | 'inactive') => {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
     const [currentPage, setCurrentPage] = useState(1);

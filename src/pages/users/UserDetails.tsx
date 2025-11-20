@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, CircularProgress, Typography, Snackbar, Alert } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -13,13 +13,19 @@ import { UserProfileHeader } from '../../components/users/details/UserProfileHea
 import { UserInfoSection } from '../../components/users/details/UserInfoSection';
 import { UserAddressSection } from '../../components/users/details/UserAddressSection';
 import { useUserDetails } from '../../hooks/user/useUserDetails';
+import { DeleteModal } from '../../components/DeleteModal';
+import { useUsers } from '../../hooks/user/useUsers';
+import { useNotification } from '../../context/NotificationContext';
 
 export default function UserDetails() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('id');
+    const [deleteModal, setDeleteModal] = useState(false);
 
-    const { loading, userDetails, isResending, snackbar, resendInvitation, closeSnackbar } = useUserDetails(userId);
+    const { addNotification } = useNotification();
+    const { deleteUser } = useUsers();
+    const { loading, userDetails, isResending, resendInvitation } = useUserDetails(userId);
 
     const handleBack = () => navigate('/app/users');
     const handleEdit = () => navigate(`/app/users/edit-user?id=${userId}`);
@@ -43,12 +49,40 @@ export default function UserDetails() {
         return null;
     }
 
-    const actions: AppBarAction[] = [{ type: 'back', label: 'Back To Users', onClick: handleBack }];
+    const openDeleteModal = () => {
+        setDeleteModal(true);
+    };
 
-    actions.push({
-        type: 'edit',
-        onClick: handleEdit,
-    });
+    const modalClose = () => {
+        setDeleteModal(false);
+    };
+
+    const handleDeleteUser = async () => {
+        const success = await deleteUser(userId);
+        if (success) {
+            navigate('/app/users');
+            addNotification('success', `User deleted`, `The user has been deleted`);
+            modalClose();
+        } else {
+            addNotification('error', 'Failed to delete user');
+        }
+    };
+
+    const handleResendInvitation = async () => {
+        const success = await resendInvitation();
+        if (success) {
+            addNotification('success', `Resend invitation`, `The invitation has been resend`);
+            modalClose();
+        } else {
+            addNotification('error', 'Failed to resend invitation');
+        }
+    };
+
+    const actions: AppBarAction[] = [
+        { type: 'back', label: 'Back To Users', onClick: handleBack },
+        { type: 'edit', onClick: handleEdit },
+        { type: 'delete', onClick: openDeleteModal },
+    ];
 
     return (
         <Box sx={USER_DETAILS_PAGE_STYLES}>
@@ -59,7 +93,7 @@ export default function UserDetails() {
                     email={userDetails.user_details.email}
                     role={userDetails.role}
                     isActive={userDetails.user_details.is_active}
-                    onResendInvitation={!userDetails.user_details.is_active ? resendInvitation : undefined}
+                    onResendInvitation={!userDetails.user_details.is_active ? handleResendInvitation : undefined}
                     isResending={isResending}
                 />
 
@@ -72,16 +106,15 @@ export default function UserDetails() {
                 <UserAddressSection address={userDetails.address} />
             </Box>
 
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={closeSnackbar}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            <DeleteModal
+                onClose={modalClose}
+                open={deleteModal}
+                id={userId}
+                modalDialog="Are you sure you want to delete this user?"
+                modalTitle="Delete User"
+                buttonName="Delete"
+                onClick={handleDeleteUser}
+            />
         </Box>
     );
 }

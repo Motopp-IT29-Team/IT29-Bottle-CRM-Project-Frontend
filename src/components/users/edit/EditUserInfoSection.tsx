@@ -1,9 +1,10 @@
 import React from 'react';
-import { Paper, Box, Typography, TextField, MenuItem, Select, FormControl } from '@mui/material';
+import { Paper, Box, Typography, TextField, MenuItem, Select, FormControl, Switch } from '@mui/material';
 import { FiUser } from '@react-icons/all-files/fi/FiUser';
 import { FiMail } from '@react-icons/all-files/fi/FiMail';
 import { FiShield } from '@react-icons/all-files/fi/FiShield';
 import { FiLock } from '@react-icons/all-files/fi/FiLock';
+import { FiToggleLeft } from '@react-icons/all-files/fi/FiToggleLeft';
 import {
     USERS_FIELD_BOX_STYLES,
     USERS_FIELD_LABEL_STYLES,
@@ -19,8 +20,12 @@ interface EditUserInfoSectionProps {
         role: string;
     };
     password: string;
+    isActive: boolean;
+    isTogglingStatus: boolean;
+    isCurrentUser: boolean;
     onChange: (e: any) => void;
     onPasswordChange: (value: string) => void;
+    onToggleStatus: () => void;
     errors: {
         email?: string[];
         role?: string[];
@@ -31,8 +36,12 @@ interface EditUserInfoSectionProps {
 export const EditUserInfoSection: React.FC<EditUserInfoSectionProps> = ({
     formData,
     password,
+    isActive,
+    isTogglingStatus,
+    isCurrentUser,
     onChange,
     onPasswordChange,
+    onToggleStatus,
     errors,
 }) => {
     return (
@@ -114,6 +123,66 @@ export const EditUserInfoSection: React.FC<EditUserInfoSectionProps> = ({
                         helperText={errors.password?.[0] || 'Minimum 8 characters'}
                         sx={USERS_TEXT_FIELD_STYLES}
                     />
+                </Box>
+
+                {/* Account Status Toggle */}
+                <Box sx={USERS_FIELD_BOX_STYLES}>
+                    <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                        <FiToggleLeft size={14} style={{ marginRight: '4px' }} />
+                        Account Status
+                    </Typography>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingX: 2,
+                            borderRadius: '8px',
+                            border: '1px solid #e5e7eb',
+                            backgroundColor: isCurrentUser ? '#f9fafb' : isActive ? '#f0fdf4' : '#fef2f2',
+                            transition: 'all 0.3s ease',
+                            opacity: isCurrentUser ? 0.6 : 1,
+                        }}
+                    >
+                        <Box>
+                            <Typography
+                                sx={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    color: isCurrentUser ? '#6b7280' : isActive ? '#10b981' : '#ef4444',
+                                    mb: 0.5,
+                                }}
+                            >
+                                {isActive ? 'Active' : 'Inactive'}
+                            </Typography>
+                            {isCurrentUser && (
+                                <Typography
+                                    sx={{
+                                        fontSize: '12px',
+                                        color: '#9ca3af',
+                                    }}
+                                >
+                                    Cannot deactivate your own account
+                                </Typography>
+                            )}
+                        </Box>
+                        <Switch
+                            checked={isActive}
+                            onChange={onToggleStatus}
+                            disabled={isTogglingStatus || isCurrentUser}
+                            sx={{
+                                '& .MuiSwitch-switchBase.Mui-checked': {
+                                    color: '#10b981',
+                                },
+                                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                    backgroundColor: '#10b981',
+                                },
+                                '& .MuiSwitch-track': {
+                                    backgroundColor: isActive ? '#10b981' : '#ef4444',
+                                },
+                            }}
+                        />
+                    </Box>
                 </Box>
             </Box>
         </Paper>

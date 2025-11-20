@@ -487,7 +487,7 @@ export default function Contacts() {
                     id={selectedId}
                     modalDialog={modalDialog}
                     modalTitle={modalTitle}
-                    DeleteItem={DeleteItem}
+                    onClick={DeleteItem}
                 />
                 // <DialogModal
                 //     contact={contact}

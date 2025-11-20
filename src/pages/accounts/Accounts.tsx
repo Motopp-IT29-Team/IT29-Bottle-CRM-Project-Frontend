@@ -908,7 +908,7 @@ export default function Accounts() {
                 id={selectedId}
                 modalDialog={modalDialog}
                 modalTitle={modalTitle}
-                DeleteItem={deleteItem}
+                onClick={deleteItem}
             />
         </Box>
     );

@@ -15,14 +15,11 @@ interface UsersTableProps {
     loading: boolean;
     tab: 'active' | 'inactive';
     onViewDetail: (userId: string) => void;
-    onEdit: (userId: string) => void;
-    onDelete: (userId: string) => void;
 }
 
 const headCells = [
     { id: 'email', numeric: false, disablePadding: false, label: 'Email Address' },
     { id: 'role', numeric: false, disablePadding: false, label: 'Role' },
-    { id: 'actions', numeric: true, disablePadding: false, label: 'Actions' },
 ];
 
 const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {
@@ -48,7 +45,7 @@ const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {
     });
 };
 
-export const UsersTable: React.FC<UsersTableProps> = ({ users, loading, tab, onViewDetail, onEdit, onDelete }) => {
+export const UsersTable: React.FC<UsersTableProps> = ({ users, loading, tab, onViewDetail }) => {
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
     const [orderBy, setOrderBy] = useState('email');
 
@@ -84,13 +81,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ users, loading, tab, onV
                             </TableRow>
                         ) : sortedUsers.length > 0 ? (
                             sortedUsers.map((user: User) => (
-                                <UserTableRow
-                                    key={user.id}
-                                    user={user}
-                                    onViewDetail={onViewDetail}
-                                    onEdit={onEdit}
-                                    onDelete={onDelete}
-                                />
+                                <UserTableRow key={user.id} user={user} onViewDetail={onViewDetail} />
                             ))
                         ) : (
                             <TableRow>

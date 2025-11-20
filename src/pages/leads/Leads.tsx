@@ -777,7 +777,7 @@ export default function Leads(props: any) {
                 id={selectedId}
                 modalDialog={modalDialog}
                 modalTitle={modalTitle}
-                DeleteItem={deleteItem}
+                onClick={deleteItem}
             />
         </Box>
     );

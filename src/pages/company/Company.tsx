@@ -417,7 +417,7 @@ export default function Company() {
                     id={selectedId}
                     modalDialog={modalDialog}
                     modalTitle={modalTitle}
-                    DeleteItem={DeleteItem}
+                    onClick={DeleteItem}
                 />
             }
         </Box>
