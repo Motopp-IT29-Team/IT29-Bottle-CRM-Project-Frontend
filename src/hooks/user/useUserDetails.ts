@@ -18,8 +18,13 @@ interface UserDetailsResponse {
     };
     date_of_joining: string;
     is_active: boolean;
+    created_by_email?: string;
+    created_at?: string;
+    updated_by_email?: string;
+    updated_at?: string;
+    deactivated_by_email?: string;
+    deactivated_at?: string;
 }
-
 export const useUserDetails = (userId: string | null) => {
     const [loading, setLoading] = useState(true);
     const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);

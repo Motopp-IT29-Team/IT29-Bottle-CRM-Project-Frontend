@@ -357,12 +357,12 @@ export default function Sidebar() {
                                 gap: 1.5,
                                 p: 1.5,
                                 borderRadius: '10px',
-                                cursor: 'pointer',
+                                // cursor: 'pointer',
                                 transition: 'all 0.2s ease',
                                 overflow: 'hidden',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                },
+                                // '&:hover': {
+                                //     backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                // },
                             }}
                         >
                             <Avatar

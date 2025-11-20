@@ -21,7 +21,7 @@ interface UserAddressSectionProps {
 
 export const UserAddressSection: React.FC<UserAddressSectionProps> = ({ address }) => {
     return (
-        <Box>
+        <Box sx={{ mb: 3 }}>
             <Typography
                 sx={{
                     fontSize: '20px',

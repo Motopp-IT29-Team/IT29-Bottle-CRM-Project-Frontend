@@ -16,6 +16,7 @@ import { useUserDetails } from '../../hooks/user/useUserDetails';
 import { DeleteModal } from '../../components/DeleteModal';
 import { useUsers } from '../../hooks/user/useUsers';
 import { useNotification } from '../../context/NotificationContext';
+import { UserActivitySection } from '../../components/users/details/UserActivitySection';
 
 export default function UserDetails() {
     const navigate = useNavigate();
@@ -104,6 +105,16 @@ export default function UserDetails() {
                 />
 
                 <UserAddressSection address={userDetails.address} />
+
+                <UserActivitySection
+                    createdByEmail={userDetails.created_by_email}
+                    createdAt={userDetails.created_at}
+                    updatedByEmail={userDetails.updated_by_email}
+                    updatedAt={userDetails.updated_at}
+                    deactivatedByEmail={userDetails.deactivated_by_email}
+                    deactivatedAt={userDetails.deactivated_at}
+                    isActive={userDetails.user_details.is_active}
+                />
             </Box>
 
             <DeleteModal

@@ -178,7 +178,7 @@ export const USER_DETAILS_PAGE_STYLES: SxProps<Theme> = {
 export const USER_DETAILS_CONTAINER_STYLES: SxProps<Theme> = {
     mt: '120px',
     p: '24px',
-    maxWidth: '1400px',
+    // maxWidth: '1400px',
     mx: 'auto',
 };
 

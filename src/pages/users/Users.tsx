@@ -47,7 +47,7 @@ export default function Users() {
                 loading={loading}
             />
 
-            <Container sx={{ maxWidth: '100%', px: 3, py: 3 }}>
+            <Container sx={{ maxWidth: '100% !important', px: 3, py: 3 }}>
                 <UsersTable users={currentUsers} loading={loading} tab={tab} onViewDetail={navigateToUserDetail} />
             </Container>
         </Box>
