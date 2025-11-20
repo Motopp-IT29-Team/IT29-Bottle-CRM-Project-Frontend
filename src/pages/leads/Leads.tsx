@@ -75,15 +75,15 @@ export const CustomTablePagination = styled(TablePagination)`
         margin-top: -5px;
     }
     background-color: white;
-    border-radius: 1;
+    border-radius: 1px;
     height: 10%;
     overflow: hidden;
     padding: 0;
     margin: 0;
     width: 39%;
-    padding-bottom: 5;
+    padding-bottom: 5px;
     color: black;
-    margin-right: 1;
+    margin-right: 1px;
 `;
 
 export const Tabss = styled(Tab)({

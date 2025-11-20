@@ -108,13 +108,11 @@ export default function OrganizationModal(props: any) {
                                 m: '12px 10px -20px 0px',
                             }}
                         >
-                            <IconButton size="small">
-                                <FaTimes onClick={onHandleClose} />
+                            <IconButton size="small" onClick={onHandleClose}>
+                                <FaTimes />
                             </IconButton>
                         </Stack>
-                    ) : (
-                        ''
-                    )}
+                    ) : null}
                     <Stack sx={{ display: 'flex', textAlign: 'center', mt: 1.5 }}>
                         <Typography sx={{ fontSize: '22px', fontWeight: 500, mb: 1.5 }}>Organizations</Typography>
                     </Stack>

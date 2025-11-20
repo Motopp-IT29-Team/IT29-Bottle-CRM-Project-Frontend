@@ -3,18 +3,12 @@ import { useState, ChangeEvent } from 'react';
 export interface UserFormData {
     email: string;
     role: string;
-    phone: string;
-    alternate_phone: string;
     address_line: string;
     street: string;
     city: string;
     state: string;
-    pincode: string;
+    postcode: string;
     country: string;
-    profile_pic: string | null;
-    has_sales_access: boolean;
-    has_marketing_access: boolean;
-    is_organization_admin: boolean;
 }
 
 export const useUserFormData = (initialState: UserFormData) => {

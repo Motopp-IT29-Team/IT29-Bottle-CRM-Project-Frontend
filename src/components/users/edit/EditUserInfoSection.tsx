@@ -1,0 +1,121 @@
+import React from 'react';
+import { Paper, Box, Typography, TextField, MenuItem, Select, FormControl } from '@mui/material';
+import { FiUser } from '@react-icons/all-files/fi/FiUser';
+import { FiMail } from '@react-icons/all-files/fi/FiMail';
+import { FiShield } from '@react-icons/all-files/fi/FiShield';
+import { FiLock } from '@react-icons/all-files/fi/FiLock';
+import {
+    USERS_FIELD_BOX_STYLES,
+    USERS_FIELD_LABEL_STYLES,
+    USERS_TEXT_FIELD_STYLES,
+    USERS_SELECT_STYLES,
+    USERS_MENU_ITEM_STYLES,
+    USER_FIELD_CONTAINER_STYLES,
+} from '../../../styles/UsersStyles';
+
+interface EditUserInfoSectionProps {
+    formData: {
+        email: string;
+        role: string;
+    };
+    password: string;
+    onChange: (e: any) => void;
+    onPasswordChange: (value: string) => void;
+    errors: {
+        email?: string[];
+        role?: string[];
+        password?: string[];
+    };
+}
+
+export const EditUserInfoSection: React.FC<EditUserInfoSectionProps> = ({
+    formData,
+    password,
+    onChange,
+    onPasswordChange,
+    errors,
+}) => {
+    return (
+        <Paper
+            elevation={0}
+            sx={{
+                p: 3,
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                mb: 3,
+            }}
+        >
+            <Typography
+                sx={{
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    color: '#111827',
+                    mb: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                }}
+            >
+                <FiUser size={20} />
+                User Information
+            </Typography>
+
+            <Box sx={USER_FIELD_CONTAINER_STYLES}>
+                <Box sx={USERS_FIELD_BOX_STYLES}>
+                    <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                        <FiMail size={14} style={{ marginRight: '4px' }} />
+                        Email
+                    </Typography>
+                    <TextField
+                        name="email"
+                        value={formData.email}
+                        onChange={onChange}
+                        placeholder="Enter email address"
+                        size="small"
+                        fullWidth
+                        required
+                        error={!!errors.email?.[0]}
+                        helperText={errors.email?.[0]}
+                        sx={USERS_TEXT_FIELD_STYLES}
+                    />
+                </Box>
+
+                <Box sx={USERS_FIELD_BOX_STYLES}>
+                    <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                        <FiShield size={14} style={{ marginRight: '4px' }} />
+                        Role
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                        <Select name="role" value={formData.role} onChange={onChange} sx={USERS_SELECT_STYLES}>
+                            <MenuItem value="ADMIN" sx={USERS_MENU_ITEM_STYLES}>
+                                ADMIN
+                            </MenuItem>
+                            <MenuItem value="USER" sx={USERS_MENU_ITEM_STYLES}>
+                                USER
+                            </MenuItem>
+                        </Select>
+                    </FormControl>
+                </Box>
+
+                <Box sx={USERS_FIELD_BOX_STYLES}>
+                    <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                        <FiLock size={14} style={{ marginRight: '4px' }} />
+                        New Password (optional)
+                    </Typography>
+                    <TextField
+                        name="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => onPasswordChange(e.target.value)}
+                        placeholder="Leave blank to keep current password"
+                        size="small"
+                        fullWidth
+                        error={!!errors.password?.[0]}
+                        helperText={errors.password?.[0] || 'Minimum 8 characters'}
+                        sx={USERS_TEXT_FIELD_STYLES}
+                    />
+                </Box>
+            </Box>
+        </Paper>
+    );
+};

@@ -149,10 +149,10 @@ export const TextFieldStyled = styled.div`
 
 export const RequiredTextField = styled(TextField)`
     fieldset {
-        border-left: 3px solid red;
-        border-bottom-left-radius: 0px;
-        border-top-left-radius: 0px;
-        padding-left: 12px;
+        //border-left: 3px solid red;
+        //border-bottom-left-radius: 0px;
+        //border-top-left-radius: 0px;
+        //padding-left: 12px;
     }
 `;
 export const RequiredSelect = styled(Select)`
