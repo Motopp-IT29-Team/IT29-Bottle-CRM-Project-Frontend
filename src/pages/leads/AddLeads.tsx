@@ -19,6 +19,8 @@ import {
     Divider,
     Select,
     Button,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
@@ -159,6 +161,11 @@ export function AddLeads() {
     const [countrySelectOpen, setCountrySelectOpen] = useState(false);
     const [industrySelectOpen, setIndustrySelectOpen] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success' as 'success' | 'error' | 'warning' | 'info',
+    });
     const [formData, setFormData] = useState<FormData>({
         title: '',
         first_name: '',
@@ -302,15 +309,33 @@ export function AddLeads() {
             .then((res: any) => {
                 // console.log('Form data:', res);
                 if (!res.error) {
+                    setNotification({
+                        open: true,
+                        message: 'Lead created successfully!',
+                        severity: 'success',
+                    });
                     resetForm();
-                    navigate('/app/leads');
+                    setTimeout(() => {
+                        navigate('/app/leads');
+                    }, 1500);
                 }
                 if (res.error) {
                     setError(true);
                     setErrors(res?.errors);
+                    setNotification({
+                        open: true,
+                        message: 'Error creating lead. Please check the form and try again.',
+                        severity: 'error',
+                    });
                 }
             })
-            .catch(() => {});
+            .catch((err) => {
+                setNotification({
+                    open: true,
+                    message: 'Failed to create lead. Network error.',
+                    severity: 'error',
+                });
+            });
     };
 
     const resetForm = () => {
@@ -1371,6 +1396,20 @@ export function AddLeads() {
                     </div>
                 </form>
             </Box>
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={4000}
+                onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setNotification({ ...notification, open: false })}
+                    severity={notification.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
