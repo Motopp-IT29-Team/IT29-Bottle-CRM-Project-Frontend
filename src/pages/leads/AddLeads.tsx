@@ -180,7 +180,7 @@ export function AddLeads() {
         teams: '',
         assigned_to: [],
         contacts: [],
-        status: 'assigned',
+        status: '',
         source: 'call',
         address_line: '',
         street: '',
@@ -275,7 +275,8 @@ export function AddLeads() {
     };
     const submitForm = () => {
         // console.log('Form data:', formData.lead_attachment,'sfs', formData.file);
-        const data = {
+        
+        const data: any = {
             title: formData.title,
             first_name: formData.first_name,
             last_name: formData.last_name,
@@ -290,7 +291,6 @@ export function AddLeads() {
             teams: formData.teams,
             assigned_to: formData.assigned_to,
             contacts: formData.contacts,
-            status: formData.status,
             source: formData.source,
             address_line: formData.address_line,
             street: formData.street,
@@ -304,6 +304,11 @@ export function AddLeads() {
             industry: formData.industry,
             skype_ID: formData.skype_ID,
         };
+        
+        // Only include status if it's selected
+        if (formData.status) {
+            data.status = formData.status.toLowerCase();
+        }
 
         fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), Header)
             .then((res: any) => {
@@ -353,7 +358,7 @@ export function AddLeads() {
             teams: '',
             assigned_to: [],
             contacts: [],
-            status: 'assigned',
+            status: '',
             source: 'call',
             address_line: '',
             street: '',
@@ -468,11 +473,10 @@ export function AddLeads() {
                                                         onChange={handleChange}
                                                         error={!!errors?.status?.[0]}
                                                     >
-                                                        <MenuItem value="">-- Select Status --</MenuItem>
                                                         {state?.status?.length
                                                             ? state?.status.map((option: any) => (
                                                                   <MenuItem key={option[0]} value={option[1]}>
-                                                                      {option[1]}
+                                                                      {option[1].charAt(0).toUpperCase() + option[1].slice(1).toLowerCase()}
                                                                   </MenuItem>
                                                               ))
                                                             : ''}
