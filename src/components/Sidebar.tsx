@@ -1,7 +1,31 @@
-
 import React, { useState, useEffect } from 'react';
-import { AppBar, Avatar, Box, Drawer, IconButton, List, ListItem, ListItemIcon, Popover, Toolbar, Tooltip, Typography } from '@mui/material';
-import { FaAddressBook, FaBars, FaBriefcase, FaBuilding, FaChartLine, FaCog, FaDiceD6, FaHandshake, FaIndustry, FaSignOutAlt, FaTachometerAlt, FaUserFriends, FaUsers } from "react-icons/fa";
+import {
+    AppBar,
+    Avatar,
+    Box,
+    Drawer,
+    IconButton,
+    List,
+    ListItem,
+    Menu,
+    MenuItem,
+    Toolbar,
+    Typography,
+    Divider,
+    Tooltip,
+} from '@mui/material';
+import {
+    FiUsers,
+    FiPhone,
+    FiTrendingUp,
+    FiFolder,
+    FiFile,
+    FiUserPlus,
+    FiBriefcase,
+    FiMenu,
+    FiLogOut,
+    FiSettings,
+} from 'react-icons/fi';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { fetchData } from './FetchData';
 import { ProfileUrl } from '../services/ApiUrls';
@@ -35,329 +59,408 @@ import { OpportunityDetails } from '../pages/opportunities/OpportunityDetails';
 import { AddCase } from '../pages/cases/AddCase';
 import { EditCase } from '../pages/cases/EditCase';
 import { CaseDetails } from '../pages/cases/CaseDetails';
-import logo from '../assets/images/auth/img_logo.png';
-import { StyledListItemButton, StyledListItemText } from '../styles/CssStyled';
-// import MyContext, { MyContextData } from '../context/Context';
 import MyContext from '../context/Context';
 
-// declare global {
-//     interface Window {
-//         drawer: any;
-//     }
-// }
+const navItems = [
+    { key: 'leads', label: 'Leads', icon: FiUsers, path: '/app/leads' },
+    { key: 'contacts', label: 'Contacts', icon: FiPhone, path: '/app/contacts' },
+    { key: 'opportunities', label: 'Opportunities', icon: FiTrendingUp, path: '/app/opportunities' },
+    { key: 'accounts', label: 'Accounts', icon: FiFolder, path: '/app/accounts' },
+    { key: 'companies', label: 'Companies', icon: FiFile, path: '/app/companies' },
+    { key: 'users', label: 'Users', icon: FiUserPlus, path: '/app/users' },
+    { key: 'cases', label: 'Cases', icon: FiBriefcase, path: '/app/cases' },
+];
 
-export default function Sidebar(props: any) {
-    const navigate = useNavigate()
-    const location = useLocation()
-    const [screen, setScreen] = useState('contacts')
-    const [drawerWidth, setDrawerWidth] = useState(200)
-    const [headerWidth, setHeaderWidth] = useState(drawerWidth)
-    const [userDetail, setUserDetail] = useState<any>('')
-    const [organizationModal, setOrganizationModal] = useState(false)
-    const organizationModalClose = () => { setOrganizationModal(false) }
-    const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
+export default function Sidebar() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [userDetail, setUserDetail] = useState<any>(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [organizationModal, setOrganizationModal] = useState(false);
 
-
-    useEffect(() => {
-        toggleScreen()
-    }, [navigate])
+    const drawerWidth = isCollapsed ? 80 : 240;
 
     useEffect(() => {
-      const token = localStorage.getItem('Token');
-      const org = localStorage.getItem('org');
-
-      if (!token || !org) return;
-
-      // Fetch role
-      fetchData(`${ProfileUrl}/`, 'GET', null as any, {
-        Authorization: token,
-        org,
-        Accept: 'application/json',
-      })
-        .then((profile: any) => {
-            const newRole = profile?.user_obj?.role;
-            console.log(newRole)
-            if (newRole) {
-                localStorage.setItem('role', newRole);
-                setRole(newRole);
-                }
-        })
-        .catch((err) => {
-          console.error("Error fetching profile:", err);
-        });
-
+        userProfile();
     }, []);
-
-    // useEffect(() => {
-    // navigate('/leads')
-    // if (localStorage.getItem('Token') && localStorage.getItem('org')) {
-    //     // setScreen('contacts')
-    //     navigate('/contacts')
-    // }
-    // if (!localStorage.getItem('Token')) {
-    //     navigate('/login')
-    // }
-    // if (!localStorage.getItem('org')) {
-    //     navigate('/organization')
-    // }
-    // toggleScreen()
-    // }, [])
-    const toggleScreen = () => {
-        // console.log(location.pathname.split('/'), 'll')
-        if (location.pathname.split('/')[1] === '' || location.pathname.split('/')[1] === undefined || location.pathname.split('/')[2] === 'leads') {
-            setScreen('leads')
-        } else if (location.pathname.split('/')[2] === 'contacts') {
-            setScreen('contacts')
-        } else if (location.pathname.split('/')[2] === 'opportunities') {
-            setScreen('opportunities')
-        } else if (location.pathname.split('/')[2] === 'accounts') {
-            setScreen('accounts')
-        } else if (location.pathname.split('/')[2] === 'companies') {
-            setScreen('companies')
-        } else if (location.pathname.split('/')[2] === 'users') {
-            setScreen('users')
-        } else if (location.pathname.split('/')[2] === 'cases') {
-            setScreen('cases')
-        }
-    }
-
-    useEffect(() => {
-        userProfile()
-    }, [])
 
     const userProfile = () => {
         fetchData(`${ProfileUrl}/`, 'GET', null as any, Header1)
             .then((res: any) => {
                 if (res?.user_obj) {
-                    setUserDetail(res?.user_obj)
+                    setUserDetail(res?.user_obj);
                 }
             })
             .catch((error) => {
-                console.error('Error:', error)
-            })
-    }
+                console.error('Error:', error);
+            });
+    };
 
+    const getCurrentScreen = () => {
+        const pathParts = location.pathname.split('/');
+        const screen = pathParts[2] || 'leads';
+        return screen;
+    };
 
-    const rawRole = role || '';
-    const isAdmin = rawRole.toUpperCase() === 'ADMIN';
-    const allNavItems = ['leads', 'contacts', 'opportunities', 'accounts', 'companies', 'users', 'cases'];
-    const navList = isAdmin
-      ? allNavItems
-      : allNavItems.filter((item) => item !== 'users');
+    const isActive = (path: string) => {
+        return location.pathname.startsWith(path);
+    };
 
-    const navIcons = (text: any, screen: any): React.ReactNode => {
-        switch (text) {
-            case 'leads':
-                return screen === 'leads' ? <FaUsers fill='#3e79f7' /> : <FaUsers />
-            case 'contacts':
-                return screen === 'contacts' ? <FaAddressBook fill='#3e79f7' /> : <FaAddressBook />
-            case 'opportunities':
-                return screen === 'opportunities' ? <FaHandshake fill='#3e79f7' /> : <FaHandshake />
-            case 'accounts':
-                return screen === 'accounts' ? <FaBuilding fill='#3e79f7' /> : <FaBuilding />
-            case 'companies':
-                return screen === 'companies' ? <FaIndustry fill='#3e79f7' /> : <FaIndustry />
-            // case 'analytics':
-            //     return screen === 'analytics' ? <FaChartLine fill='#3e79f7' /> : <FaChartLine />
-            case 'users':
-                return screen === 'users' ? <FaUserFriends fill='#3e79f7' /> : <FaUserFriends />
-            case 'cases':
-                return screen === 'cases' ? <FaBriefcase fill='#3e79f7' /> : <FaBriefcase />
-            default: return <FaDiceD6 fill='#3e79f7' />
-        }
-    }
-
-
-    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        userProfile();
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
+    const handleMenuClose = () => {
         setAnchorEl(null);
     };
 
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
-    const context = { drawerWidth: drawerWidth, screen: screen }
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login');
+    };
+
+    const context = { drawerWidth, screen: getCurrentScreen() };
 
     return (
-        <>
-            <Box>
-                <AppBar position="fixed"
-                    sx={{
-                        zIndex: (theme) => theme.zIndex.drawer + 1,
-                        height: '60px',
-                        backgroundColor: 'white',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        // boxShadow: 'none',
-                        // borderBottom: `0.5px solid #0000001f`
-                        boxShadow: '1px'
-                    }}
-                >
-                    <Box>
-                        <Toolbar>
-                            {drawerWidth === 60 ? <img src={logo} width={'40px'} style={{ transform: 'rotate(270deg)', marginLeft: '-15px', marginRight: '10px' }} /> : <img src={logo} width={'100px'} style={{ marginLeft: '-5px', marginRight: '30px' }} />}
-                            <IconButton sx={{ ml: '-10px' }} onClick={() => setDrawerWidth(drawerWidth === 60 ? 200 : 60)}>
-                                <FaBars style={{ height: '20px' }} />
-                            </IconButton>
-                            <Typography sx={{ fontWeight: 'bold', color: 'black', ml: '20px', textTransform: 'capitalize', fontSize: '20px', mt: '5px' }}>
-                                {screen}
-                            </Typography>
-                        </Toolbar>
-                    </Box>
+        <Box sx={{ display: 'flex' }}>
+            {/* Header */}
+            <AppBar
+                position="fixed"
+                elevation={0}
+                sx={{
+                    width: `calc(100% - ${drawerWidth}px)`,
+                    ml: `${drawerWidth}px`,
+                    backgroundColor: 'white',
+                    borderBottom: '1px solid #e5e7eb',
+                    transition: 'width 0.3s ease, margin 0.3s ease',
+                    height: '60px',
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
+            >
+                <Toolbar sx={{ minHeight: '60px !important', justifyContent: 'space-between' }}>
+                    <Typography
+                        sx={{
+                            fontSize: '20px',
+                            fontWeight: 700,
+                            color: '#111827',
+                            textTransform: 'capitalize',
+                            letterSpacing: '-0.5px',
+                        }}
+                    >
+                        {getCurrentScreen()}
+                    </Typography>
 
-                    <Box style={{
-                        marginRight: '10px',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center'
-                    }}>
-                        <Box style={{
-                            color: 'black',
-                            marginRight: '10px',
-                        }}>
-                            {userDetail?.user_details?.email}
-                        </Box>
-                        {/* <IconButton onClick={userProfile} sx={{ mr: 2 }}><FaCog /></IconButton> */}
-                        <IconButton onClick={handleClick} sx={{ mr: 3 }}>
-                            <Avatar
-                                // src='hj'
-                                sx={{ height: '27px', width: '27px' }}
-                            />
-                        </IconButton>
-                        <Popover
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
+                    <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+                        <Avatar
+                            sx={{
+                                width: 40,
+                                height: 40,
+                                backgroundColor: '#6366f1',
+                                fontSize: '16px',
+                                fontWeight: 600,
                             }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            id={id}
-                            open={open}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
                         >
-                            <List disablePadding>
-                                <ListItem disablePadding>
-                                    <StyledListItemButton onClick={() => {
-                                        localStorage.clear()
-                                        navigate('/login')
-                                    }}>
-                                        <ListItemIcon > <FaSignOutAlt fill='#3e79f7' /></ListItemIcon>
-                                        <StyledListItemText primary={'Sign out'} sx={{ ml: '-20px', color: '#3e79f7' }} />
-                                    </StyledListItemButton>
-                                </ListItem>
-                                <ListItem disablePadding>
-                                    <StyledListItemButton onClick={() => setOrganizationModal(!organizationModal)}>
-                                        <ListItemIcon > <FaIndustry fill='#3e79f7' /></ListItemIcon>
-                                        <StyledListItemText primary={'Organization'} sx={{ ml: '-20px', color: '#3e79f7' }} />
-                                    </StyledListItemButton>
-                                </ListItem>
-                            </List>
-                            {/* <Tooltip title='logout' sx={{ ml: '15px' }}>
-                                <IconButton
-                                    >
-                                </IconButton>
-                            </Tooltip> */}
-                        </Popover>
-                    </Box>
-                </AppBar>
+                            {userDetail?.user_details?.email?.charAt(0).toUpperCase() || 'U'}
+                        </Avatar>
+                    </IconButton>
 
-                <Drawer
-                    variant="permanent"
-                    sx={{
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                        PaperProps={{
+                            sx: {
+                                mt: 1.5,
+                                borderRadius: '12px',
+                                minWidth: 220,
+                                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+                            },
+                        }}
+                    >
+                        <Box sx={{ px: 2, py: 1.5 }}>
+                            <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
+                                {userDetail?.user_details?.email}
+                            </Typography>
+                            <Typography sx={{ fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
+                                {userDetail?.role?.toLowerCase()}
+                            </Typography>
+                        </Box>
+                        <Divider />
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                setOrganizationModal(true);
+                            }}
+                            sx={{ gap: 1.5, py: 1.5 }}
+                        >
+                            <FiSettings size={18} />
+                            Organization
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                handleLogout();
+                            }}
+                            sx={{ gap: 1.5, py: 1.5, color: '#ef4444' }}
+                        >
+                            <FiLogOut size={18} />
+                            Sign Out
+                        </MenuItem>
+                    </Menu>
+                </Toolbar>
+            </AppBar>
+
+            {/* Sidebar */}
+            <Drawer
+                variant="permanent"
+                sx={{
+                    width: drawerWidth,
+                    flexShrink: 0,
+                    '& .MuiDrawer-paper': {
                         width: drawerWidth,
-                        flexShrink: 0,
-                        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' }
+                        boxSizing: 'border-box',
+                        backgroundColor: '#1e293b',
+                        borderRight: 'none',
+                        transition: 'width 0.3s ease',
+                        overflowX: 'hidden',
+                    },
+                }}
+            >
+                {/* Logo & Toggle */}
+                <Box
+                    sx={{
+                        height: '60px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'space-between',
+                        px: isCollapsed ? 0 : 2,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                        overflow: 'hidden',
                     }}
                 >
-                    <Box>
-                        <List sx={{ pt: '65px' }}>
-                            {navList.map((text, index) => (
-                                <ListItem key={text} disablePadding  >
-                                    <StyledListItemButton
-                                        sx={{ pt: '6px', pb: '6px' }}
-                                        onClick={() => {
-                                            navigate(`/app/${text}`)
-                                            setScreen(text)
+                    <Box
+                        sx={{
+                            opacity: isCollapsed ? 0 : 1,
+                            transition: 'opacity 0.2s ease',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            display: isCollapsed ? 'none' : 'block',
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                fontSize: '20px',
+                                fontWeight: 700,
+                                color: 'white',
+                                letterSpacing: '-0.5px',
+                            }}
+                        >
+                            Bottle CRM
+                        </Typography>
+                    </Box>
+                    <IconButton
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        sx={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            flexShrink: 0,
+                            '&:hover': {
+                                color: 'white',
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            },
+                        }}
+                    >
+                        <FiMenu size={20} />
+                    </IconButton>
+                </Box>
+
+                {/* Navigation */}
+                <List sx={{ px: 1.5, py: 2, flex: 1 }}>
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActive(item.path);
+
+                        return (
+                            <Tooltip key={item.key} title={isCollapsed ? item.label : ''} placement="right">
+                                <ListItem disablePadding sx={{ mb: 0.5 }}>
+                                    <Box
+                                        onClick={() => navigate(item.path)}
+                                        sx={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 2,
+                                            px: 2,
+                                            py: 1.5,
+                                            borderRadius: '10px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            color: active ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                                            backgroundColor: active ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            '&:hover': {
+                                                backgroundColor: active
+                                                    ? 'rgba(99, 102, 241, 0.2)'
+                                                    : 'rgba(255, 255, 255, 0.05)',
+                                                color: 'white',
+                                            },
+                                            '&::before': active
+                                                ? {
+                                                      content: '""',
+                                                      position: 'absolute',
+                                                      left: 0,
+                                                      top: '50%',
+                                                      transform: 'translateY(-50%)',
+                                                      width: '3px',
+                                                      height: '60%',
+                                                      backgroundColor: '#6366f1',
+                                                      borderRadius: '0 2px 2px 0',
+                                                  }
+                                                : {},
                                         }}
-                                        selected={screen === text}
                                     >
-                                        <ListItemIcon sx={{ ml: '5px' }}>
-                                            {navIcons(text, screen)}
-                                        </ListItemIcon>
-                                        <StyledListItemText primary={text} sx={{ ml: -2, textTransform: 'capitalize' }} />
-                                    </StyledListItemButton>
+                                        <Box sx={{ flexShrink: 0, display: 'flex' }}>
+                                            <Icon size={20} />
+                                        </Box>
+                                        <Box
+                                            sx={{
+                                                opacity: isCollapsed ? 0 : 1,
+                                                transition: 'opacity 0.2s ease',
+                                                overflow: 'hidden',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{
+                                                    fontSize: '14px',
+                                                    fontWeight: active ? 600 : 500,
+                                                }}
+                                            >
+                                                {item.label}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
                                 </ListItem>
-                            ))}
-                        </List>
-                    </Box>
+                            </Tooltip>
+                        );
+                    })}
+                </List>
 
-                </Drawer>
-                <MyContext.Provider value={context}>
+                {/* User Profile at Bottom */}
+                <Box sx={{ p: 1.5, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <Tooltip title={isCollapsed ? userDetail?.user_details?.email : ''} placement="right">
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                                p: 1.5,
+                                borderRadius: '10px',
+                                // cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                overflow: 'hidden',
+                                // '&:hover': {
+                                //     backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                // },
+                            }}
+                        >
+                            <Avatar
+                                sx={{
+                                    width: 36,
+                                    height: 36,
+                                    backgroundColor: '#6366f1',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    flexShrink: 0,
+                                }}
+                            >
+                                {userDetail?.user_details?.email?.charAt(0).toUpperCase() || 'U'}
+                            </Avatar>
+                            <Box
+                                sx={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    opacity: isCollapsed ? 0 : 1,
+                                    transition: 'opacity 0.2s ease',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <Typography
+                                    sx={{
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        color: 'white',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                    }}
+                                >
+                                    {userDetail?.user_details?.email?.split('@')[0] || 'User'}
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontSize: '11px',
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                        textTransform: 'capitalize',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                    }}
+                                >
+                                    {userDetail?.role?.toLowerCase() || 'User'}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Tooltip>
+                </Box>
+            </Drawer>
 
-                    {/* <Box sx={{ width: drawerWidth === 60 ? '1380px' : '1240px', ml: drawerWidth === 60 ? '60px' : '200px', overflowX: 'hidden' }}> */}
-                    <Box sx={{ width: 'auto', ml: drawerWidth === 60 ? '60px' : '200px', overflowX: 'hidden' }}>
-                        {/* {location.pathname.split('/')[1] === '' && <Contacts />}
-                {location.pathname.split('/')[1] === 'contacts' && <Contacts />}
-                {location.pathname.split('/')[2] === 'add-leads' && <AddLeads />} */}
-                        {/* {location.pathname === 'leads' && <LeadList />}
-                        {screen === 'contacts' && <Contacts />} */}
-                        {/* <Routes>
-                            <Route index element={<Navigate to="/contacts" replace />} />
-                            </Routes> */}
-                        <Routes>
-                            <Route index element={<Leads />} />
-                            {/* <Route path='/' element={<Contacts />} /> */}
-                            <Route path='/app/leads' element={<Leads />} />
-                            <Route path='/app/leads/add-leads' element={<AddLeads />} />
-                            <Route path='/app/leads/edit-lead' element={<EditLead />} />
-                            <Route path='/app/leads/lead-details' element={<LeadDetails />} />
-                            <Route path='/app/companies' element={<Company />} />
-                            <Route path='/app/companies/add-company' element={<AddCompany />} />
-                            <Route path='/app/companies/edit-company' element={<EditCompany />} />
-                            <Route path='/app/companies/company-details' element={<CompanyDetails />} />
-                            <Route path='/app/contacts' element={<Contacts />} />
-                            <Route path='/app/contacts/add-contacts' element={<AddContacts />} />
-                            <Route path='/app/contacts/contact-details' element={<ContactDetails />} />
-                            <Route path='/app/contacts/edit-contact' element={<EditContact />} />
-                            <Route path='/app/accounts' element={<Accounts />} />
-                            <Route path='/app/accounts/add-account' element={<AddAccount />} />
-                            <Route path='/app/accounts/account-details' element={<AccountDetails />} />
-                            <Route path='/app/accounts/edit-account' element={<EditAccount />} />
-                            {isAdmin && (
-                                <>
-                                    <Route path='/app/users' element={<Users />} />
-                                    <Route path='/app/users/add-users' element={<AddUsers />} />
-                                    <Route path='/app/users/edit-user' element={<EditUser />} />
-                                    <Route path='/app/users/user-details' element={<UserDetails />} />
-                                </>
-                            )}
-                            <Route path='/app/opportunities' element={<Opportunities />} />
-                            <Route path='/app/opportunities/add-opportunity' element={<AddOpportunity />} />
-                            <Route path='/app/opportunities/opportunity-details' element={<OpportunityDetails />} />
-                            <Route path='/app/opportunities/edit-opportunity' element={<EditOpportunity />} />
-                            <Route path='/app/cases' element={<Cases />} />
-                            <Route path='/app/cases/add-case' element={<AddCase />} />
-                            <Route path='/app/cases/edit-case' element={<EditCase />} />
-                            <Route path='/app/cases/case-details' element={<CaseDetails />} />
-                        </Routes>
-                    </Box>
-                </MyContext.Provider>
-                <OrganizationModal
-                    open={organizationModal}
-                    handleClose={organizationModalClose}
-                />
-            </Box >
-        </>
+            {/* Main Content */}
+            <MyContext.Provider value={context}>
+                <Box
+                    component="main"
+                    sx={{
+                        flexGrow: 1,
+                        backgroundColor: '#f9fafb',
+                        transition: 'margin 0.3s ease',
+                    }}
+                >
+                    <Routes>
+                        <Route index element={<Leads />} />
+                        <Route path="/app/leads" element={<Leads />} />
+                        <Route path="/app/leads/add-leads" element={<AddLeads />} />
+                        <Route path="/app/leads/edit-lead" element={<EditLead />} />
+                        <Route path="/app/leads/lead-details" element={<LeadDetails />} />
+                        <Route path="/app/companies" element={<Company />} />
+                        <Route path="/app/companies/add-company" element={<AddCompany />} />
+                        <Route path="/app/companies/edit-company" element={<EditCompany />} />
+                        <Route path="/app/companies/company-details" element={<CompanyDetails />} />
+                        <Route path="/app/contacts" element={<Contacts />} />
+                        <Route path="/app/contacts/add-contacts" element={<AddContacts />} />
+                        <Route path="/app/contacts/contact-details" element={<ContactDetails />} />
+                        <Route path="/app/contacts/edit-contact" element={<EditContact />} />
+                        <Route path="/app/accounts" element={<Accounts />} />
+                        <Route path="/app/accounts/add-account" element={<AddAccount />} />
+                        <Route path="/app/accounts/account-details" element={<AccountDetails />} />
+                        <Route path="/app/accounts/edit-account" element={<EditAccount />} />
+                        <Route path="/app/users" element={<Users />} />
+                        <Route path="/app/users/add-users" element={<AddUsers />} />
+                        <Route path="/app/users/edit-user" element={<EditUser />} />
+                        <Route path="/app/users/user-details" element={<UserDetails />} />
+                        <Route path="/app/opportunities" element={<Opportunities />} />
+                        <Route path="/app/opportunities/add-opportunity" element={<AddOpportunity />} />
+                        <Route path="/app/opportunities/opportunity-details" element={<OpportunityDetails />} />
+                        <Route path="/app/opportunities/edit-opportunity" element={<EditOpportunity />} />
+                        <Route path="/app/cases" element={<Cases />} />
+                        <Route path="/app/cases/add-case" element={<AddCase />} />
+                        <Route path="/app/cases/edit-case" element={<EditCase />} />
+                        <Route path="/app/cases/case-details" element={<CaseDetails />} />
+                    </Routes>
+                </Box>
+            </MyContext.Provider>
 
-    )
+            <OrganizationModal open={organizationModal} handleClose={() => setOrganizationModal(false)} />
+        </Box>
+    );
 }
-

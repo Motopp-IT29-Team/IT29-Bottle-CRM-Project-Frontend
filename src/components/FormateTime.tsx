@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export default function FormateTime(props: any) {
     // console.log(props,'tttt')
@@ -29,9 +29,5 @@ export default function FormateTime(props: any) {
             return `${secondsDifference} ${secondsDifference === 1 ? 'second' : 'seconds'} ago`;
         }
     };
-    return (
-        <div>
-            {formatDate(props)}
-        </div>
-    )
+    return <div>{formatDate(props)}</div>;
 }

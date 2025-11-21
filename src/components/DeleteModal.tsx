@@ -1,57 +1,152 @@
-import React, { useEffect, useState } from 'react'
-import {
-    Dialog,
-    DialogTitle,
-    DialogActions,
-    Button,
-    DialogContent,
-    DialogContentText
-} from '@mui/material'
+import React from 'react';
+import { Dialog, DialogTitle, DialogActions, Button, DialogContent, Box, Typography } from '@mui/material';
+import { FiAlertTriangle } from 'react-icons/fi';
 
-export const DeleteModal = (props: any) => {
-    const { onClose, open, modalDialog, modalTitle, id, DeleteItem } = props
-    // const [deleteItem, setDeleteItem] = useState(false)
+interface DeleteModalProps {
+    id: any;
+    open: boolean;
+    onClose: () => void;
+    modalTitle: string;
+    modalDialog: string;
+    buttonName?: string;
+    onClick: () => void;
+    isLoading?: boolean;
+}
 
-    // console.log(id, 'id')
+export const DeleteModal: React.FC<DeleteModalProps> = ({
+    id,
+    open,
+    onClose,
+    modalTitle,
+    modalDialog,
+    buttonName = 'Delete',
+    onClick,
+    isLoading = false,
+}) => {
     return (
         <Dialog
-            onClose={() => onClose()}
+            id={id}
             open={open}
+            onClose={isLoading ? undefined : onClose}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    width: 'auto',
+                    paddingX: '50px',
+                    borderRadius: '12px',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+                },
+            }}
         >
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    pt: 4,
+                    pb: 2,
+                }}
+            >
+                <Box
+                    sx={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: '50%',
+                        backgroundColor: '#fef2f2',
+                        border: '3px solid #fee2e2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <FiAlertTriangle size={28} color="#dc2626" />
+                </Box>
+            </Box>
+
             <DialogTitle
                 sx={{
-                    fontSize: '18px',
-                    padding: '15px',
-                    width: '420px',
-                    color: 'black',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
+                    textAlign: 'center',
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    color: '#111827',
+                    px: 4,
+                    pt: 2,
+                    pb: 1,
                 }}
-            >{modalTitle}</DialogTitle>
-            <DialogContent>
-                <DialogContentText sx={{
-                    fontSize: '16px', ml: -1, display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                }}>
+            >
+                {modalTitle}
+            </DialogTitle>
+
+            <DialogContent sx={{ px: 4, pb: 3 }}>
+                <Typography
+                    sx={{
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        lineHeight: 1.6,
+                    }}
+                >
                     {modalDialog}
-                </DialogContentText>
+                </Typography>
             </DialogContent>
-            <DialogActions>
+
+            <DialogActions
+                sx={{
+                    px: 3,
+                    pb: 3,
+                    pt: 0,
+                    gap: 1.5,
+                    justifyContent: 'center',
+                }}
+            >
                 <Button
-                    onClick={() => onClose()}
-                    style={{ textTransform: 'capitalize' }}
+                    onClick={onClose}
+                    disabled={isLoading}
+                    variant="outlined"
+                    sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                        px: 3,
+                        py: 1,
+                        borderRadius: '8px',
+                        color: '#374151',
+                        borderColor: '#d1d5db',
+                        '&:hover': {
+                            borderColor: '#9ca3af',
+                            backgroundColor: '#f9fafb',
+                        },
+                        '&:disabled': {
+                            borderColor: '#e5e7eb',
+                            color: '#d1d5db',
+                        },
+                    }}
                 >
                     Cancel
                 </Button>
                 <Button
-                    onClick={() => DeleteItem()}
-                    style={{ textTransform: 'capitalize', backgroundColor: '#3E79F7', color: 'white', height: '30px' }}
+                    onClick={onClick}
+                    disabled={isLoading}
+                    variant="contained"
+                    sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                        px: 3,
+                        py: 1,
+                        borderRadius: '8px',
+                        backgroundColor: '#dc2626',
+                        '&:hover': {
+                            backgroundColor: '#b91c1c',
+                        },
+                        '&:disabled': {
+                            backgroundColor: '#fca5a5',
+                        },
+                    }}
                 >
-                    Yes
+                    {isLoading ? 'Loading...' : buttonName}
                 </Button>
             </DialogActions>
         </Dialog>
-    )
-}
+    );
+};

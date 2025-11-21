@@ -1,182 +1,111 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-    TextField,
-    AccordionDetails,
-    Accordion,
-    AccordionSummary,
-    Typography,
-    Box,
-    MenuItem,
-    Divider,
-    Select,
-    FormControl,
-} from '@mui/material';
-
-import '../../styles/style.css';
-import { CustomAppBar } from '../../components/CustomAppBar';
-import { RequiredTextField } from '../../styles/CssStyled';
-import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
-import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
+import { Box } from '@mui/material';
 import { useUserFormData, UserFormData } from '../../hooks/user/useUserFormData';
 import { useUserValidation } from '../../hooks/user/useUserValidation';
 import { useSubmitUser } from '../../hooks/user/useSubmitUser';
+import { UsersLoadingBackdrop } from '../../components/users/create/UsersLoadingBackdrop';
+import { UsersInfoSection } from '../../components/users/create/UsersInfoSection';
+import { UsersAddressSection } from '../../components/users/create/UsersAddressSection';
+import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { useNotification } from '../../context/NotificationContext';
+import '../../styles/style.css';
+
+const INITIAL_FORM_DATA: UserFormData = {
+    email: '',
+    role: 'ADMIN',
+    address_line: '',
+    street: '',
+    city: '',
+    state: '',
+    postcode: '',
+    country: '',
+};
 
 export function AddUsers() {
     const navigate = useNavigate();
-    const [roleSelectOpen, setRoleSelectOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
 
-    const initialFormData: UserFormData = {
-        email: '',
-        role: 'ADMIN',
-        phone: '',
-        alternate_phone: '',
-        address_line: '',
-        street: '',
-        city: '',
-        state: '',
-        pincode: '',
-        country: '',
-        profile_pic: null,
-        has_sales_access: false,
-        has_marketing_access: false,
-        is_organization_admin: false,
-    };
-
-    const { formData, handleChange, resetForm } = useUserFormData(initialFormData);
+    const { formData, handleChange, resetForm } = useUserFormData(INITIAL_FORM_DATA);
     const { validationErrors, validateForm } = useUserValidation();
     const { submitForm } = useSubmitUser(resetForm);
+    const { addNotification } = useNotification();
 
-    const backBtnHandle = () => navigate('/app/users');
+    const handleBack = () => navigate('/app/users');
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        const errors = validateForm(formData);
-        if (Object.keys(errors).length === 0) submitForm(formData);
+    const handleCancel = () => {
+        navigate(-1);
     };
 
-    const module = 'Users';
-    const currentPage = 'Add Users';
-    const backBtn = 'Back To Users';
+    const handleSubmit = async () => {
+        setBackendErrors({});
+
+        const errors = validateForm(formData);
+        if (Object.keys(errors).length > 0) {
+            addNotification('warning', 'Validation Error', 'Please fix the form errors');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const result = await submitForm(formData);
+
+            if (result.success) {
+                addNotification('success', 'User created successfully!', 'Invitation email has been sent');
+                navigate('/app/users');
+            } else {
+                if (result.fieldErrors) {
+                    setBackendErrors(result.fieldErrors);
+                }
+                addNotification('error', 'Failed to create user', result.error);
+            }
+        } catch (error: any) {
+            addNotification('error', 'Error', error.message || 'Something went wrong');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const allErrors = { ...validationErrors, ...backendErrors };
+
+    const actions: AppBarAction[] = [
+        { type: 'back', label: 'Back To Users', onClick: handleBack },
+        { type: 'cancel', onClick: handleCancel, disabled: isLoading },
+        { type: 'save', label: 'Create', onClick: handleSubmit, loading: isLoading },
+    ];
 
     return (
-      <Box sx={{ mt: '60px' }}>
-          <CustomAppBar
-            backbtnHandle={backBtnHandle}
-            module={module}
-            backBtn={backBtn}
-            crntPage={currentPage}
-            onCancel={resetForm}
-            onSubmit={handleSubmit}
-          />
+        <Box sx={{ mt: '60px' }}>
+            <ModernAppBar module="Users" crntPage="Create User" actions={actions} />
 
-          <Box sx={{ mt: '120px' }}>
-              <form onSubmit={handleSubmit}>
-                  <div style={{ padding: '10px' }}>
-                      {/* USER INFO */}
-                      <div className='leadContainer'>
-                          <Accordion defaultExpanded style={{ width: '98%' }}>
-                              <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                  <Typography className='accordion-header'>User Information</Typography>
-                              </AccordionSummary>
+            <UsersLoadingBackdrop open={isLoading} />
 
-                              <Divider className='divider' />
+            <Box sx={{ mt: '120px' }}>
+                <div style={{ padding: '10px' }}>
+                    <UsersInfoSection
+                        email={formData.email}
+                        role={formData.role}
+                        onChange={handleChange}
+                        errors={allErrors}
+                        disabled={isLoading}
+                    />
 
-                              <AccordionDetails>
-                                  <Box sx={{ width: '98%', color: '#1A3353', mb: 1 }}>
-                                      <div className='fieldContainer'>
-                                          <div className='fieldSubContainer'>
-                                              <div className='fieldTitle'>Email</div>
-                                              <RequiredTextField
-                                                required
-                                                name='email'
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                style={{ width: '70%' }}
-                                                size='small'
-                                                error={!!validationErrors.email}
-                                                helperText={validationErrors.email}
-                                              />
-                                          </div>
-
-                                          <div className='fieldSubContainer'>
-                                              <div className='fieldTitle'>Role</div>
-                                              <FormControl sx={{ width: '70%' }}>
-                                                  <Select
-                                                    name='role'
-                                                    value={formData.role}
-                                                    open={roleSelectOpen}
-                                                    onClick={() => setRoleSelectOpen(!roleSelectOpen)}
-                                                    IconComponent={() => (
-                                                      <div
-                                                        onClick={() => setRoleSelectOpen(!roleSelectOpen)}
-                                                        className='select-icon-background'
-                                                      >
-                                                          {roleSelectOpen ? (
-                                                            <FiChevronUp className='select-icon' />
-                                                          ) : (
-                                                            <FiChevronDown className='select-icon' />
-                                                          )}
-                                                      </div>
-                                                    )}
-                                                    className={'select'}
-                                                    onChange={handleChange}
-                                                  >
-                                                      {['ADMIN', 'USER'].map((option) => (
-                                                        <MenuItem key={option} value={option}>
-                                                            {option}
-                                                        </MenuItem>
-                                                      ))}
-                                                  </Select>
-                                              </FormControl>
-                                          </div>
-                                      </div>
-                                  </Box>
-                              </AccordionDetails>
-                          </Accordion>
-                      </div>
-
-                      {/* ADDRESS INFO */}
-                      <div className='leadContainer'>
-                          <Accordion defaultExpanded style={{ width: '98%' }}>
-                              <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                  <Typography className='accordion-header'>Address</Typography>
-                              </AccordionSummary>
-
-                              <Divider className='divider' />
-
-                              <AccordionDetails>
-                                  <Box sx={{ width: '98%', color: '#1A3353', mb: 1 }}>
-                                      {[
-                                          ['address_line', 'street'],
-                                          ['city', 'state'],
-                                          ['pincode', 'country'],
-                                      ].map(([f1, f2]) => (
-                                        <div key={f1} className='fieldContainer2'>
-                                            {[f1, f2].map((field) => (
-                                              <div key={field} className='fieldSubContainer'>
-                                                  <div className='fieldTitle'>{field.replace('_', ' ')}</div>
-                                                  <TextField
-                                                    required
-                                                    name={field}
-                                                    value={(formData as any)[field]}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size='small'
-                                                    error={!!validationErrors[field]}
-                                                    helperText={validationErrors[field]}
-                                                  />
-                                              </div>
-                                            ))}
-                                        </div>
-                                      ))}
-                                  </Box>
-                              </AccordionDetails>
-                          </Accordion>
-                      </div>
-                  </div>
-              </form>
-          </Box>
-      </Box>
+                    <UsersAddressSection
+                        address={{
+                            address_line: formData.address_line,
+                            street: formData.street,
+                            city: formData.city,
+                            state: formData.state,
+                            postcode: formData.postcode,
+                            country: formData.country,
+                        }}
+                        onChange={handleChange}
+                        errors={validationErrors}
+                        disabled={isLoading}
+                    />
+                </div>
+            </Box>
+        </Box>
     );
 }
