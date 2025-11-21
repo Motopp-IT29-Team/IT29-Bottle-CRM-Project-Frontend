@@ -393,6 +393,10 @@ export function AddLeads() {
                                         autoComplete="off"
                                     >
                                         {/* GROUP 1: Lead Basics */}
+                                        <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Lead Basics
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
                                         <div className="fieldContainer">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Lead Name</div>
@@ -487,6 +491,10 @@ export function AddLeads() {
                                         </div>
 
                                         {/* GROUP 2: Company & Industry */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Company & Industry
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
                                         <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Industry</div>
@@ -549,6 +557,10 @@ export function AddLeads() {
                                         </div>
 
                                         {/* GROUP 3: Relationships & Assignment */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Relationships & Assignment
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
                                         <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Contact Name</div>
@@ -694,6 +706,10 @@ export function AddLeads() {
                                         </div>
 
                                         {/* GROUP 4: Financial & Timeline */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Financial & Timeline
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
                                         <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Amount</div>
@@ -749,6 +765,10 @@ export function AddLeads() {
                                         </div>
 
                                         {/* GROUP 5: Additional Information */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Additional Information
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
                                         <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">SkypeID</div>
