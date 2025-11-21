@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppBar, Breadcrumbs, Link, Button, CircularProgress, Box } from '@mui/material';
 import { FaCheckCircle, FaEdit, FaTimesCircle, FaTrash } from 'react-icons/fa';
 import { FiChevronLeft } from '@react-icons/all-files/fi/FiChevronLeft';
-import { useMyContext } from '../context/Context';
 
 export type ActionType = 'back' | 'save' | 'cancel' | 'edit' | 'delete' | 'custom';
 export type ActionColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
@@ -101,7 +100,6 @@ const colorStyles = {
 };
 
 export function ModernAppBar({ module, crntPage, actions = [] }: ModernAppBarProps) {
-    const sharedData = useMyContext();
     const navigate = useNavigate();
     const moduleLink = module.toLowerCase();
 

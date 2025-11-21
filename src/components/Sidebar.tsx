@@ -45,7 +45,7 @@ import ContactDetails from '../pages/contacts/ContactDetails';
 import Users from '../pages/users/Users';
 import Opportunities from '../pages/opportunities/Opportunities';
 import Cases from '../pages/cases/Cases';
-import { AddLeads } from '../pages/leads/AddLeads';
+import { AddLead } from '../pages/leads/AddLead';
 import Accounts from '../pages/accounts/Accounts';
 import { AddAccount } from '../pages/accounts/AddAccount';
 import { EditAccount } from '../pages/accounts/EditAccount';
@@ -429,7 +429,7 @@ export default function Sidebar() {
                     <Routes>
                         <Route index element={<Leads />} />
                         <Route path="/app/leads" element={<Leads />} />
-                        <Route path="/app/leads/add-leads" element={<AddLeads />} />
+                        <Route path="/app/leads/add-leads" element={<AddLead />} />
                         <Route path="/app/leads/edit-lead" element={<EditLead />} />
                         <Route path="/app/leads/lead-details" element={<LeadDetails />} />
                         <Route path="/app/companies" element={<Company />} />

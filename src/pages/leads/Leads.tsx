@@ -1,5 +1,5 @@
 import React, { SyntheticEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarGroup, Box, Button, Stack, Tabs, Typography, Link, MenuItem, Select } from '@mui/material';
 import { LeadUrl } from '../../services/ApiUrls';
 import { DeleteModal } from '../../components/DeleteModal';
@@ -34,6 +34,7 @@ interface Lead {
 
 export default function Leads() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [tab, setTab] = useState<string>('open');
     const [loading, setLoading] = useState(true);
 
@@ -75,6 +76,12 @@ export default function Leads() {
             getLeads();
         }
     }, []);
+
+    useEffect(() => {
+        if (location.pathname === '/' || location.pathname === '/app' || location.pathname === '/app/') {
+            navigate('/app/leads', { replace: true });
+        }
+    }, [location.pathname, navigate]);
 
     useEffect(() => {
         getLeads();
