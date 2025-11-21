@@ -303,6 +303,7 @@ export function AddLeads() {
             probability: formData.probability,
             industry: formData.industry,
             skype_ID: formData.skype_ID,
+            salutation: formData.salutation,
         };
         
         // Only include status if it's selected
@@ -1038,11 +1039,11 @@ export function AddLeads() {
                                                         onChange={handleChange}
                                                         error={!!errors?.salutation?.[0]}
                                                     >
-                                                        <MenuItem value="Mr">Mr</MenuItem>
-                                                        <MenuItem value="Ms">Ms</MenuItem>
-                                                        <MenuItem value="Mrs">Mrs</MenuItem>
-                                                        <MenuItem value="Dr">Dr</MenuItem>
-                                                        <MenuItem value="Prof">Prof</MenuItem>
+                                                        <MenuItem value="mr">Mr</MenuItem>
+                                                        <MenuItem value="ms">Ms</MenuItem>
+                                                        <MenuItem value="mrs">Mrs</MenuItem>
+                                                        <MenuItem value="dr">Dr</MenuItem>
+                                                        <MenuItem value="prof">Prof</MenuItem>
                                                     </Select>
                                                     <FormHelperText>
                                                         {errors?.salutation?.[0] ? errors?.salutation[0] : ''}
