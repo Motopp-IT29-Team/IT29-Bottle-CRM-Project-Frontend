@@ -468,6 +468,7 @@ export function AddLeads() {
                                                         onChange={handleChange}
                                                         error={!!errors?.status?.[0]}
                                                     >
+                                                        <MenuItem value="">-- Select Status --</MenuItem>
                                                         {state?.status?.length
                                                             ? state?.status.map((option: any) => (
                                                                   <MenuItem key={option[0]} value={option[1]}>
