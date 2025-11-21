@@ -108,6 +108,7 @@ type FormErrors = {
     industry?: string[];
     skype_ID?: string[];
     file?: string[];
+    salutation?: string[];
 };
 interface FormData {
     title: string;
@@ -137,6 +138,7 @@ interface FormData {
     industry: string;
     skype_ID: string;
     file: string | null;
+    salutation: string;
 }
 
 export function AddLeads() {
@@ -153,6 +155,7 @@ export function AddLeads() {
     const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
     const [sourceSelectOpen, setSourceSelectOpen] = useState(false);
     const [statusSelectOpen, setStatusSelectOpen] = useState(false);
+    const [salutationSelectOpen, setSalutationSelectOpen] = useState(false);
     const [countrySelectOpen, setCountrySelectOpen] = useState(false);
     const [industrySelectOpen, setIndustrySelectOpen] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
@@ -184,6 +187,7 @@ export function AddLeads() {
         industry: 'ADVERTISING',
         skype_ID: '',
         file: null,
+        salutation: '',
     });
 
     useEffect(() => {
@@ -338,6 +342,7 @@ export function AddLeads() {
             industry: 'ADVERTISING',
             skype_ID: '',
             file: null,
+            salutation: '',
         });
         setErrors({});
         setSelectedContacts([]);
@@ -412,6 +417,8 @@ export function AddLeads() {
                                                     error={!!errors?.account_name?.[0]}
                                                 />
                                             </div>
+                                        </div>
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Status</div>
                                                 <FormControl sx={{ width: '70%' }}>
@@ -449,8 +456,6 @@ export function AddLeads() {
                                                     </FormHelperText>
                                                 </FormControl>
                                             </div>
-                                        </div>
-                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Lead Source</div>
                                                 <FormControl sx={{ width: '70%' }}>
@@ -980,6 +985,41 @@ export function AddLeads() {
                                     >
                                         <div className="fieldContainer">
                                             <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Salutation</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="salutation"
+                                                        value={formData.salutation}
+                                                        open={salutationSelectOpen}
+                                                        onClick={() => setSalutationSelectOpen(!salutationSelectOpen)}
+                                                        IconComponent={() => (
+                                                            <div
+                                                                onClick={() => setSalutationSelectOpen(!salutationSelectOpen)}
+                                                                className="select-icon-background"
+                                                            >
+                                                                {salutationSelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        className={'select'}
+                                                        onChange={handleChange}
+                                                        error={!!errors?.salutation?.[0]}
+                                                    >
+                                                        <MenuItem value="Mr">Mr</MenuItem>
+                                                        <MenuItem value="Ms">Ms</MenuItem>
+                                                        <MenuItem value="Mrs">Mrs</MenuItem>
+                                                        <MenuItem value="Dr">Dr</MenuItem>
+                                                        <MenuItem value="Prof">Prof</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.salutation?.[0] ? errors?.salutation[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
                                                 <div className="fieldTitle">First Name</div>
                                                 <RequiredTextField
                                                     name="first_name"
@@ -992,6 +1032,8 @@ export function AddLeads() {
                                                     error={!!errors?.first_name?.[0]}
                                                 />
                                             </div>
+                                        </div>
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Last Name</div>
                                                 <RequiredTextField
@@ -1005,8 +1047,6 @@ export function AddLeads() {
                                                     error={!!errors?.last_name?.[0]}
                                                 />
                                             </div>
-                                        </div>
-                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Job Title</div>
                                                 <RequiredTextField
@@ -1019,6 +1059,8 @@ export function AddLeads() {
                                                     error={!!errors?.title?.[0]}
                                                 />
                                             </div>
+                                        </div>
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Phone Number</div>
                                                 <Tooltip title="Number must starts with +91">
@@ -1033,27 +1075,19 @@ export function AddLeads() {
                                                     />
                                                 </Tooltip>
                                             </div>
-                                        </div>
-                                        <div
-                                            className="fieldSubContainer"
-                                            style={{
-                                                marginLeft: '5%',
-                                                marginTop: '19px',
-                                            }}
-                                        >
-                                            <div className="fieldTitle">Email Address</div>
-                                            {/* <div style={{ width: '40%', display: 'flex', flexDirection: 'row', marginTop: '19px', marginLeft: '6.6%' }}>
-                      <div style={{ marginRight: '10px', fontSize: '13px', width: '22%', textAlign: 'right', fontWeight: 'bold' }}>Email Address</div> */}
-                                            <TextField
-                                                name="email"
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                style={{ width: '70%' }}
-                                                size="small"
-                                                helperText={errors?.email?.[0] ? errors?.email[0] : ''}
-                                                error={!!errors?.email?.[0]}
-                                            />
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Email Address</div>
+                                                <TextField
+                                                    name="email"
+                                                    type="email"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    style={{ width: '70%' }}
+                                                    size="small"
+                                                    helperText={errors?.email?.[0] ? errors?.email[0] : ''}
+                                                    error={!!errors?.email?.[0]}
+                                                />
+                                            </div>
                                         </div>
                                     </Box>
                                 </AccordionDetails>
