@@ -113,6 +113,7 @@ type FormErrors = {
     salutation?: string[];
     department?: string[];
     preferred_language?: string[];
+    rating?: string[];
 };
 interface FormData {
     title: string;
@@ -145,6 +146,7 @@ interface FormData {
     salutation: string;
     department: string;
     preferred_language: string;
+    rating: string;
 }
 
 export function AddLeads() {
@@ -201,6 +203,7 @@ export function AddLeads() {
         salutation: '',
         department: 'sales',
         preferred_language: 'english',
+        rating: 'warm',
     });
 
     useEffect(() => {
@@ -312,6 +315,7 @@ export function AddLeads() {
             salutation: formData.salutation,
             department: formData.department,
             preferred_language: formData.preferred_language,
+            rating: formData.rating,
         };
         
         // Only include status if it's selected
@@ -384,6 +388,7 @@ export function AddLeads() {
             salutation: '',
             department: 'sales',
             preferred_language: 'english',
+            rating: 'warm',
         });
         setErrors({});
         setSelectedContacts([]);
@@ -552,6 +557,25 @@ export function AddLeads() {
                                                     </Select>
                                                     <FormHelperText>
                                                         {errors?.department?.[0] ? errors?.department[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Rating</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="rating"
+                                                        value={formData.rating}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.rating?.[0]}
+                                                    >
+                                                        <MenuItem value="hot">Hot</MenuItem>
+                                                        <MenuItem value="warm">Warm</MenuItem>
+                                                        <MenuItem value="cold">Cold</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.rating?.[0] ? errors?.rating[0] : ''}
                                                     </FormHelperText>
                                                 </FormControl>
                                             </div>
