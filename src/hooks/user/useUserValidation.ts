@@ -9,21 +9,22 @@ export const useUserValidation = () => {
     const validateForm = (data: UserFormData) => {
         const errors: { [key: string]: string } = {};
 
-        if (!data.email.trim()) errors.email = 'Email is required';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = 'Invalid email format';
+        // First Name validation
+        if (!data.first_name.trim()) {
+            errors.first_name = 'First name is required';
+        }
 
-        // if (!password.trim()) errors.password = 'Password is required';
-        // else if (password.trim().length < 8)
-        //   errors.password = 'Password must be at least 8 characters';
+        // Last Name validation
+        if (!data.last_name.trim()) {
+            errors.last_name = 'Last name is required';
+        }
 
-        // if (!data.phone.trim()) errors.phone = 'Phone number is required';
-        // else if (!/^\+\d+$/.test(data.phone.trim()))
-        //   errors.phone = 'Phone number must start with + and contain digits';
-
-        // ['address_line', 'street', 'city', 'state', 'pincode', 'country'].forEach((field) => {
-        //   if (!(data as any)[field]?.trim())
-        //     errors[field] = `${field.replace('_', ' ')} is required`;
-        // });
+        // Email validation
+        if (!data.email.trim()) {
+            errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.email = 'Invalid email format';
+        }
 
         setValidationErrors(errors);
         return errors;

@@ -4,7 +4,14 @@ import { UsersUrl, UserUrl } from '../../services/ApiUrls';
 
 interface User {
     id: string;
-    user_details: { email: string };
+    first_name: string;
+    last_name: string;
+    user_details: {
+        email: string;
+        id: string;
+        is_active: boolean;
+        profile_pic?: string;
+    };
     role: string;
 }
 

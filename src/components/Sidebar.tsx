@@ -120,6 +120,21 @@ export default function Sidebar() {
         navigate('/login');
     };
 
+    const getInitials = () => {
+        if (userDetail?.first_name) {
+            const firstInitial = userDetail.first_name.charAt(0).toUpperCase();
+            const lastInitial = userDetail.last_name?.charAt(0).toUpperCase() || '';
+            return `${firstInitial}${lastInitial}`;
+        }
+        return userDetail?.user_details?.email?.charAt(0).toUpperCase() || 'U';
+    };
+
+    const getDisplayName = () => {
+        const fullName = `${userDetail?.first_name || ''} ${userDetail?.last_name || ''}`.trim();
+        if (fullName) return fullName;
+        return userDetail?.user_details?.email?.split('@')[0] || 'User';
+    };
+
     const context = { drawerWidth, screen: getCurrentScreen() };
 
     return (
@@ -153,6 +168,7 @@ export default function Sidebar() {
 
                     <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
                         <Avatar
+                            src={userDetail?.user_details?.profile_pic || undefined}
                             sx={{
                                 width: 40,
                                 height: 40,
@@ -161,7 +177,7 @@ export default function Sidebar() {
                                 fontWeight: 600,
                             }}
                         >
-                            {userDetail?.user_details?.email?.charAt(0).toUpperCase() || 'U'}
+                            {getInitials()}
                         </Avatar>
                     </IconButton>
 
@@ -179,9 +195,20 @@ export default function Sidebar() {
                         }}
                     >
                         <Box sx={{ px: 2, py: 1.5 }}>
-                            <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
-                                {userDetail?.user_details?.email}
-                            </Typography>
+                            {userDetail?.first_name || userDetail?.last_name ? (
+                                <>
+                                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
+                                        {`${userDetail?.first_name || ''} ${userDetail?.last_name || ''}`.trim()}
+                                    </Typography>
+                                    <Typography sx={{ fontSize: '12px', color: '#6b7280', mb: 0.5 }}>
+                                        {userDetail?.user_details?.email}
+                                    </Typography>
+                                </>
+                            ) : (
+                                <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#111827', mb: 0.5 }}>
+                                    {userDetail?.user_details?.email}
+                                </Typography>
+                            )}
                             <Typography sx={{ fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
                                 {userDetail?.role?.toLowerCase()}
                             </Typography>
@@ -349,7 +376,15 @@ export default function Sidebar() {
 
                 {/* User Profile at Bottom */}
                 <Box sx={{ p: 1.5, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <Tooltip title={isCollapsed ? userDetail?.user_details?.email : ''} placement="right">
+                    <Tooltip
+                        title={
+                            isCollapsed
+                                ? `${userDetail?.first_name || ''} ${userDetail?.last_name || ''}`.trim() ||
+                                  userDetail?.user_details?.email
+                                : ''
+                        }
+                        placement="right"
+                    >
                         <Box
                             sx={{
                                 display: 'flex',
@@ -357,15 +392,12 @@ export default function Sidebar() {
                                 gap: 1.5,
                                 p: 1.5,
                                 borderRadius: '10px',
-                                // cursor: 'pointer',
                                 transition: 'all 0.2s ease',
                                 overflow: 'hidden',
-                                // '&:hover': {
-                                //     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                // },
                             }}
                         >
                             <Avatar
+                                src={userDetail?.user_details?.profile_pic || undefined}
                                 sx={{
                                     width: 36,
                                     height: 36,
@@ -375,7 +407,7 @@ export default function Sidebar() {
                                     flexShrink: 0,
                                 }}
                             >
-                                {userDetail?.user_details?.email?.charAt(0).toUpperCase() || 'U'}
+                                {getInitials()}
                             </Avatar>
                             <Box
                                 sx={{
@@ -396,7 +428,7 @@ export default function Sidebar() {
                                         textOverflow: 'ellipsis',
                                     }}
                                 >
-                                    {userDetail?.user_details?.email?.split('@')[0] || 'User'}
+                                    {getDisplayName()}
                                 </Typography>
                                 <Typography
                                     sx={{

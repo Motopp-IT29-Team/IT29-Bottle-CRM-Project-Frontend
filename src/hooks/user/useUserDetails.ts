@@ -3,9 +3,12 @@ import { fetchData } from '../../components/FetchData';
 import { UserUrl } from '../../services/ApiUrls';
 
 interface UserDetailsResponse {
+    first_name: string;
+    last_name: string;
     user_details: {
         email: string;
         is_active: boolean;
+        profile_pic?: string;
     };
     role: string;
     address: {
@@ -25,6 +28,7 @@ interface UserDetailsResponse {
     deactivated_by_email?: string;
     deactivated_at?: string;
 }
+
 export const useUserDetails = (userId: string | null) => {
     const [loading, setLoading] = useState(true);
     const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
