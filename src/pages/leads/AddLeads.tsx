@@ -84,6 +84,38 @@ import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 //   }
 // }
 
+// States mapping for countries (keyed by country code)
+const statesMapping: { [key: string]: string[] } = {
+    'nl': [
+        'Drenthe',
+        'Flevoland',
+        'Friesland',
+        'Gelderland',
+        'Groningen',
+        'Limburg',
+        'North Brabant',
+        'North Holland',
+        'Overijssel',
+        'South Holland',
+        'Utrecht',
+        'Zeeland',
+    ],
+    'netherlands': [
+        'Drenthe',
+        'Flevoland',
+        'Friesland',
+        'Gelderland',
+        'Groningen',
+        'Limburg',
+        'North Brabant',
+        'North Holland',
+        'Overijssel',
+        'South Holland',
+        'Utrecht',
+        'Zeeland',
+    ],
+};
+
 type FormErrors = {
     title?: string[];
     first_name?: string[];
@@ -1352,15 +1384,38 @@ export function AddLeads() {
                                             </div>
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">State</div>
-                                                <TextField
-                                                    name="state"
-                                                    value={formData.state}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.state?.[0] ? errors?.state[0] : ''}
-                                                    error={!!errors?.state?.[0]}
-                                                />
+                                                {formData.country && statesMapping[formData.country.toLowerCase()] ? (
+                                                    <FormControl sx={{ width: '70%' }}>
+                                                        <Select
+                                                            name="state"
+                                                            value={formData.state}
+                                                            onChange={handleChange}
+                                                            className={'select'}
+                                                            error={!!errors?.state?.[0]}
+                                                        >
+                                                            <MenuItem value="">-- Select State/Province --</MenuItem>
+                                                            {(statesMapping[formData.country.toLowerCase()] || []).map((state) => (
+                                                                <MenuItem key={state} value={state}>
+                                                                    {state}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                        <FormHelperText>
+                                                            {errors?.state?.[0] ? errors?.state[0] : ''}
+                                                        </FormHelperText>
+                                                    </FormControl>
+                                                ) : (
+                                                    <TextField
+                                                        name="state"
+                                                        value={formData.state}
+                                                        onChange={handleChange}
+                                                        placeholder="Select country first or enter state"
+                                                        style={{ width: '70%' }}
+                                                        size="small"
+                                                        helperText={errors?.state?.[0] ? errors?.state[0] : ''}
+                                                        error={!!errors?.state?.[0]}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                         <div className="fieldContainer2">
@@ -1408,11 +1463,21 @@ export function AddLeads() {
                                                         error={!!errors?.country?.[0]}
                                                     >
                                                         {state?.countries?.length
-                                                            ? state?.countries.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[0]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
+                                                            ? (() => {
+                                                                const countries = [...state.countries];
+                                                                const netherlandsIndex = countries.findIndex(
+                                                                    (c: any) => c[0].toLowerCase() === 'netherlands' || c[1].toLowerCase() === 'netherlands'
+                                                                );
+                                                                if (netherlandsIndex > -1) {
+                                                                    const [netherlands] = countries.splice(netherlandsIndex, 1);
+                                                                    countries.unshift(netherlands);
+                                                                }
+                                                                return countries.map((option: any) => (
+                                                                    <MenuItem key={option[0]} value={option[0]}>
+                                                                        {option[1]}
+                                                                    </MenuItem>
+                                                                ));
+                                                            })()
                                                             : ''}
                                                     </Select>
                                                     <FormHelperText>
