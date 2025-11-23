@@ -114,6 +114,7 @@ type FormErrors = {
     department?: string[];
     preferred_language?: string[];
     rating?: string[];
+    budget_range?: string[];
 };
 interface FormData {
     title: string;
@@ -147,6 +148,7 @@ interface FormData {
     department: string;
     preferred_language: string;
     rating: string;
+    budget_range: string;
 }
 
 export function AddLeads() {
@@ -204,6 +206,7 @@ export function AddLeads() {
         department: 'sales',
         preferred_language: 'english',
         rating: 'warm',
+        budget_range: '',
     });
 
     useEffect(() => {
@@ -316,6 +319,7 @@ export function AddLeads() {
             department: formData.department,
             preferred_language: formData.preferred_language,
             rating: formData.rating,
+            budget_range: formData.budget_range,
         };
         
         // Only include status if it's selected
@@ -389,6 +393,7 @@ export function AddLeads() {
             department: 'sales',
             preferred_language: 'english',
             rating: 'warm',
+            budget_range: '',
         });
         setErrors({});
         setSelectedContacts([]);
@@ -852,6 +857,29 @@ export function AddLeads() {
                                                     helperText={errors?.probability?.[0] ? errors?.probability[0] : ''}
                                                     error={!!errors?.probability?.[0]}
                                                 />
+                                            </div>
+                                        </div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Budget Range</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="budget_range"
+                                                        value={formData.budget_range}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.budget_range?.[0]}
+                                                    >
+                                                        <MenuItem value="">-- Select Budget Range --</MenuItem>
+                                                        <MenuItem value="less_than_5000">Less than €5,000</MenuItem>
+                                                        <MenuItem value="5000_to_10000">€5,000–€10,000</MenuItem>
+                                                        <MenuItem value="10000_to_25000">€10,000–€25,000</MenuItem>
+                                                        <MenuItem value="over_25000">Over €25,000</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.budget_range?.[0] ? errors?.budget_range[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
                                             </div>
                                         </div>
 
