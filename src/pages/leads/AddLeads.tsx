@@ -111,6 +111,7 @@ type FormErrors = {
     skype_ID?: string[];
     file?: string[];
     salutation?: string[];
+    department?: string[];
 };
 interface FormData {
     title: string;
@@ -141,6 +142,7 @@ interface FormData {
     skype_ID: string;
     file: string | null;
     salutation: string;
+    department: string;
 }
 
 export function AddLeads() {
@@ -195,6 +197,7 @@ export function AddLeads() {
         skype_ID: '',
         file: null,
         salutation: '',
+        department: 'sales',
     });
 
     useEffect(() => {
@@ -304,6 +307,7 @@ export function AddLeads() {
             industry: formData.industry,
             skype_ID: formData.skype_ID,
             salutation: formData.salutation,
+            department: formData.department,
         };
         
         // Only include status if it's selected
@@ -374,6 +378,7 @@ export function AddLeads() {
             skype_ID: '',
             file: null,
             salutation: '',
+            department: 'sales',
         });
         setErrors({});
         setSelectedContacts([]);
@@ -521,6 +526,27 @@ export function AddLeads() {
                                                     </Select>
                                                     <FormHelperText>
                                                         {errors?.source?.[0] ? errors?.source[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Department</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="department"
+                                                        value={formData.department}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.department?.[0]}
+                                                    >
+                                                        <MenuItem value="sales">Sales</MenuItem>
+                                                        <MenuItem value="marketing">Marketing</MenuItem>
+                                                        <MenuItem value="support">Support</MenuItem>
+                                                        <MenuItem value="finance">Finance</MenuItem>
+                                                        <MenuItem value="operations">Operations</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.department?.[0] ? errors?.department[0] : ''}
                                                     </FormHelperText>
                                                 </FormControl>
                                             </div>
