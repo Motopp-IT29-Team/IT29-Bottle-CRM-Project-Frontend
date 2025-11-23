@@ -35,7 +35,7 @@ interface AddressSectionProps {
         country: string;
     };
     onChange: (e: any) => void;
-    errors: Record<string, string>;
+    errors: Record<string, string | string[]>;
     disabled?: boolean;
 }
 

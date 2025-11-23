@@ -19,7 +19,7 @@ interface EditUserAddressSectionProps {
         street: string;
         city: string;
         state: string;
-        pincode: string;
+        postcode: string;
         country: string;
     };
     onChange: (e: any) => void;
@@ -28,7 +28,7 @@ interface EditUserAddressSectionProps {
         street?: string[];
         city?: string[];
         state?: string[];
-        pincode?: string[];
+        postcode?: string[];
         country?: string[];
     };
 }
@@ -141,15 +141,15 @@ export const EditUserAddressSection: React.FC<EditUserAddressSectionProps> = ({ 
                         Postal Code
                     </Typography>
                     <TextField
-                        name="pincode"
-                        value={formData.pincode}
+                        name="postcode"
+                        value={formData.postcode}
                         onChange={onChange}
                         placeholder="Enter postal code"
                         size="small"
                         fullWidth
                         required
-                        error={!!errors.pincode?.[0]}
-                        helperText={errors.pincode?.[0]}
+                        error={!!errors.postcode?.[0]}
+                        helperText={errors.postcode?.[0]}
                         sx={USERS_TEXT_FIELD_STYLES}
                     />
                 </Box>
