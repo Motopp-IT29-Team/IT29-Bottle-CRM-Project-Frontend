@@ -21,6 +21,8 @@ import {
     Button,
     Snackbar,
     Alert,
+    FormControlLabel,
+    Checkbox,
 } from '@mui/material';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
@@ -116,6 +118,7 @@ type FormErrors = {
     rating?: string[];
     budget_range?: string[];
     decision_timeframe?: string[];
+    do_not_call?: string[];
 };
 interface FormData {
     title: string;
@@ -151,6 +154,7 @@ interface FormData {
     rating: string;
     budget_range: string;
     decision_timeframe: string;
+    do_not_call: boolean;
 }
 
 export function AddLeads() {
@@ -210,6 +214,7 @@ export function AddLeads() {
         rating: 'warm',
         budget_range: '',
         decision_timeframe: '',
+        do_not_call: false,
     });
 
     useEffect(() => {
@@ -324,6 +329,7 @@ export function AddLeads() {
             rating: formData.rating,
             budget_range: formData.budget_range,
             decision_timeframe: formData.decision_timeframe,
+            do_not_call: formData.do_not_call,
         };
         
         // Only include status if it's selected
@@ -399,6 +405,7 @@ export function AddLeads() {
             rating: 'warm',
             budget_range: '',
             decision_timeframe: '',
+            do_not_call: false,
         });
         setErrors({});
         setSelectedContacts([]);
@@ -1250,6 +1257,21 @@ export function AddLeads() {
                                                     size="small"
                                                     helperText={errors?.email?.[0] ? errors?.email[0] : ''}
                                                     error={!!errors?.email?.[0]}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Do Not Call</div>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            name="do_not_call"
+                                                            checked={formData.do_not_call}
+                                                            onChange={handleChange}
+                                                        />
+                                                    }
+                                                    label={formData.do_not_call ? 'Yes' : 'No'}
                                                 />
                                             </div>
                                         </div>
