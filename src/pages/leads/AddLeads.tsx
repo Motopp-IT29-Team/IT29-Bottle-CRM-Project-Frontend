@@ -116,6 +116,22 @@ const statesMapping: { [key: string]: string[] } = {
     ],
 };
 
+// Cities mapping for states (keyed by state name)
+const citiesMapping: { [key: string]: string[] } = {
+    'Drenthe': ['Assen', 'Emmen', 'Hoogeveen', 'Meppel', 'Coevorden'],
+    'Flevoland': ['Lelystad', 'Almere', 'Dronten', 'Urk', 'Emmeloord'],
+    'Friesland': ['Leeuwarden', 'Sneek', 'Heerenveen', 'Harlingen', 'Dokkum'],
+    'Gelderland': ['Arnhem', 'Nijmegen', 'Apeldoorn', 'Zutphen', 'Tiel'],
+    'Groningen': ['Groningen', 'Delfzijl', 'Winschoten', 'Stadskanaal', 'Appingedam'],
+    'Limburg': ['Maastricht', 'Heerlen', 'Roermond', 'Venlo', 'Sittard'],
+    'North Brabant': ['Breda', 'Eindhoven', 'Tilburg', 'Den Bosch', 'Oosterhout'],
+    'North Holland': ['Alkmaar', 'Amsterdam', 'Haarlem', 'Zaanstad', 'Purmerend'],
+    'Overijssel': ['Zwolle', 'Enschede', 'Almelo', 'Deventer', 'Hengelo'],
+    'South Holland': ['Rotterdam', 'The Hague', 'Leiden', 'Delft', 'Dordrecht'],
+    'Utrecht': ['Utrecht', 'Vianen', 'Woerden', 'Nieuwegein', 'Veenendaal'],
+    'Zeeland': ['Middelburg', 'Vlissingen', 'Terneuzen', 'Goes', 'Sluis'],
+};
+
 type FormErrors = {
     title?: string[];
     first_name?: string[];
@@ -1358,15 +1374,38 @@ export function AddLeads() {
                                             </div>
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">City</div>
-                                                <TextField
-                                                    name="city"
-                                                    value={formData.city}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.city?.[0] ? errors?.city[0] : ''}
-                                                    error={!!errors?.city?.[0]}
-                                                />
+                                                {formData.state && citiesMapping[formData.state] ? (
+                                                    <FormControl sx={{ width: '70%' }}>
+                                                        <Select
+                                                            name="city"
+                                                            value={formData.city}
+                                                            onChange={handleChange}
+                                                            className={'select'}
+                                                            error={!!errors?.city?.[0]}
+                                                        >
+                                                            <MenuItem value="">-- Select City --</MenuItem>
+                                                            {(citiesMapping[formData.state] || []).map((city) => (
+                                                                <MenuItem key={city} value={city}>
+                                                                    {city}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                        <FormHelperText>
+                                                            {errors?.city?.[0] ? errors?.city[0] : ''}
+                                                        </FormHelperText>
+                                                    </FormControl>
+                                                ) : (
+                                                    <TextField
+                                                        name="city"
+                                                        value={formData.city}
+                                                        onChange={handleChange}
+                                                        placeholder="Select state first or enter city"
+                                                        style={{ width: '70%' }}
+                                                        size="small"
+                                                        helperText={errors?.city?.[0] ? errors?.city[0] : ''}
+                                                        error={!!errors?.city?.[0]}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                         <div className="fieldContainer2">
