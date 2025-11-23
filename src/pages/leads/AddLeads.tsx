@@ -115,6 +115,7 @@ type FormErrors = {
     preferred_language?: string[];
     rating?: string[];
     budget_range?: string[];
+    decision_timeframe?: string[];
 };
 interface FormData {
     title: string;
@@ -149,6 +150,7 @@ interface FormData {
     preferred_language: string;
     rating: string;
     budget_range: string;
+    decision_timeframe: string;
 }
 
 export function AddLeads() {
@@ -207,6 +209,7 @@ export function AddLeads() {
         preferred_language: 'english',
         rating: 'warm',
         budget_range: '',
+        decision_timeframe: '',
     });
 
     useEffect(() => {
@@ -320,6 +323,7 @@ export function AddLeads() {
             preferred_language: formData.preferred_language,
             rating: formData.rating,
             budget_range: formData.budget_range,
+            decision_timeframe: formData.decision_timeframe,
         };
         
         // Only include status if it's selected
@@ -394,6 +398,7 @@ export function AddLeads() {
             preferred_language: 'english',
             rating: 'warm',
             budget_range: '',
+            decision_timeframe: '',
         });
         setErrors({});
         setSelectedContacts([]);
@@ -878,6 +883,29 @@ export function AddLeads() {
                                                     </Select>
                                                     <FormHelperText>
                                                         {errors?.budget_range?.[0] ? errors?.budget_range[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Decision Timeframe</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="decision_timeframe"
+                                                        value={formData.decision_timeframe}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.decision_timeframe?.[0]}
+                                                    >
+                                                        <MenuItem value="">-- Select Decision Timeframe --</MenuItem>
+                                                        <MenuItem value="within_1_week">Within 1 week</MenuItem>
+                                                        <MenuItem value="within_1_month">Within 1 month</MenuItem>
+                                                        <MenuItem value="within_3_months">Within 3 months</MenuItem>
+                                                        <MenuItem value="more_than_3_months">More than 3 months</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.decision_timeframe?.[0] ? errors?.decision_timeframe[0] : ''}
                                                     </FormHelperText>
                                                 </FormControl>
                                             </div>
