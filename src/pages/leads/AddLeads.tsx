@@ -112,6 +112,7 @@ type FormErrors = {
     file?: string[];
     salutation?: string[];
     department?: string[];
+    preferred_language?: string[];
 };
 interface FormData {
     title: string;
@@ -143,6 +144,7 @@ interface FormData {
     file: string | null;
     salutation: string;
     department: string;
+    preferred_language: string;
 }
 
 export function AddLeads() {
@@ -198,6 +200,7 @@ export function AddLeads() {
         file: null,
         salutation: '',
         department: 'sales',
+        preferred_language: 'english',
     });
 
     useEffect(() => {
@@ -308,6 +311,7 @@ export function AddLeads() {
             skype_ID: formData.skype_ID,
             salutation: formData.salutation,
             department: formData.department,
+            preferred_language: formData.preferred_language,
         };
         
         // Only include status if it's selected
@@ -379,6 +383,7 @@ export function AddLeads() {
             file: null,
             salutation: '',
             department: 'sales',
+            preferred_language: 'english',
         });
         setErrors({});
         setSelectedContacts([]);
@@ -1088,6 +1093,28 @@ export function AddLeads() {
                                                     helperText={errors?.first_name?.[0] ? errors?.first_name[0] : ''}
                                                     error={!!errors?.first_name?.[0]}
                                                 />
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Preferred Language</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="preferred_language"
+                                                        value={formData.preferred_language}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.preferred_language?.[0]}
+                                                    >
+                                                        <MenuItem value="english">English</MenuItem>
+                                                        <MenuItem value="dutch">Dutch</MenuItem>
+                                                        <MenuItem value="arabic">Arabic</MenuItem>
+                                                        <MenuItem value="german">German</MenuItem>
+                                                        <MenuItem value="french">French</MenuItem>
+                                                        <MenuItem value="spanish">Spanish</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.preferred_language?.[0] ? errors?.preferred_language[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
                                             </div>
                                         </div>
                                         <div className="fieldContainer2">
