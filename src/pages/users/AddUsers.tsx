@@ -13,6 +13,8 @@ import '../../styles/style.css';
 
 const INITIAL_FORM_DATA: UserFormData = {
     email: '',
+    first_name: '',
+    last_name: '',
     role: 'ADMIN',
     address_line: '',
     street: '',
@@ -35,6 +37,8 @@ export function AddUsers() {
     const handleBack = () => navigate('/app/users');
 
     const handleCancel = () => {
+        resetForm();
+        setBackendErrors({});
         navigate(-1);
     };
 
@@ -85,6 +89,8 @@ export function AddUsers() {
                 <div style={{ padding: '10px' }}>
                     <UsersInfoSection
                         email={formData.email}
+                        first_name={formData.first_name}
+                        last_name={formData.last_name}
                         role={formData.role}
                         onChange={handleChange}
                         errors={allErrors}
@@ -101,7 +107,7 @@ export function AddUsers() {
                             country: formData.country,
                         }}
                         onChange={handleChange}
-                        errors={validationErrors}
+                        errors={allErrors}
                         disabled={isLoading}
                     />
                 </div>
