@@ -18,7 +18,7 @@ import { useUsers } from '../../hooks/user/useUsers';
 import { useNotification } from '../../context/NotificationContext';
 import { UserActivitySection } from '../../components/users/details/UserActivitySection';
 
-export default function UserDetails() {
+export function UserDetails() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('id');
@@ -26,7 +26,7 @@ export default function UserDetails() {
 
     const { addNotification } = useNotification();
     const { deleteUser } = useUsers();
-    const { loading, userDetails, isResending, resendInvitation } = useUserDetails(userId);
+    const { isLoading, userDetails, isResending, resendInvitation } = useUserDetails(userId);
 
     const handleBack = () => navigate('/app/users');
     const handleEdit = () => navigate(`/app/users/edit-user?id=${userId}`);
@@ -36,7 +36,7 @@ export default function UserDetails() {
         return null;
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <Box sx={USER_DETAILS_LOADING_CONTAINER_STYLES}>
                 <CircularProgress size={40} sx={USER_DETAILS_LOADING_SPINNER_STYLES} />

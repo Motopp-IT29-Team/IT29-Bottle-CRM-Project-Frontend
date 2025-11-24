@@ -32,7 +32,7 @@ interface Lead {
     };
 }
 
-export default function Leads() {
+export function Leads() {
     const navigate = useNavigate();
     const location = useLocation();
     const [tab, setTab] = useState<string>('open');
@@ -181,20 +181,7 @@ export default function Leads() {
     };
 
     const selectLeadList = (leadId: string) => {
-        navigate('/app/leads/lead-details', {
-            state: {
-                leadId,
-                detail: true,
-                contacts,
-                status,
-                source,
-                companies,
-                tags,
-                users,
-                countries,
-                industries,
-            },
-        });
+        navigate(`/app/leads/lead-details?id=${leadId}`);
     };
 
     const deleteLead = (deleteId: string) => {

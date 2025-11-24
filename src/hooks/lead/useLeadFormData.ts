@@ -1,6 +1,13 @@
 import { ChangeEvent, useState } from 'react';
 
 export interface LeadFormData {
+    // Contact Information
+    first_name: string;
+    last_name: string;
+    title: string;
+    phone: string;
+    email: string;
+
     // Lead Information
     account_name: string;
     opportunity_amount: string;
@@ -11,12 +18,14 @@ export interface LeadFormData {
     probability: number;
     skype_ID: string;
 
-    // Contact Information
-    first_name: string;
-    last_name: string;
-    title: string;
-    phone: string;
-    email: string;
+    // Lead Information
+    salutation: string;
+    department: string;
+    preferred_language: string;
+    rating: string;
+    budget_range: string;
+    decision_timeframe: string;
+    do_not_call: boolean;
 
     // Address Information
     address_line: string;
@@ -29,7 +38,7 @@ export interface LeadFormData {
     // Additional
     description: string;
     lead_attachment: string | null;
-    file: string | null;
+    actualFile: File | null;
 
     // Relations (arrays of IDs)
     assigned_to: string[];
@@ -38,6 +47,13 @@ export interface LeadFormData {
 }
 
 export const INITIAL_LEAD_FORM_DATA: LeadFormData = {
+    // Contact Information
+    first_name: '',
+    last_name: '',
+    title: '',
+    phone: '',
+    email: '',
+
     // Lead Information
     account_name: '',
     opportunity_amount: '',
@@ -48,12 +64,14 @@ export const INITIAL_LEAD_FORM_DATA: LeadFormData = {
     probability: 50,
     skype_ID: '',
 
-    // Contact Information
-    first_name: '',
-    last_name: '',
-    title: '',
-    phone: '',
-    email: '',
+    // Lead Information
+    salutation: 'Mr',
+    department: 'Sales',
+    preferred_language: 'English',
+    rating: '',
+    budget_range: '',
+    decision_timeframe: '',
+    do_not_call: false,
 
     // Address Information
     address_line: '',
@@ -61,12 +79,12 @@ export const INITIAL_LEAD_FORM_DATA: LeadFormData = {
     city: '',
     state: '',
     postcode: '',
-    country: '',
+    country: 'NL',
 
     // Additional
     description: '',
     lead_attachment: null,
-    file: null,
+    actualFile: null,
 
     // Relations
     assigned_to: [],
@@ -84,6 +102,12 @@ export function useLeadFormData(initialData: LeadFormData = INITIAL_LEAD_FORM_DA
             setFormData((prev) => ({
                 ...prev,
                 [name]: value === '' ? '' : Number(value),
+            }));
+        } else if (type === 'checkbox') {
+            const target = e.target as HTMLInputElement;
+            setFormData((prev) => ({
+                ...prev,
+                [name]: target.checked,
             }));
         } else {
             setFormData((prev) => ({
@@ -117,19 +141,15 @@ export function useLeadFormData(initialData: LeadFormData = INITIAL_LEAD_FORM_DA
 
     const handleFileChange = (file: File | null) => {
         if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setFormData((prev) => ({
-                    ...prev,
-                    file: reader.result as string,
-                    lead_attachment: file.name,
-                }));
-            };
-            reader.readAsDataURL(file);
+            setFormData((prev) => ({
+                ...prev,
+                actualFile: file,
+                lead_attachment: file.name,
+            }));
         } else {
             setFormData((prev) => ({
                 ...prev,
-                file: null,
+                actualFile: null,
                 lead_attachment: null,
             }));
         }

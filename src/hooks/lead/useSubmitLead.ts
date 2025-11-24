@@ -1,5 +1,5 @@
 import { LeadFormData } from './useLeadFormData';
-import { fetchData } from '../../components/FetchData';
+import { SERVER } from '../../services/ApiUrls';
 import { LeadUrl } from '../../services/ApiUrls';
 
 interface SubmitResult {
@@ -11,55 +11,80 @@ interface SubmitResult {
 
 export function useSubmitLead(resetForm: () => void) {
     const submitForm = async (formData: LeadFormData): Promise<SubmitResult> => {
-        const Header = {
+        const token = localStorage.getItem('Token');
+        const org = localStorage.getItem('org');
+
+        const Header: Record<string, string> = {
             Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
         };
 
-        const data = {
-            title: formData.title,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            account_name: formData.account_name,
-            phone: formData.phone,
-            email: formData.email,
-            lead_attachment: formData.file,
-            opportunity_amount: formData.opportunity_amount,
-            website: formData.website,
-            description: formData.description,
-            assigned_to: formData.assigned_to,
-            contacts: formData.contacts,
-            status: formData.status,
-            source: formData.source,
-            address_line: formData.address_line,
-            street: formData.street,
-            city: formData.city,
-            state: formData.state,
-            postcode: formData.postcode,
-            country: formData.country,
-            tags: formData.tags,
-            probability: formData.probability,
-            industry: formData.industry,
-            skype_ID: formData.skype_ID,
-        };
+        if (token) {
+            Header.Authorization = token;
+        }
+
+        if (org) {
+            Header.org = org;
+        }
+
+        const formDataObj = new FormData();
+
+        formDataObj.append('title', formData.title);
+        formDataObj.append('first_name', formData.first_name);
+        formDataObj.append('last_name', formData.last_name);
+        formDataObj.append('account_name', formData.account_name);
+        formDataObj.append('phone', formData.phone);
+        formDataObj.append('email', formData.email);
+        formDataObj.append('opportunity_amount', formData.opportunity_amount.toString());
+        formDataObj.append('website', formData.website);
+        formDataObj.append('description', formData.description);
+        formDataObj.append('status', formData.status);
+        formDataObj.append('source', formData.source);
+        formDataObj.append('probability', formData.probability.toString());
+        formDataObj.append('industry', formData.industry);
+        formDataObj.append('skype_ID', formData.skype_ID);
+        formDataObj.append('salutation', formData.salutation);
+        formDataObj.append('department', formData.department);
+        formDataObj.append('preferred_language', formData.preferred_language);
+        formDataObj.append('rating', formData.rating);
+        formDataObj.append('budget_range', formData.budget_range);
+        formDataObj.append('decision_timeframe', formData.decision_timeframe);
+        formDataObj.append('do_not_call', formData.do_not_call.toString());
+        formDataObj.append('address_line', formData.address_line);
+        formDataObj.append('street', formData.street);
+        formDataObj.append('city', formData.city);
+        formDataObj.append('state', formData.state);
+        formDataObj.append('postcode', formData.postcode);
+        formDataObj.append('country', formData.country);
+
+        if (formData.actualFile) {
+            formDataObj.append('lead_attachment', formData.actualFile);
+        }
+
+        formData.assigned_to.forEach((id) => formDataObj.append('assigned_to', id));
+        formData.contacts.forEach((id) => formDataObj.append('contacts', id));
+        formData.tags.forEach((tag) => formDataObj.append('tags', tag));
 
         try {
-            const response = await fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), Header);
+            const response = await fetch(`${SERVER}${LeadUrl}/`, {
+                method: 'POST',
+                headers: Header,
+                body: formDataObj,
+            });
 
-            if (response.error) {
+            const data = await response.json();
+
+            if (!response.ok) {
                 return {
                     success: false,
-                    error: response.error.message || 'Failed to create lead',
-                    fieldErrors: response.errors || {},
+                    error: data.message || 'Failed to create lead',
+                    fieldErrors: data.errors || {},
                 };
             }
 
             resetForm();
             return {
                 success: true,
-                data: response,
+                data: data,
             };
         } catch (error: any) {
             return {
@@ -78,14 +103,16 @@ export function useSubmitLead(resetForm: () => void) {
         };
 
         try {
-            const response = await fetchData(
-                `${LeadUrl}/check-duplicate/?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`,
-                'GET',
-                null,
-                Header
+            const response = await fetch(
+                `${SERVER}${LeadUrl}/check-duplicate/?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`,
+                {
+                    method: 'GET',
+                    headers: Header as any,
+                }
             );
 
-            return response.isDuplicate || false;
+            const data = await response.json();
+            return data.duplicate || false;
         } catch (error) {
             console.error('Error checking duplicate:', error);
             return false;

@@ -39,6 +39,11 @@ export function useLeadValidation() {
             errors.first_name = 'First name is required';
         }
 
+        // Required: Job Title
+        if (!formData.title || formData.title.trim() === '') {
+            errors.title = 'Job Title is required';
+        }
+
         // Required: Last Name
         if (!formData.last_name || formData.last_name.trim() === '') {
             errors.last_name = 'Last name is required';

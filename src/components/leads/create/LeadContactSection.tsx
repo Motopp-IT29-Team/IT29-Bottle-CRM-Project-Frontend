@@ -1,17 +1,12 @@
 import React from 'react';
-import { Accordion, AccordionSummary, AccordionDetails, Typography, Box, TextField, Paper } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Typography, Box, Paper } from '@mui/material';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
-import { RequiredTextField } from '../../../styles/CssStyled';
+import { ITextField } from '../../ui';
 import {
     LEADS_ACCORDION_STYLES,
     LEADS_ACCORDION_SUMMARY_STYLES,
     LEADS_ACCORDION_TITLE_STYLES,
-    LEADS_EXPAND_ICON_STYLES,
-    LEADS_FIELD_BOX_STYLES,
     LEADS_FIELD_CONTAINER_STYLES,
-    LEADS_FIELD_LABEL_STYLES,
-    LEADS_TEXT_FIELD_STYLES,
-    LEADS_REQUIRED_ASTERISK_STYLES,
 } from '../../../styles/LeadsStyles';
 
 interface LeadContactSectionProps {
@@ -33,7 +28,7 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ data, on
             <Accordion defaultExpanded sx={LEADS_ACCORDION_STYLES}>
                 <AccordionSummary
                     expandIcon={
-                        <Box sx={LEADS_EXPAND_ICON_STYLES}>
+                        <Box sx={{ backgroundColor: '#f3f4f6', borderRadius: '8px', p: 0.5 }}>
                             <FiChevronDown style={{ fontSize: '20px', color: '#6b7280' }} />
                         </Box>
                     }
@@ -45,97 +40,66 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ data, on
                 <AccordionDetails sx={{ p: 0 }}>
                     <Box sx={LEADS_FIELD_CONTAINER_STYLES}>
                         {/* First Name - REQUIRED */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>
-                                First Name <span style={LEADS_REQUIRED_ASTERISK_STYLES}>*</span>
-                            </Typography>
-                            <RequiredTextField
-                                required
-                                name="first_name"
-                                value={data.first_name}
-                                onChange={onChange}
-                                placeholder="Enter first name"
-                                size="small"
-                                error={!!errors.first_name}
-                                helperText={errors.first_name}
-                                disabled={disabled}
-                                sx={LEADS_TEXT_FIELD_STYLES}
-                            />
-                        </Box>
+                        <ITextField
+                            label="First Name"
+                            name="first_name"
+                            value={data.first_name}
+                            onChange={onChange}
+                            error={errors.first_name}
+                            disabled={disabled}
+                            required
+                            placeholder="Enter first name"
+                        />
 
-                        {/* Last Name */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>
-                                Last Name <span style={LEADS_REQUIRED_ASTERISK_STYLES}>*</span>
-                            </Typography>
-                            <RequiredTextField
-                                required
-                                name="last_name"
-                                value={data.last_name}
-                                onChange={onChange}
-                                placeholder="Enter last name"
-                                size="small"
-                                error={!!errors.last_name}
-                                helperText={errors.last_name}
-                                disabled={disabled}
-                                sx={LEADS_TEXT_FIELD_STYLES}
-                            />
-                        </Box>
+                        {/* Last Name - REQUIRED */}
+                        <ITextField
+                            label="Last Name"
+                            name="last_name"
+                            value={data.last_name}
+                            onChange={onChange}
+                            error={errors.last_name}
+                            disabled={disabled}
+                            required
+                            placeholder="Enter last name"
+                        />
 
                         {/* Job Title */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>Job Title</Typography>
-                            <TextField
-                                name="title"
-                                value={data.title}
-                                onChange={onChange}
-                                placeholder="Enter job title"
-                                size="small"
-                                error={!!errors.title}
-                                helperText={errors.title}
-                                disabled={disabled}
-                                sx={LEADS_TEXT_FIELD_STYLES}
-                            />
-                        </Box>
+                        <ITextField
+                            label="Job Title"
+                            name="title"
+                            value={data.title}
+                            onChange={onChange}
+                            error={errors.title}
+                            disabled={disabled}
+                            required
+                            placeholder="Enter job title"
+                        />
 
-                        {/* Phone */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>
-                                Phone Number <span style={LEADS_REQUIRED_ASTERISK_STYLES}>*</span>
-                            </Typography>
-                            <RequiredTextField
-                                required
-                                name="phone"
-                                value={data.phone}
-                                onChange={onChange}
-                                placeholder="+1 (555) 123-4567"
-                                size="small"
-                                error={!!errors.phone}
-                                helperText={errors.phone}
-                                disabled={disabled}
-                                sx={LEADS_TEXT_FIELD_STYLES}
-                            />
-                        </Box>
+                        {/* Phone - REQUIRED */}
+                        <ITextField
+                            label="Phone Number"
+                            name="phone"
+                            type="tel"
+                            value={data.phone}
+                            onChange={onChange}
+                            error={errors.phone}
+                            disabled={disabled}
+                            required
+                            placeholder="+1 (555) 123-4567"
+                        />
 
-                        {/* Email */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>
-                                Email Address <span style={LEADS_REQUIRED_ASTERISK_STYLES}>*</span>
-                            </Typography>
-                            <RequiredTextField
-                                required
-                                name="email"
-                                type="email"
-                                value={data.email}
-                                onChange={onChange}
-                                placeholder="email@company.com"
-                                size="small"
-                                error={!!errors.email}
-                                helperText={errors.email}
-                                disabled={disabled}
-                                sx={LEADS_TEXT_FIELD_STYLES}
-                            />
-                        </Box>
+                        {/* Email - REQUIRED */}
+                        <ITextField
+                            label="Email Address"
+                            name="email"
+                            type="email"
+                            value={data.email}
+                            onChange={onChange}
+                            error={errors.email}
+                            disabled={disabled}
+                            required
+                            placeholder="email@company.com"
+                        />
                     </Box>
                 </AccordionDetails>
             </Accordion>

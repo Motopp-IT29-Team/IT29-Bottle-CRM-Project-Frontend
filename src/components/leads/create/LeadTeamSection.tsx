@@ -1,29 +1,12 @@
 import React from 'react';
-import {
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Typography,
-    Box,
-    Paper,
-    Autocomplete,
-    TextField,
-    Chip,
-    FormControl,
-    FormHelperText,
-} from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Typography, Box, Paper } from '@mui/material';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
-import { FaTimes } from 'react-icons/fa';
+import { IAutocomplete } from '../../ui';
 import {
     LEADS_ACCORDION_STYLES,
     LEADS_ACCORDION_SUMMARY_STYLES,
     LEADS_ACCORDION_TITLE_STYLES,
-    LEADS_EXPAND_ICON_STYLES,
-    LEADS_FIELD_BOX_STYLES,
     LEADS_FIELD_CONTAINER_STYLES,
-    LEADS_FIELD_LABEL_STYLES,
-    LEADS_AUTOCOMPLETE_STYLES,
-    LEADS_CHIP_STYLES,
 } from '../../../styles/LeadsStyles';
 
 interface LeadTeamSectionProps {
@@ -58,7 +41,7 @@ export const LeadTeamSection: React.FC<LeadTeamSectionProps> = ({
             <Accordion defaultExpanded sx={LEADS_ACCORDION_STYLES}>
                 <AccordionSummary
                     expandIcon={
-                        <Box sx={LEADS_EXPAND_ICON_STYLES}>
+                        <Box sx={{ backgroundColor: '#f3f4f6', borderRadius: '8px', p: 0.5 }}>
                             <FiChevronDown style={{ fontSize: '20px', color: '#6b7280' }} />
                         </Box>
                     }
@@ -70,107 +53,47 @@ export const LeadTeamSection: React.FC<LeadTeamSectionProps> = ({
                 <AccordionDetails sx={{ p: 0 }}>
                     <Box sx={LEADS_FIELD_CONTAINER_STYLES}>
                         {/* Assign To */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>Assign To</Typography>
-                            <FormControl fullWidth error={!!errors.assigned_to}>
-                                <Autocomplete
-                                    multiple
-                                    value={selectedAssignTo}
-                                    options={users}
-                                    getOptionLabel={(option: any) => option?.user__email || ''}
-                                    onChange={(e: any, value: any) => onAssignToChange('assigned_to', value)}
-                                    disabled={disabled}
-                                    size="small"
-                                    limitTags={2}
-                                    filterSelectedOptions
-                                    renderTags={(value, getTagProps) =>
-                                        value.map((option, index) => (
-                                            <Chip
-                                                label={option?.user__email}
-                                                deleteIcon={<FaTimes style={{ fontSize: '12px' }} />}
-                                                {...getTagProps({ index })}
-                                                sx={LEADS_CHIP_STYLES}
-                                            />
-                                        ))
-                                    }
-                                    renderInput={(params) => (
-                                        <TextField {...params} placeholder="Add users" sx={LEADS_AUTOCOMPLETE_STYLES} />
-                                    )}
-                                    sx={LEADS_AUTOCOMPLETE_STYLES}
-                                />
-                                {errors.assigned_to && <FormHelperText>{errors.assigned_to}</FormHelperText>}
-                            </FormControl>
-                        </Box>
+                        <IAutocomplete
+                            label="Assign To"
+                            name="assigned_to"
+                            value={selectedAssignTo}
+                            options={users}
+                            onChange={onAssignToChange}
+                            getOptionLabel={(option: any) => option?.user__email || ''}
+                            error={errors.assigned_to}
+                            disabled={disabled}
+                            placeholder="Add users"
+                            limitTags={2}
+                        />
 
                         {/* Contact Name */}
-                        <Box sx={LEADS_FIELD_BOX_STYLES}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>Contact Name</Typography>
-                            <FormControl fullWidth error={!!errors.contacts}>
-                                <Autocomplete
-                                    multiple
-                                    value={selectedContacts}
-                                    options={contacts}
-                                    getOptionLabel={(option: any) => option?.first_name || ''}
-                                    onChange={(e: any, value: any) => onContactsChange('contacts', value)}
-                                    disabled={disabled}
-                                    size="small"
-                                    limitTags={2}
-                                    filterSelectedOptions
-                                    renderTags={(value, getTagProps) =>
-                                        value.map((option, index) => (
-                                            <Chip
-                                                label={option?.first_name}
-                                                deleteIcon={<FaTimes style={{ fontSize: '12px' }} />}
-                                                {...getTagProps({ index })}
-                                                sx={LEADS_CHIP_STYLES}
-                                            />
-                                        ))
-                                    }
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            placeholder="Add contacts"
-                                            sx={LEADS_AUTOCOMPLETE_STYLES}
-                                        />
-                                    )}
-                                    sx={LEADS_AUTOCOMPLETE_STYLES}
-                                />
-                                {errors.contacts && <FormHelperText>{errors.contacts}</FormHelperText>}
-                            </FormControl>
-                        </Box>
+                        <IAutocomplete
+                            label="Contact Name"
+                            name="contacts"
+                            value={selectedContacts}
+                            options={contacts}
+                            onChange={onContactsChange}
+                            getOptionLabel={(option: any) => option?.first_name || ''}
+                            error={errors.contacts}
+                            disabled={disabled}
+                            placeholder="Add contacts"
+                            limitTags={2}
+                        />
 
-                        {/* Tags */}
-                        <Box sx={{ ...LEADS_FIELD_BOX_STYLES, gridColumn: 'span 2' }}>
-                            <Typography sx={LEADS_FIELD_LABEL_STYLES}>Tags</Typography>
-                            <FormControl fullWidth error={!!errors.tags}>
-                                <Autocomplete
-                                    multiple
-                                    value={selectedTags}
-                                    options={tags}
-                                    getOptionLabel={(option: any) => option}
-                                    onChange={(e: any, value: any) => onTagsChange('tags', value)}
-                                    disabled={disabled}
-                                    size="small"
-                                    limitTags={5}
-                                    filterSelectedOptions
-                                    renderTags={(value, getTagProps) =>
-                                        value.map((option, index) => (
-                                            <Chip
-                                                label={option}
-                                                deleteIcon={<FaTimes style={{ fontSize: '12px' }} />}
-                                                {...getTagProps({ index })}
-                                                sx={LEADS_CHIP_STYLES}
-                                            />
-                                        ))
-                                    }
-                                    renderInput={(params) => (
-                                        <TextField {...params} placeholder="Add tags" sx={LEADS_AUTOCOMPLETE_STYLES} />
-                                    )}
-                                    sx={LEADS_AUTOCOMPLETE_STYLES}
-                                />
-                                {errors.tags && <FormHelperText>{errors.tags}</FormHelperText>}
-                            </FormControl>
-                        </Box>
+                        {/* Tags - Full Width */}
+                        <IAutocomplete
+                            label="Tags"
+                            name="tags"
+                            value={selectedTags}
+                            options={tags}
+                            onChange={onTagsChange}
+                            getOptionLabel={(option: any) => option}
+                            error={errors.tags}
+                            disabled={disabled}
+                            placeholder="Add tags"
+                            limitTags={5}
+                            fullWidth
+                        />
                     </Box>
                 </AccordionDetails>
             </Accordion>

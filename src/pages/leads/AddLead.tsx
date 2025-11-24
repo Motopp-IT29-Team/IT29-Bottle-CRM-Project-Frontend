@@ -12,7 +12,6 @@ import { LeadDescriptionSection } from '../../components/leads/create/LeadDescri
 import { LeadTeamSection } from '../../components/leads/create/LeadTeamSection';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
-import '../../styles/style.css';
 
 export function AddLead() {
     const navigate = useNavigate();
@@ -139,23 +138,22 @@ export function AddLead() {
                 <div style={{ padding: '10px' }}>
                     {/* Lead Information */}
                     <LeadInformationSection
-                        data={{
-                            account_name: formData.account_name,
-                            opportunity_amount: formData.opportunity_amount,
-                            website: formData.website,
-                            industry: formData.industry,
-                            status: formData.status,
-                            source: formData.source,
-                            probability: formData.probability,
-                            skype_ID: formData.skype_ID,
-                        }}
+                        data={formData}
                         onChange={(e) => {
                             if (
                                 e.target.name === 'source' ||
                                 e.target.name === 'status' ||
-                                e.target.name === 'industry'
+                                e.target.name === 'industry' ||
+                                e.target.name === 'salutation' ||
+                                e.target.name === 'department' ||
+                                e.target.name === 'preferred_language' ||
+                                e.target.name === 'rating' ||
+                                e.target.name === 'budget_range' ||
+                                e.target.name === 'decision_timeframe'
                             ) {
                                 handleSelectChange(e);
+                            } else if (e.target.name === 'do_not_call') {
+                                handleChange(e);
                             } else {
                                 handleChange(e);
                             }

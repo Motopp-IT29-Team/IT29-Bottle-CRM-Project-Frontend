@@ -29,8 +29,8 @@ interface UserDetailsResponse {
     deactivated_at?: string;
 }
 
-export const useUserDetails = (userId: string | null) => {
-    const [loading, setLoading] = useState(true);
+export const useUserDetails = (id: string | null) => {
+    const [isLoading, setIsLoading] = useState(true);
     const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
     const [isResending, setIsResending] = useState(false);
 
@@ -42,7 +42,7 @@ export const useUserDetails = (userId: string | null) => {
     });
 
     const getUserDetail = async (id: string) => {
-        setLoading(true);
+        setIsLoading(true);
         try {
             const res = await fetchData(`${UserUrl}/${id}/`, 'GET', null as any, getAuthHeaders());
             if (!res.error) {
@@ -54,27 +54,23 @@ export const useUserDetails = (userId: string | null) => {
             console.error('Error fetching user details:', error);
             return false;
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     const resendInvitation = async () => {
-        if (!userId) return false;
+        if (!id) return false;
 
         setIsResending(true);
         try {
             const response = await fetchData(
-                `${UserUrl}/${userId}/resend-invitation/`,
+                `${UserUrl}/${id}/resend-invitation/`,
                 'POST',
                 null as any,
                 getAuthHeaders()
             );
 
-            if (!response.error) {
-                return true;
-            } else {
-                return false;
-            }
+            return !response.error;
         } catch (error) {
             return false;
         } finally {
@@ -82,17 +78,23 @@ export const useUserDetails = (userId: string | null) => {
         }
     };
 
-    useEffect(() => {
-        if (userId) {
-            void getUserDetail(userId);
+    const refresh = async () => {
+        if (id) {
+            await getUserDetail(id);
         }
-    }, [userId]);
+    };
+
+    useEffect(() => {
+        if (id) {
+            void getUserDetail(id);
+        }
+    }, [id]);
 
     return {
-        loading,
+        isLoading,
         userDetails,
         isResending,
         resendInvitation,
-        refreshUser: () => userId && getUserDetail(userId),
+        refresh,
     };
 };
