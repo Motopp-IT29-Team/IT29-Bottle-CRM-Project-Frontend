@@ -107,6 +107,8 @@ export const USERS_FIELD_BOX_STYLES: SxProps<Theme> = {
 };
 
 export const USERS_FIELD_LABEL_STYLES: SxProps<Theme> = {
+    display: 'flex',
+    alignItems: 'center',
     fontSize: '14px',
     fontWeight: 600,
     color: '#374151',

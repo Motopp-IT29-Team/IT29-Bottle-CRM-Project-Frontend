@@ -4,6 +4,7 @@ import { Box, Typography, Link } from '@mui/material';
 import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt } from 'react-icons/fa';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
+import { IActionModal } from '../../components/ui';
 import { useLeadDetails } from '../../hooks/lead/useLeadDetails';
 import { useLeadActions } from '../../hooks/lead/useLeadActions';
 import { useNotification } from '../../context/NotificationContext';
@@ -14,9 +15,16 @@ export function LeadDetails() {
     const navigate = useNavigate();
     const [note, setNote] = useState('');
 
-    const { leadDetails, attachments, comments, isLoading, refresh } = useLeadDetails(leadId);
-    const { deleteLead, addComment, uploadAttachment } = useLeadActions();
+    // Modal states
+    const [deleteLeadModalOpen, setDeleteLeadModalOpen] = useState(false);
+    const [deleteAttachmentModalOpen, setDeleteAttachmentModalOpen] = useState(false);
+    const [deleteNoteModalOpen, setDeleteNoteModalOpen] = useState(false);
+    const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+    const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
+    const { leadDetails, attachments, comments, isLoading, refresh } = useLeadDetails(leadId);
+    const { deleteLead, addComment, uploadAttachment, deleteAttachment, deleteComment } = useLeadActions();
     const { addNotification } = useNotification();
 
     if (!leadId) {
@@ -35,21 +43,28 @@ export function LeadDetails() {
         navigate(`/app/leads/edit-lead?id=${leadId}`);
     };
 
-    const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this lead?')) {
-            const success = await deleteLead(leadId);
-            if (success) {
-                addNotification('success', 'Lead deleted successfully', '');
-                navigate('/app/leads');
-            } else {
-                addNotification('error', 'Failed to delete lead', '');
-            }
+    const handleDeleteClick = () => {
+        setDeleteLeadModalOpen(true);
+    };
+
+    const handleConfirmDeleteLead = async () => {
+        setIsDeleting(true);
+        const success = await deleteLead(leadId);
+        setIsDeleting(false);
+
+        if (success) {
+            setDeleteLeadModalOpen(false);
+            addNotification('success', 'Lead deleted successfully', '');
+            navigate('/app/leads');
+        } else {
+            setDeleteLeadModalOpen(false);
+            addNotification('error', 'Failed to delete lead', '');
         }
     };
 
     const handleFileUpload = async (file: File) => {
-        const success = await uploadAttachment(leadId, file);
-        if (success) {
+        const result = await uploadAttachment(leadId, file);
+        if (result.success) {
             addNotification('success', 'Attachment uploaded successfully', '');
             await refresh();
         } else {
@@ -57,11 +72,35 @@ export function LeadDetails() {
         }
     };
 
+    const handleDeleteAttachmentClick = (attachmentId: string) => {
+        setSelectedAttachmentId(attachmentId);
+        setDeleteAttachmentModalOpen(true);
+    };
+
+    const handleConfirmDeleteAttachment = async () => {
+        if (!selectedAttachmentId) return;
+
+        setIsDeleting(true);
+        const success = await deleteAttachment(selectedAttachmentId);
+        setIsDeleting(false);
+
+        if (success) {
+            setDeleteAttachmentModalOpen(false);
+            setSelectedAttachmentId(null);
+            addNotification('success', 'Attachment deleted successfully', '');
+            await refresh();
+        } else {
+            setDeleteAttachmentModalOpen(false);
+            setSelectedAttachmentId(null);
+            addNotification('error', 'Failed to delete attachment', '');
+        }
+    };
+
     const handleSendNote = async () => {
         if (!note.trim()) return;
 
-        const success = await addComment(leadId, note);
-        if (success) {
+        const result = await addComment(leadId, note);
+        if (result.success) {
             addNotification('success', 'Note added successfully', '');
             setNote('');
             await refresh();
@@ -70,10 +109,34 @@ export function LeadDetails() {
         }
     };
 
+    const handleDeleteNoteClick = (commentId: string) => {
+        setSelectedCommentId(commentId);
+        setDeleteNoteModalOpen(true);
+    };
+
+    const handleConfirmDeleteNote = async () => {
+        if (!selectedCommentId) return;
+
+        setIsDeleting(true);
+        const success = await deleteComment(selectedCommentId);
+        setIsDeleting(false);
+
+        if (success) {
+            setDeleteNoteModalOpen(false);
+            setSelectedCommentId(null);
+            addNotification('success', 'Note deleted successfully', '');
+            await refresh();
+        } else {
+            setDeleteNoteModalOpen(false);
+            setSelectedCommentId(null);
+            addNotification('error', 'Failed to delete note', '');
+        }
+    };
+
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Leads', onClick: handleBack },
         { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
-        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDelete, color: 'error' },
+        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
     ];
 
     if (isLoading) {
@@ -99,7 +162,6 @@ export function LeadDetails() {
             <Box sx={{ mt: '120px', p: 3, display: 'flex', gap: 3 }}>
                 {/* Main Content - 68% */}
                 <Box sx={{ flex: '0 0 68%' }}>
-                    {/* Hero Card */}
                     <HeroCard
                         salutation={leadDetails.salutation}
                         firstName={leadDetails.first_name}
@@ -118,7 +180,6 @@ export function LeadDetails() {
                         createdAt={leadDetails.created_at}
                     />
 
-                    {/* Lead Information */}
                     <DetailSection title="Lead Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
                         <DetailField label="Company Name" value={leadDetails.account_name} />
                         <DetailField label="Industry" value={leadDetails.industry} />
@@ -138,11 +199,9 @@ export function LeadDetails() {
                                 )
                             }
                         />
-                        <DetailField label="Skype ID" value={leadDetails.skype_ID} />
                         <DetailField label="Preferred Language" value={leadDetails.preferred_language} />
                     </DetailSection>
 
-                    {/* Contact Information */}
                     <DetailSection title="Contact Information" icon={<FaUser style={{ color: '#6366f1' }} />}>
                         <DetailField label="First Name" value={leadDetails.first_name} />
                         <DetailField label="Last Name" value={leadDetails.last_name} />
@@ -161,7 +220,6 @@ export function LeadDetails() {
                         <DetailField label="Do Not Call" value={leadDetails.do_not_call ? 'Yes' : 'No'} />
                     </DetailSection>
 
-                    {/* Address Information */}
                     <DetailSection title="Address Information" icon={<FaMapMarkerAlt style={{ color: '#6366f1' }} />}>
                         <DetailField label="Address Line" value={leadDetails.address_line} />
                         <DetailField label="Street" value={leadDetails.street} />
@@ -171,7 +229,6 @@ export function LeadDetails() {
                         <DetailField label="Country" value={leadDetails.country} />
                     </DetailSection>
 
-                    {/* Description */}
                     <DetailSection title="Description" icon={<FaFileAlt style={{ color: '#6366f1' }} />}>
                         {leadDetails.description ? (
                             <Box
@@ -193,10 +250,65 @@ export function LeadDetails() {
 
                 {/* Sidebar - 30% */}
                 <Box sx={{ flex: '0 0 30%' }}>
-                    <AttachmentsCard attachments={attachments} onFileUpload={handleFileUpload} />
-                    <NotesCard comments={comments} note={note} onNoteChange={setNote} onSendNote={handleSendNote} />
+                    <AttachmentsCard
+                        attachments={attachments}
+                        onFileUpload={handleFileUpload}
+                        onDeleteAttachment={handleDeleteAttachmentClick}
+                    />
+                    <NotesCard
+                        comments={comments}
+                        note={note}
+                        onNoteChange={setNote}
+                        onSendNote={handleSendNote}
+                        onDeleteNote={handleDeleteNoteClick}
+                    />
                 </Box>
             </Box>
+
+            {/* Delete Lead Modal */}
+            <IActionModal
+                open={deleteLeadModalOpen}
+                onClose={() => setDeleteLeadModalOpen(false)}
+                onConfirm={handleConfirmDeleteLead}
+                variant="error"
+                title="Delete Lead?"
+                message={`Are you sure you want to delete "${leadDetails?.first_name} ${leadDetails?.last_name}"? This action cannot be undone and will remove all associated data.`}
+                confirmText="Delete Lead"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
+
+            {/* Delete Attachment Modal */}
+            <IActionModal
+                open={deleteAttachmentModalOpen}
+                onClose={() => {
+                    setDeleteAttachmentModalOpen(false);
+                    setSelectedAttachmentId(null);
+                }}
+                onConfirm={handleConfirmDeleteAttachment}
+                variant="warning"
+                title="Delete Attachment?"
+                message="Are you sure you want to delete this attachment? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
+
+            {/* Delete Note Modal */}
+            <IActionModal
+                open={deleteNoteModalOpen}
+                onClose={() => {
+                    setDeleteNoteModalOpen(false);
+                    setSelectedCommentId(null);
+                }}
+                onConfirm={handleConfirmDeleteNote}
+                variant="warning"
+                title="Delete Note?"
+                message="Are you sure you want to delete this note? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
         </Box>
     );
 }

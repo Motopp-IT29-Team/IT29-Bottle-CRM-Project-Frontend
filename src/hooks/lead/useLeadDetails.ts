@@ -60,7 +60,7 @@ export function useLeadDetails(id: string | null): UseLeadDetailsResult {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchLeadDetails = async (id: string) => {
+    const fetchLeadDetails = async (id: string, showLoader = true) => {
         const Header = {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -68,7 +68,9 @@ export function useLeadDetails(id: string | null): UseLeadDetailsResult {
             org: localStorage.getItem('org'),
         };
 
-        setIsLoading(true);
+        if (showLoader) {
+            setIsLoading(true);
+        }
         setError(null);
 
         try {
@@ -85,19 +87,21 @@ export function useLeadDetails(id: string | null): UseLeadDetailsResult {
             setError(err.message || 'An unexpected error occurred');
             console.error('Failed to load lead details:', err);
         } finally {
-            setIsLoading(false);
+            if (showLoader) {
+                setIsLoading(false);
+            }
         }
     };
 
     const refresh = async () => {
         if (id) {
-            await fetchLeadDetails(id);
+            await fetchLeadDetails(id, false);
         }
     };
 
     useEffect(() => {
         if (id) {
-            void fetchLeadDetails(id);
+            void fetchLeadDetails(id, true);
         }
     }, [id]);
 

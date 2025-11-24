@@ -3,8 +3,10 @@ import { LeadUrl } from '../../services/ApiUrls';
 
 interface UseLeadActionsResult {
     deleteLead: (id: string) => Promise<boolean>;
-    addComment: (id: string, comment: string) => Promise<boolean>;
+    addComment: (id: string, comment: string) => Promise<{ success: boolean; data?: any }>;
+    deleteComment: (commentId: string) => Promise<boolean>;
     uploadAttachment: (id: string, file: File) => Promise<{ success: boolean; data?: any }>;
+    deleteAttachment: (attachmentId: string) => Promise<boolean>;
 }
 
 export function useLeadActions(): UseLeadActionsResult {
@@ -25,15 +27,18 @@ export function useLeadActions(): UseLeadActionsResult {
         }
     };
 
-    const addComment = async (id: string, comment: string): Promise<boolean> => {
+    const addComment = async (id: string, comment: string): Promise<{ success: boolean; data?: any }> => {
         const data = { comment };
 
         try {
             const response = await fetchData(`${LeadUrl}/${id}/`, 'POST', JSON.stringify(data), getHeaders());
-            return !response.error;
+            return {
+                success: !response.error,
+                data: response,
+            };
         } catch (error) {
             console.error('Failed to add comment:', error);
-            return false;
+            return { success: false };
         }
     };
 
@@ -43,25 +48,20 @@ export function useLeadActions(): UseLeadActionsResult {
             const org = localStorage.getItem('org');
 
             const headers: Record<string, string> = {};
-
             if (token) headers['Authorization'] = token;
             if (org) headers['org'] = org;
 
             const formData = new FormData();
             formData.append('lead_attachment', file);
 
-            console.log('Uploading file:', file.name);
-            console.log('FormData entries:');
-
             const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api/app/';
-            const response = await fetch(`${baseUrl}leads/${id}/`, {
+            const response = await fetch(`${baseUrl}leads/${id}/attachments/`, {
                 method: 'POST',
                 headers: headers,
                 body: formData,
             });
 
             const data = await response.json();
-            console.log('Upload response:', data);
 
             return {
                 success: response.ok && !data.error,
@@ -73,9 +73,65 @@ export function useLeadActions(): UseLeadActionsResult {
         }
     };
 
+    const deleteAttachment = async (attachmentId: string): Promise<boolean> => {
+        try {
+            const token = localStorage.getItem('Token');
+            const org = localStorage.getItem('org');
+
+            const headers: Record<string, string> = {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            };
+
+            if (token) headers['Authorization'] = token;
+            if (org) headers['org'] = org;
+
+            const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api/app/';
+            const response = await fetch(`${baseUrl}leads/attachments/${attachmentId}/`, {
+                method: 'DELETE',
+                headers: headers,
+            });
+
+            const data = await response.json();
+            return response.ok && !data.error;
+        } catch (error) {
+            console.error('Failed to delete attachment:', error);
+            return false;
+        }
+    };
+
+    const deleteComment = async (commentId: string): Promise<boolean> => {
+        try {
+            const token = localStorage.getItem('Token');
+            const org = localStorage.getItem('org');
+
+            const headers: Record<string, string> = {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            };
+
+            if (token) headers['Authorization'] = token;
+            if (org) headers['org'] = org;
+
+            const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api/app/';
+            const response = await fetch(`${baseUrl}leads/comment/${commentId}/`, {
+                method: 'DELETE',
+                headers: headers,
+            });
+
+            const data = await response.json();
+            return response.ok && !data.error;
+        } catch (error) {
+            console.error('Failed to delete comment:', error);
+            return false;
+        }
+    };
+
     return {
         deleteLead,
-        addComment,
         uploadAttachment,
+        deleteAttachment,
+        addComment,
+        deleteComment,
     };
 }

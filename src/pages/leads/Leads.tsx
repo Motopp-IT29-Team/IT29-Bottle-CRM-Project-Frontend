@@ -2,12 +2,10 @@ import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarGroup, Box, Button, Stack, Tabs, Typography, Link, MenuItem, Select } from '@mui/material';
 import { LeadUrl } from '../../services/ApiUrls';
-import { DeleteModal } from '../../components/DeleteModal';
 import { Label } from '../../components/Label';
 import { fetchData } from '../../components/FetchData';
 import { Spinner } from '../../components/Spinner';
 import FormateTime from '../../components/FormateTime';
-import { FaTrashAlt } from 'react-icons/fa';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiPlus } from '@react-icons/all-files/fi/FiPlus';
@@ -40,9 +38,7 @@ export function Leads() {
 
     // Leads data
     const [openLeads, setOpenLeads] = useState<Lead[]>([]);
-    const [openLeadsCount, setOpenLeadsCount] = useState(0);
     const [closedLeads, setClosedLeads] = useState<Lead[]>([]);
-    const [closedLeadsCount, setClosedLeadsCount] = useState(0);
 
     // Filter data
     const [contacts, setContacts] = useState([]);
@@ -66,10 +62,6 @@ export function Leads() {
     const [closedCurrentPage, setClosedCurrentPage] = useState(1);
     const [closedRecordsPerPage, setClosedRecordsPerPage] = useState(10);
     const [closedTotalPages, setClosedTotalPages] = useState(0);
-
-    // Delete modal
-    const [deleteLeadModal, setDeleteLeadModal] = useState(false);
-    const [selectedId, setSelectedId] = useState('');
 
     useEffect(() => {
         if (localStorage.getItem('org')) {
@@ -106,11 +98,9 @@ export function Leads() {
 
             if (!res.error) {
                 setOpenLeads(res?.open_leads?.open_leads || []);
-                setOpenLeadsCount(res?.open_leads?.leads_count || 0);
                 setOpenTotalPages(Math.ceil((res?.open_leads?.leads_count || 0) / openRecordsPerPage));
 
                 setClosedLeads(res?.close_leads?.close_leads || []);
-                setClosedLeadsCount(res?.close_leads?.leads_count || 0);
                 setClosedTotalPages(Math.ceil((res?.close_leads?.leads_count || 0) / closedRecordsPerPage));
 
                 setContacts(res?.contacts || []);
@@ -184,35 +174,6 @@ export function Leads() {
         navigate(`/app/leads/lead-details?id=${leadId}`);
     };
 
-    const deleteLead = (deleteId: string) => {
-        setDeleteLeadModal(true);
-        setSelectedId(deleteId);
-    };
-
-    const deleteLeadModalClose = () => {
-        setDeleteLeadModal(false);
-        setSelectedId('');
-    };
-
-    const deleteItem = async () => {
-        const Header = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
-        };
-
-        try {
-            const res = await fetchData(`${LeadUrl}/${selectedId}/`, 'DELETE', null as any, Header);
-            if (!res.error) {
-                deleteLeadModalClose();
-                getLeads();
-            }
-        } catch (error) {
-            console.error('Error deleting lead:', error);
-        }
-    };
-
     const recordsList = [10, 20, 30, 40, 50];
 
     const renderLead = (item: Lead, index: number) => (
@@ -229,14 +190,6 @@ export function Leads() {
                         onClick={() => selectLeadList(item.id)}
                     >
                         {item.title}
-                    </div>
-                    <div onClick={() => deleteLead(item.id)}>
-                        <FaTrashAlt
-                            style={{
-                                cursor: 'pointer',
-                                color: 'gray',
-                            }}
-                        />
                     </div>
                 </Stack>
 
@@ -394,15 +347,6 @@ export function Leads() {
                     <Typography sx={{ textAlign: 'center', mt: 4, color: 'gray' }}>No {tab} leads found</Typography>
                 )}
             </Box>
-
-            <DeleteModal
-                onClose={deleteLeadModalClose}
-                open={deleteLeadModal}
-                id={selectedId}
-                modalDialog="Are You Sure You want to delete selected Lead?"
-                modalTitle="Delete Lead"
-                onClick={deleteItem}
-            />
         </Box>
     );
 }

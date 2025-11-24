@@ -1,3 +1,4 @@
+export { IActionModal } from './IActionModal';
 export { IAutocomplete } from './IAutocomplete';
 export { IFileUpload } from './IFileUpload';
 export { ISelect } from './ISelect';
