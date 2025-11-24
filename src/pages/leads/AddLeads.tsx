@@ -19,12 +19,16 @@ import {
     Divider,
     Select,
     Button,
+    Snackbar,
+    Alert,
+    FormControlLabel,
+    Checkbox,
 } from '@mui/material';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
 import '../../styles/style.css';
 import { LeadUrl } from '../../services/ApiUrls';
-import { fetchData, Header } from '../../components/FetchData';
+import { fetchData, getHeader } from '../../components/FetchData';
 import { CustomAppBar } from '../../components/CustomAppBar';
 import {
     FaArrowDown,
@@ -80,6 +84,54 @@ import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 //   }
 // }
 
+// States mapping for countries (keyed by country code)
+const statesMapping: { [key: string]: string[] } = {
+    'nl': [
+        'Drenthe',
+        'Flevoland',
+        'Friesland',
+        'Gelderland',
+        'Groningen',
+        'Limburg',
+        'North Brabant',
+        'North Holland',
+        'Overijssel',
+        'South Holland',
+        'Utrecht',
+        'Zeeland',
+    ],
+    'netherlands': [
+        'Drenthe',
+        'Flevoland',
+        'Friesland',
+        'Gelderland',
+        'Groningen',
+        'Limburg',
+        'North Brabant',
+        'North Holland',
+        'Overijssel',
+        'South Holland',
+        'Utrecht',
+        'Zeeland',
+    ],
+};
+
+// Cities mapping for states (keyed by state name)
+const citiesMapping: { [key: string]: string[] } = {
+    'Drenthe': ['Assen', 'Emmen', 'Hoogeveen', 'Meppel', 'Coevorden'],
+    'Flevoland': ['Lelystad', 'Almere', 'Dronten', 'Urk', 'Emmeloord'],
+    'Friesland': ['Leeuwarden', 'Sneek', 'Heerenveen', 'Harlingen', 'Dokkum'],
+    'Gelderland': ['Arnhem', 'Nijmegen', 'Apeldoorn', 'Zutphen', 'Tiel'],
+    'Groningen': ['Groningen', 'Delfzijl', 'Winschoten', 'Stadskanaal', 'Appingedam'],
+    'Limburg': ['Maastricht', 'Heerlen', 'Roermond', 'Venlo', 'Sittard'],
+    'North Brabant': ['Breda', 'Eindhoven', 'Tilburg', 'Den Bosch', 'Oosterhout'],
+    'North Holland': ['Alkmaar', 'Amsterdam', 'Haarlem', 'Zaanstad', 'Purmerend'],
+    'Overijssel': ['Zwolle', 'Enschede', 'Almelo', 'Deventer', 'Hengelo'],
+    'South Holland': ['Rotterdam', 'The Hague', 'Leiden', 'Delft', 'Dordrecht'],
+    'Utrecht': ['Utrecht', 'Vianen', 'Woerden', 'Nieuwegein', 'Veenendaal'],
+    'Zeeland': ['Middelburg', 'Vlissingen', 'Terneuzen', 'Goes', 'Sluis'],
+};
+
 type FormErrors = {
     title?: string[];
     first_name?: string[];
@@ -108,6 +160,13 @@ type FormErrors = {
     industry?: string[];
     skype_ID?: string[];
     file?: string[];
+    salutation?: string[];
+    department?: string[];
+    preferred_language?: string[];
+    rating?: string[];
+    budget_range?: string[];
+    decision_timeframe?: string[];
+    do_not_call?: string[];
 };
 interface FormData {
     title: string;
@@ -137,6 +196,13 @@ interface FormData {
     industry: string;
     skype_ID: string;
     file: string | null;
+    salutation: string;
+    department: string;
+    preferred_language: string;
+    rating: string;
+    budget_range: string;
+    decision_timeframe: string;
+    do_not_call: boolean;
 }
 
 export function AddLeads() {
@@ -153,9 +219,15 @@ export function AddLeads() {
     const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
     const [sourceSelectOpen, setSourceSelectOpen] = useState(false);
     const [statusSelectOpen, setStatusSelectOpen] = useState(false);
+    const [salutationSelectOpen, setSalutationSelectOpen] = useState(false);
     const [countrySelectOpen, setCountrySelectOpen] = useState(false);
     const [industrySelectOpen, setIndustrySelectOpen] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success' as 'success' | 'error' | 'warning' | 'info',
+    });
     const [formData, setFormData] = useState<FormData>({
         title: '',
         first_name: '',
@@ -170,7 +242,7 @@ export function AddLeads() {
         teams: '',
         assigned_to: [],
         contacts: [],
-        status: 'assigned',
+        status: '',
         source: 'call',
         address_line: '',
         street: '',
@@ -184,6 +256,13 @@ export function AddLeads() {
         industry: 'ADVERTISING',
         skype_ID: '',
         file: null,
+        salutation: '',
+        department: 'sales',
+        preferred_language: 'english',
+        rating: 'warm',
+        budget_range: '',
+        decision_timeframe: '',
+        do_not_call: false,
     });
 
     useEffect(() => {
@@ -264,7 +343,8 @@ export function AddLeads() {
     };
     const submitForm = () => {
         // console.log('Form data:', formData.lead_attachment,'sfs', formData.file);
-        const data = {
+        
+        const data: any = {
             title: formData.title,
             first_name: formData.first_name,
             last_name: formData.last_name,
@@ -279,7 +359,6 @@ export function AddLeads() {
             teams: formData.teams,
             assigned_to: formData.assigned_to,
             contacts: formData.contacts,
-            status: formData.status,
             source: formData.source,
             address_line: formData.address_line,
             street: formData.street,
@@ -292,21 +371,51 @@ export function AddLeads() {
             probability: formData.probability,
             industry: formData.industry,
             skype_ID: formData.skype_ID,
+            salutation: formData.salutation,
+            department: formData.department,
+            preferred_language: formData.preferred_language,
+            rating: formData.rating,
+            budget_range: formData.budget_range,
+            decision_timeframe: formData.decision_timeframe,
+            do_not_call: formData.do_not_call,
         };
+        
+        // Only include status if it's selected
+        if (formData.status) {
+            data.status = formData.status.toLowerCase();
+        }
 
-        fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), Header)
+        fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), getHeader())
             .then((res: any) => {
                 // console.log('Form data:', res);
                 if (!res.error) {
+                    setNotification({
+                        open: true,
+                        message: 'Lead created successfully!',
+                        severity: 'success',
+                    });
                     resetForm();
-                    navigate('/app/leads');
+                    setTimeout(() => {
+                        navigate('/app/leads');
+                    }, 1500);
                 }
                 if (res.error) {
                     setError(true);
                     setErrors(res?.errors);
+                    setNotification({
+                        open: true,
+                        message: 'Error creating lead. Please check the form and try again.',
+                        severity: 'error',
+                    });
                 }
             })
-            .catch(() => {});
+            .catch((err) => {
+                setNotification({
+                    open: true,
+                    message: 'Failed to create lead. Network error.',
+                    severity: 'error',
+                });
+            });
     };
 
     const resetForm = () => {
@@ -324,7 +433,7 @@ export function AddLeads() {
             teams: '',
             assigned_to: [],
             contacts: [],
-            status: 'assigned',
+            status: '',
             source: 'call',
             address_line: '',
             street: '',
@@ -338,6 +447,13 @@ export function AddLeads() {
             industry: 'ADVERTISING',
             skype_ID: '',
             file: null,
+            salutation: '',
+            department: 'sales',
+            preferred_language: 'english',
+            rating: 'warm',
+            budget_range: '',
+            decision_timeframe: '',
+            do_not_call: false,
         });
         setErrors({});
         setSelectedContacts([]);
@@ -392,6 +508,11 @@ export function AddLeads() {
                                         noValidate
                                         autoComplete="off"
                                     >
+                                        {/* GROUP 1: Lead Basics */}
+                                        <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Lead Basics
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
                                         <div className="fieldContainer">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Lead Name</div>
@@ -407,25 +528,176 @@ export function AddLeads() {
                                                     error={!!errors?.account_name?.[0]}
                                                 />
                                             </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Amount</div>
-                                                <TextField
-                                                    type={'number'}
-                                                    name="opportunity_amount"
-                                                    value={formData.opportunity_amount}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={
-                                                        errors?.opportunity_amount?.[0]
-                                                            ? errors?.opportunity_amount[0]
-                                                            : ''
-                                                    }
-                                                    error={!!errors?.opportunity_amount?.[0]}
-                                                />
-                                            </div>
                                         </div>
                                         <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Status</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="status"
+                                                        value={formData.status}
+                                                        open={statusSelectOpen}
+                                                        onClick={() => setStatusSelectOpen(!statusSelectOpen)}
+                                                        IconComponent={() => (
+                                                            <div
+                                                                onClick={() => setStatusSelectOpen(!statusSelectOpen)}
+                                                                className="select-icon-background"
+                                                            >
+                                                                {statusSelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        className={'select'}
+                                                        onChange={handleChange}
+                                                        error={!!errors?.status?.[0]}
+                                                    >
+                                                        {state?.status?.length
+                                                            ? state?.status.map((option: any) => (
+                                                                  <MenuItem key={option[0]} value={option[1]}>
+                                                                      {option[1].charAt(0).toUpperCase() + option[1].slice(1).toLowerCase()}
+                                                                  </MenuItem>
+                                                              ))
+                                                            : ''}
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.status?.[0] ? errors?.status[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Lead Source</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="source"
+                                                        value={formData.source}
+                                                        open={sourceSelectOpen}
+                                                        onClick={() => setSourceSelectOpen(!sourceSelectOpen)}
+                                                        IconComponent={() => (
+                                                            <div
+                                                                onClick={() => setSourceSelectOpen(!sourceSelectOpen)}
+                                                                className="select-icon-background"
+                                                            >
+                                                                {sourceSelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        className={'select'}
+                                                        onChange={handleChange}
+                                                        error={!!errors?.source?.[0]}
+                                                    >
+                                                        {state?.source?.length
+                                                            ? state?.source.map((option: any) => (
+                                                                  <MenuItem key={option[0]} value={option[0]}>
+                                                                      {option[1]}
+                                                                  </MenuItem>
+                                                              ))
+                                                            : ''}
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.source?.[0] ? errors?.source[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Department</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="department"
+                                                        value={formData.department}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.department?.[0]}
+                                                    >
+                                                        <MenuItem value="sales">Sales</MenuItem>
+                                                        <MenuItem value="marketing">Marketing</MenuItem>
+                                                        <MenuItem value="support">Support</MenuItem>
+                                                        <MenuItem value="finance">Finance</MenuItem>
+                                                        <MenuItem value="operations">Operations</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.department?.[0] ? errors?.department[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Rating</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="rating"
+                                                        value={formData.rating}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.rating?.[0]}
+                                                    >
+                                                        <MenuItem value="hot">Hot</MenuItem>
+                                                        <MenuItem value="warm">Warm</MenuItem>
+                                                        <MenuItem value="cold">Cold</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.rating?.[0] ? errors?.rating[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+
+                                        {/* GROUP 2: Company & Industry */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Company & Industry
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Industry</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="industry"
+                                                        value={formData.industry}
+                                                        open={industrySelectOpen}
+                                                        onClick={() => setIndustrySelectOpen(!industrySelectOpen)}
+                                                        IconComponent={() => (
+                                                            <div
+                                                                onClick={() =>
+                                                                    setIndustrySelectOpen(!industrySelectOpen)
+                                                                }
+                                                                className="select-icon-background"
+                                                            >
+                                                                {industrySelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        className={'select'}
+                                                        onChange={handleChange}
+                                                        error={!!errors?.industry?.[0]}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                style: {
+                                                                    height: '200px',
+                                                                },
+                                                            },
+                                                        }}
+                                                    >
+                                                        {state?.industries?.length
+                                                            ? state?.industries.map((option: any) => (
+                                                                  <MenuItem key={option[0]} value={option[1]}>
+                                                                      {option[1]}
+                                                                  </MenuItem>
+                                                              ))
+                                                            : ''}
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.industry?.[0] ? errors?.industry[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Website</div>
                                                 <TextField
@@ -438,6 +710,14 @@ export function AddLeads() {
                                                     error={!!errors?.website?.[0]}
                                                 />
                                             </div>
+                                        </div>
+
+                                        {/* GROUP 3: Relationships & Assignment */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Relationships & Assignment
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Contact Name</div>
                                                 <FormControl error={!!errors?.contacts?.[0]} sx={{ width: '70%' }}>
@@ -512,8 +792,6 @@ export function AddLeads() {
                                                     <FormHelperText>{errors?.contacts?.[0] || ''}</FormHelperText>
                                                 </FormControl>
                                             </div>
-                                        </div>
-                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Assign To</div>
                                                 <FormControl error={!!errors?.assigned_to?.[0]} sx={{ width: '70%' }}>
@@ -581,112 +859,119 @@ export function AddLeads() {
                                                     <FormHelperText>{errors?.assigned_to?.[0] || ''}</FormHelperText>
                                                 </FormControl>
                                             </div>
+                                        </div>
+
+                                        {/* GROUP 4: Financial & Timeline */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Financial & Timeline
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Industry</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="industry"
-                                                        value={formData.industry}
-                                                        open={industrySelectOpen}
-                                                        onClick={() => setIndustrySelectOpen(!industrySelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() =>
-                                                                    setIndustrySelectOpen(!industrySelectOpen)
-                                                                }
-                                                                className="select-icon-background"
-                                                            >
-                                                                {industrySelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
-                                                        onChange={handleChange}
-                                                        error={!!errors?.industry?.[0]}
-                                                        MenuProps={{
-                                                            PaperProps: {
-                                                                style: {
-                                                                    height: '200px',
-                                                                },
-                                                            },
-                                                        }}
-                                                    >
-                                                        {state?.industries?.length
-                                                            ? state?.industries.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[1]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
-                                                    </Select>
-                                                    <FormHelperText>
-                                                        {errors?.industry?.[0] ? errors?.industry[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                                {/* <CustomSelectField
-                          name='industry'
-                          select
-                          value={formData.industry}
-                          InputProps={{
-                            style: {
-                              height: '40px',
-                              maxHeight: '40px'
-                            }
-                          }}
-                          onChange={handleChange}
-                          sx={{ width: '70%' }}
-                          helperText={errors?.industry?.[0] ? errors?.industry[0] : ''}
-                          error={!!errors?.industry?.[0]}
-                        >
-                          {state?.industries?.length && state?.industries.map((option: any) => (
-                            <MenuItem key={option[0]} value={option[1]}>
-                              {option[1]}
-                            </MenuItem>
-                          ))}
-                        </CustomSelectField> */}
+                                                <div className="fieldTitle">Amount</div>
+                                                <TextField
+                                                    type={'number'}
+                                                    name="opportunity_amount"
+                                                    value={formData.opportunity_amount}
+                                                    onChange={handleChange}
+                                                    style={{ width: '70%' }}
+                                                    size="small"
+                                                    helperText={
+                                                        errors?.opportunity_amount?.[0]
+                                                            ? errors?.opportunity_amount[0]
+                                                            : ''
+                                                    }
+                                                    error={!!errors?.opportunity_amount?.[0]}
+                                                />
+                                            </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Probability</div>
+                                                <TextField
+                                                    name="probability"
+                                                    value={formData.probability}
+                                                    onChange={handleChange}
+                                                    InputProps={{
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <IconButton
+                                                                    disableFocusRipple
+                                                                    disableTouchRipple
+                                                                    sx={{
+                                                                        backgroundColor: '#d3d3d34a',
+                                                                        width: '45px',
+                                                                        borderRadius: '0px',
+                                                                        mr: '-12px',
+                                                                    }}
+                                                                >
+                                                                    <FaPercent
+                                                                        style={{
+                                                                            width: '12px',
+                                                                        }}
+                                                                    />
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                    style={{ width: '70%' }}
+                                                    size="small"
+                                                    helperText={errors?.probability?.[0] ? errors?.probability[0] : ''}
+                                                    error={!!errors?.probability?.[0]}
+                                                />
                                             </div>
                                         </div>
                                         <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Status</div>
+                                                <div className="fieldTitle">Budget Range</div>
                                                 <FormControl sx={{ width: '70%' }}>
                                                     <Select
-                                                        name="status"
-                                                        value={formData.status}
-                                                        open={statusSelectOpen}
-                                                        onClick={() => setStatusSelectOpen(!statusSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setStatusSelectOpen(!statusSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {statusSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
+                                                        name="budget_range"
+                                                        value={formData.budget_range}
                                                         onChange={handleChange}
-                                                        error={!!errors?.status?.[0]}
+                                                        className={'select'}
+                                                        error={!!errors?.budget_range?.[0]}
                                                     >
-                                                        {state?.status?.length
-                                                            ? state?.status.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[1]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
+                                                        <MenuItem value="">-- Select Budget Range --</MenuItem>
+                                                        <MenuItem value="less_than_5000">Less than €5,000</MenuItem>
+                                                        <MenuItem value="5000_to_10000">€5,000–€10,000</MenuItem>
+                                                        <MenuItem value="10000_to_25000">€10,000–€25,000</MenuItem>
+                                                        <MenuItem value="over_25000">Over €25,000</MenuItem>
                                                     </Select>
                                                     <FormHelperText>
-                                                        {errors?.status?.[0] ? errors?.status[0] : ''}
+                                                        {errors?.budget_range?.[0] ? errors?.budget_range[0] : ''}
                                                     </FormHelperText>
                                                 </FormControl>
                                             </div>
+                                        </div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Decision Timeframe</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="decision_timeframe"
+                                                        value={formData.decision_timeframe}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.decision_timeframe?.[0]}
+                                                    >
+                                                        <MenuItem value="">-- Select Decision Timeframe --</MenuItem>
+                                                        <MenuItem value="within_1_week">Within 1 week</MenuItem>
+                                                        <MenuItem value="within_1_month">Within 1 month</MenuItem>
+                                                        <MenuItem value="within_3_months">Within 3 months</MenuItem>
+                                                        <MenuItem value="more_than_3_months">More than 3 months</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.decision_timeframe?.[0] ? errors?.decision_timeframe[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+
+                                        {/* GROUP 5: Additional Information */}
+                                        <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600, color: '#1A3353' }}>
+                                            Additional Information
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">SkypeID</div>
                                                 <TextField
@@ -698,45 +983,6 @@ export function AddLeads() {
                                                     helperText={errors?.skype_ID?.[0] ? errors?.skype_ID[0] : ''}
                                                     error={!!errors?.skype_ID?.[0]}
                                                 />
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Lead Source</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="source"
-                                                        value={formData.source}
-                                                        open={sourceSelectOpen}
-                                                        onClick={() => setSourceSelectOpen(!sourceSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setSourceSelectOpen(!sourceSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {sourceSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
-                                                        onChange={handleChange}
-                                                        error={!!errors?.source?.[0]}
-                                                    >
-                                                        {state?.source?.length
-                                                            ? state?.source.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[0]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
-                                                    </Select>
-                                                    <FormHelperText>
-                                                        {errors?.source?.[0] ? errors?.source[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
                                             </div>
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Lead Attachment</div>
@@ -857,40 +1103,6 @@ export function AddLeads() {
                                                     <FormHelperText>{errors?.tags?.[0] || ''}</FormHelperText>
                                                 </FormControl>
                                             </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Probability</div>
-                                                <TextField
-                                                    name="probability"
-                                                    value={formData.probability}
-                                                    onChange={handleChange}
-                                                    InputProps={{
-                                                        endAdornment: (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    disableFocusRipple
-                                                                    disableTouchRipple
-                                                                    sx={{
-                                                                        backgroundColor: '#d3d3d34a',
-                                                                        width: '45px',
-                                                                        borderRadius: '0px',
-                                                                        mr: '-12px',
-                                                                    }}
-                                                                >
-                                                                    <FaPercent
-                                                                        style={{
-                                                                            width: '12px',
-                                                                        }}
-                                                                    />
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.probability?.[0] ? errors?.probability[0] : ''}
-                                                    error={!!errors?.probability?.[0]}
-                                                />
-                                            </div>
                                         </div>
                                         {/* <div className='fieldContainer2'>
                       <div className='fieldSubContainer'>
@@ -970,6 +1182,41 @@ export function AddLeads() {
                                     >
                                         <div className="fieldContainer">
                                             <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Salutation</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="salutation"
+                                                        value={formData.salutation}
+                                                        open={salutationSelectOpen}
+                                                        onClick={() => setSalutationSelectOpen(!salutationSelectOpen)}
+                                                        IconComponent={() => (
+                                                            <div
+                                                                onClick={() => setSalutationSelectOpen(!salutationSelectOpen)}
+                                                                className="select-icon-background"
+                                                            >
+                                                                {salutationSelectOpen ? (
+                                                                    <FiChevronUp className="select-icon" />
+                                                                ) : (
+                                                                    <FiChevronDown className="select-icon" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        className={'select'}
+                                                        onChange={handleChange}
+                                                        error={!!errors?.salutation?.[0]}
+                                                    >
+                                                        <MenuItem value="mr">Mr</MenuItem>
+                                                        <MenuItem value="ms">Ms</MenuItem>
+                                                        <MenuItem value="mrs">Mrs</MenuItem>
+                                                        <MenuItem value="dr">Dr</MenuItem>
+                                                        <MenuItem value="prof">Prof</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.salutation?.[0] ? errors?.salutation[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                            <div className="fieldSubContainer">
                                                 <div className="fieldTitle">First Name</div>
                                                 <RequiredTextField
                                                     name="first_name"
@@ -983,6 +1230,30 @@ export function AddLeads() {
                                                 />
                                             </div>
                                             <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Preferred Language</div>
+                                                <FormControl sx={{ width: '70%' }}>
+                                                    <Select
+                                                        name="preferred_language"
+                                                        value={formData.preferred_language}
+                                                        onChange={handleChange}
+                                                        className={'select'}
+                                                        error={!!errors?.preferred_language?.[0]}
+                                                    >
+                                                        <MenuItem value="english">English</MenuItem>
+                                                        <MenuItem value="dutch">Dutch</MenuItem>
+                                                        <MenuItem value="arabic">Arabic</MenuItem>
+                                                        <MenuItem value="german">German</MenuItem>
+                                                        <MenuItem value="french">French</MenuItem>
+                                                        <MenuItem value="spanish">Spanish</MenuItem>
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        {errors?.preferred_language?.[0] ? errors?.preferred_language[0] : ''}
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Last Name</div>
                                                 <RequiredTextField
                                                     name="last_name"
@@ -995,8 +1266,6 @@ export function AddLeads() {
                                                     error={!!errors?.last_name?.[0]}
                                                 />
                                             </div>
-                                        </div>
-                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Job Title</div>
                                                 <RequiredTextField
@@ -1009,6 +1278,8 @@ export function AddLeads() {
                                                     error={!!errors?.title?.[0]}
                                                 />
                                             </div>
+                                        </div>
+                                        <div className="fieldContainer2">
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">Phone Number</div>
                                                 <Tooltip title="Number must starts with +91">
@@ -1023,27 +1294,34 @@ export function AddLeads() {
                                                     />
                                                 </Tooltip>
                                             </div>
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Email Address</div>
+                                                <TextField
+                                                    name="email"
+                                                    type="email"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    style={{ width: '70%' }}
+                                                    size="small"
+                                                    helperText={errors?.email?.[0] ? errors?.email[0] : ''}
+                                                    error={!!errors?.email?.[0]}
+                                                />
+                                            </div>
                                         </div>
-                                        <div
-                                            className="fieldSubContainer"
-                                            style={{
-                                                marginLeft: '5%',
-                                                marginTop: '19px',
-                                            }}
-                                        >
-                                            <div className="fieldTitle">Email Address</div>
-                                            {/* <div style={{ width: '40%', display: 'flex', flexDirection: 'row', marginTop: '19px', marginLeft: '6.6%' }}>
-                      <div style={{ marginRight: '10px', fontSize: '13px', width: '22%', textAlign: 'right', fontWeight: 'bold' }}>Email Address</div> */}
-                                            <TextField
-                                                name="email"
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                style={{ width: '70%' }}
-                                                size="small"
-                                                helperText={errors?.email?.[0] ? errors?.email[0] : ''}
-                                                error={!!errors?.email?.[0]}
-                                            />
+                                        <div className="fieldContainer2">
+                                            <div className="fieldSubContainer">
+                                                <div className="fieldTitle">Do Not Call</div>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            name="do_not_call"
+                                                            checked={formData.do_not_call}
+                                                            onChange={handleChange}
+                                                        />
+                                                    }
+                                                    label={formData.do_not_call ? 'Yes' : 'No'}
+                                                />
+                                            </div>
                                         </div>
                                     </Box>
                                 </AccordionDetails>
@@ -1096,15 +1374,38 @@ export function AddLeads() {
                                             </div>
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">City</div>
-                                                <TextField
-                                                    name="city"
-                                                    value={formData.city}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.city?.[0] ? errors?.city[0] : ''}
-                                                    error={!!errors?.city?.[0]}
-                                                />
+                                                {formData.state && citiesMapping[formData.state] ? (
+                                                    <FormControl sx={{ width: '70%' }}>
+                                                        <Select
+                                                            name="city"
+                                                            value={formData.city}
+                                                            onChange={handleChange}
+                                                            className={'select'}
+                                                            error={!!errors?.city?.[0]}
+                                                        >
+                                                            <MenuItem value="">-- Select City --</MenuItem>
+                                                            {(citiesMapping[formData.state] || []).map((city) => (
+                                                                <MenuItem key={city} value={city}>
+                                                                    {city}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                        <FormHelperText>
+                                                            {errors?.city?.[0] ? errors?.city[0] : ''}
+                                                        </FormHelperText>
+                                                    </FormControl>
+                                                ) : (
+                                                    <TextField
+                                                        name="city"
+                                                        value={formData.city}
+                                                        onChange={handleChange}
+                                                        placeholder="Select state first or enter city"
+                                                        style={{ width: '70%' }}
+                                                        size="small"
+                                                        helperText={errors?.city?.[0] ? errors?.city[0] : ''}
+                                                        error={!!errors?.city?.[0]}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                         <div className="fieldContainer2">
@@ -1122,15 +1423,38 @@ export function AddLeads() {
                                             </div>
                                             <div className="fieldSubContainer">
                                                 <div className="fieldTitle">State</div>
-                                                <TextField
-                                                    name="state"
-                                                    value={formData.state}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.state?.[0] ? errors?.state[0] : ''}
-                                                    error={!!errors?.state?.[0]}
-                                                />
+                                                {formData.country && statesMapping[formData.country.toLowerCase()] ? (
+                                                    <FormControl sx={{ width: '70%' }}>
+                                                        <Select
+                                                            name="state"
+                                                            value={formData.state}
+                                                            onChange={handleChange}
+                                                            className={'select'}
+                                                            error={!!errors?.state?.[0]}
+                                                        >
+                                                            <MenuItem value="">-- Select State/Province --</MenuItem>
+                                                            {(statesMapping[formData.country.toLowerCase()] || []).map((state) => (
+                                                                <MenuItem key={state} value={state}>
+                                                                    {state}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                        <FormHelperText>
+                                                            {errors?.state?.[0] ? errors?.state[0] : ''}
+                                                        </FormHelperText>
+                                                    </FormControl>
+                                                ) : (
+                                                    <TextField
+                                                        name="state"
+                                                        value={formData.state}
+                                                        onChange={handleChange}
+                                                        placeholder="Select country first or enter state"
+                                                        style={{ width: '70%' }}
+                                                        size="small"
+                                                        helperText={errors?.state?.[0] ? errors?.state[0] : ''}
+                                                        error={!!errors?.state?.[0]}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                         <div className="fieldContainer2">
@@ -1178,11 +1502,21 @@ export function AddLeads() {
                                                         error={!!errors?.country?.[0]}
                                                     >
                                                         {state?.countries?.length
-                                                            ? state?.countries.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[0]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
+                                                            ? (() => {
+                                                                const countries = [...state.countries];
+                                                                const netherlandsIndex = countries.findIndex(
+                                                                    (c: any) => c[0].toLowerCase() === 'netherlands' || c[1].toLowerCase() === 'netherlands'
+                                                                );
+                                                                if (netherlandsIndex > -1) {
+                                                                    const [netherlands] = countries.splice(netherlandsIndex, 1);
+                                                                    countries.unshift(netherlands);
+                                                                }
+                                                                return countries.map((option: any) => (
+                                                                    <MenuItem key={option[0]} value={option[0]}>
+                                                                        {option[1]}
+                                                                    </MenuItem>
+                                                                ));
+                                                            })()
                                                             : ''}
                                                     </Select>
                                                     <FormHelperText>
@@ -1327,6 +1661,20 @@ export function AddLeads() {
                     </div>
                 </form>
             </Box>
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={4000}
+                onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setNotification({ ...notification, open: false })}
+                    severity={notification.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
