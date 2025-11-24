@@ -6,6 +6,8 @@ import { Spinner } from '../Spinner';
 
 interface User {
     id: string;
+    first_name: string;
+    last_name: string;
     user_details: { email: string };
     role: string;
 }
@@ -18,6 +20,7 @@ interface UsersTableProps {
 }
 
 const headCells = [
+    { id: 'name', numeric: false, disablePadding: false, label: 'Full Name' },
     { id: 'email', numeric: false, disablePadding: false, label: 'Email Address' },
     { id: 'role', numeric: false, disablePadding: false, label: 'Role' },
 ];
@@ -27,7 +30,10 @@ const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {
         let aValue: any;
         let bValue: any;
 
-        if (orderBy === 'email') {
+        if (orderBy === 'name') {
+            aValue = `${a.first_name} ${a.last_name}`.toLowerCase().trim();
+            bValue = `${b.first_name} ${b.last_name}`.toLowerCase().trim();
+        } else if (orderBy === 'email') {
             aValue = a.user_details?.email?.toLowerCase() || '';
             bValue = b.user_details?.email?.toLowerCase() || '';
         } else if (orderBy === 'role') {
@@ -47,7 +53,7 @@ const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {
 
 export const UsersTable: React.FC<UsersTableProps> = ({ users, loading, tab, onViewDetail }) => {
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-    const [orderBy, setOrderBy] = useState('email');
+    const [orderBy, setOrderBy] = useState('name');
 
     const handleRequestSort = (event: any, property: string) => {
         const isAsc = orderBy === property && order === 'asc';

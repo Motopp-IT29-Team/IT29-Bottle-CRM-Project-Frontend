@@ -2,6 +2,8 @@ import { useState, ChangeEvent } from 'react';
 
 export interface UserFormData {
     email: string;
+    first_name: string;
+    last_name: string;
     role: string;
     address_line: string;
     street: string;

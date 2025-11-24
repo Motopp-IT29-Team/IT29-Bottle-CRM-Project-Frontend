@@ -121,6 +121,10 @@ export const USERS_TEXT_FIELD_STYLES: SxProps<Theme> = {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
         },
     },
+    '& .MuiFormHelperText-root': {
+        marginLeft: '2px',
+        fontSize: '13px',
+    },
 };
 
 export const USERS_SELECT_STYLES: SxProps<Theme> = {

@@ -3,13 +3,15 @@ import { fetchData } from '../../components/FetchData';
 import { UserUrl } from '../../services/ApiUrls';
 
 interface FormData {
+    first_name: string;
+    last_name: string;
     email: string;
     role: string;
     address_line: string;
     street: string;
     city: string;
     state: string;
-    pincode: string;
+    postcode: string;
     country: string;
 }
 
@@ -37,13 +39,15 @@ export const useEditUser = () => {
                 return {
                     success: true,
                     data: {
+                        first_name: data?.first_name || '',
+                        last_name: data?.last_name || '',
                         email: data?.user_details?.email || '',
                         role: data?.role || 'ADMIN',
                         address_line: data?.address?.address_line || '',
                         street: data?.address?.street || '',
                         city: data?.address?.city || '',
                         state: data?.address?.state || '',
-                        pincode: data?.address?.postcode || '',
+                        postcode: data?.address?.postcode || '',
                         country: data?.address?.country || '',
                         is_active: data?.user_details?.is_active ?? true,
                     },
@@ -76,7 +80,6 @@ export const useEditUser = () => {
                     ...res?.errors?.address_errors,
                 };
 
-                // Форматуємо помилки
                 const errorMessages: string[] = [];
                 Object.keys(allErrors).forEach((key) => {
                     if (Array.isArray(allErrors[key])) {

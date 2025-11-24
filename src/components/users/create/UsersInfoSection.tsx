@@ -31,9 +31,11 @@ import {
 
 interface UsersInfoSectionProps {
     email: string;
+    first_name: string;
+    last_name: string;
     role: string;
     onChange: (e: any) => void;
-    errors: { email?: string; role?: string };
+    errors: Record<string, string | string[]>;
     disabled?: boolean;
 }
 
@@ -44,6 +46,8 @@ export const USERS_ROLES = [
 
 export const UsersInfoSection: React.FC<UsersInfoSectionProps> = ({
     email,
+    first_name,
+    last_name,
     role,
     onChange,
     errors,
@@ -65,6 +69,45 @@ export const UsersInfoSection: React.FC<UsersInfoSectionProps> = ({
 
                 <AccordionDetails sx={{ p: 0 }}>
                     <Box sx={USERS_FIELD_CONTAINER_STYLES}>
+                        {/* First Name */}
+                        <Box sx={USERS_FIELD_BOX_STYLES}>
+                            <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                                First Name <span style={USERS_REQUIRED_ASTERISK_STYLES}>*</span>
+                            </Typography>
+                            <RequiredTextField
+                                required
+                                name="first_name"
+                                value={first_name}
+                                onChange={onChange}
+                                placeholder="Enter first name"
+                                size="small"
+                                error={!!errors.first_name}
+                                helperText={errors.first_name}
+                                disabled={disabled}
+                                sx={USERS_TEXT_FIELD_STYLES}
+                            />
+                        </Box>
+
+                        {/* Last Name */}
+                        <Box sx={USERS_FIELD_BOX_STYLES}>
+                            <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                                Last Name <span style={USERS_REQUIRED_ASTERISK_STYLES}>*</span>
+                            </Typography>
+                            <RequiredTextField
+                                required
+                                name="last_name"
+                                value={last_name}
+                                onChange={onChange}
+                                placeholder="Enter last name"
+                                size="small"
+                                error={!!errors.last_name}
+                                helperText={errors.last_name}
+                                disabled={disabled}
+                                sx={USERS_TEXT_FIELD_STYLES}
+                            />
+                        </Box>
+
+                        {/* Email Address */}
                         <Box sx={USERS_FIELD_BOX_STYLES}>
                             <Typography sx={USERS_FIELD_LABEL_STYLES}>
                                 Email Address <span style={USERS_REQUIRED_ASTERISK_STYLES}>*</span>
@@ -84,6 +127,7 @@ export const UsersInfoSection: React.FC<UsersInfoSectionProps> = ({
                             />
                         </Box>
 
+                        {/* Role */}
                         <Box sx={USERS_FIELD_BOX_STYLES}>
                             <Typography sx={USERS_FIELD_LABEL_STYLES}>Role</Typography>
                             <FormControl fullWidth size="small">
