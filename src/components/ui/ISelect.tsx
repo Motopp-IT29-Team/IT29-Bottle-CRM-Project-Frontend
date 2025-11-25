@@ -53,12 +53,12 @@ export const ISelect: React.FC<Props> = ({
                     }}
                 >
                     {placeholder && (
-                        <MenuItem value="" disabled>
+                        <MenuItem value="" disabled key="placeholder">
                             <em>{placeholder}</em>
                         </MenuItem>
                     )}
-                    {options.map((option) => (
-                        <MenuItem key={option.value} value={option.value} sx={MENU_ITEM_STYLES}>
+                    {options.map((option, index) => (
+                        <MenuItem key={option.value ?? `option-${index}`} value={option.value} sx={MENU_ITEM_STYLES}>
                             {renderBadge ? renderBadge(option) : option.label}
                         </MenuItem>
                     ))}

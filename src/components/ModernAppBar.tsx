@@ -112,6 +112,7 @@ export function ModernAppBar({ module, crntPage, actions = [] }: ModernAppBarPro
         return (
             <Button
                 key={index}
+                type="button"
                 size="small"
                 onClick={action.onClick}
                 disabled={action.disabled || action.loading}

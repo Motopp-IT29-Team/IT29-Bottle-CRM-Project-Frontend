@@ -26,3 +26,9 @@ export const REQUIRED_ASTERISK_STYLES: CSSProperties = {
     color: '#ef4444',
     marginLeft: '2px',
 };
+
+export const FIELD_CONTAINER_STYLES: SxProps<Theme> = {
+    display: 'grid',
+    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+    gap: 3,
+};

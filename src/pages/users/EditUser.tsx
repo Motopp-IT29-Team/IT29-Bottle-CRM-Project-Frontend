@@ -2,32 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
-import { EditUserInfoSection } from '../../components/users/edit/EditUserInfoSection';
-import { EditUserAddressSection } from '../../components/users/edit/EditUserAddressSection';
-import { useEditUser } from '../../hooks/user/useEditUser';
 import { useNotification } from '../../context/NotificationContext';
 import { fetchData } from '../../components/FetchData';
 import { ProfileUrl } from '../../services/ApiUrls';
-
-interface FormErrors {
-    email?: string[];
-    first_name?: string[];
-    last_name?: string[];
-    password?: string[];
-    role?: string[];
-    address_line?: string[];
-    street?: string[];
-    city?: string[];
-    state?: string[];
-    postcode?: string[];
-    country?: string[];
-}
+import { FormErrors, IForm } from '../../components/ui/form';
+import { getEditUserFormConfig } from '../../configs/users/editUserFormConfig';
+import { useUserApi } from '../../hooks/users/useUserApi';
 
 interface FormData {
     email: string;
     first_name: string;
     last_name: string;
     role: string;
+    password: string;
+    is_active: boolean;
     address_line: string;
     street: string;
     city: string;
@@ -41,20 +29,19 @@ export function EditUser() {
     const userId = searchParams.get('id');
     const navigate = useNavigate();
     const { addNotification } = useNotification();
-    const { getUserData, updateUser, toggleUserStatus, isSubmitting } = useEditUser();
+    const { getUser, updateUser, isLoading: isSubmitting } = useUserApi();
 
     const [loading, setLoading] = useState(true);
-    const [isTogglingStatus, setIsTogglingStatus] = useState(false);
     const [error, setError] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
-    const [password, setPassword] = useState('');
-    const [isActive, setIsActive] = useState(true);
     const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
     const [formData, setFormData] = useState<FormData>({
         email: '',
         first_name: '',
         last_name: '',
         role: 'ADMIN',
+        password: '',
+        is_active: true,
         address_line: '',
         street: '',
         city: '',
@@ -72,16 +59,14 @@ export function EditUser() {
         }
     }, [userId, navigate]);
 
-    const getAuthHeaders = () => ({
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Token'),
-        org: localStorage.getItem('org'),
-    });
-
     const fetchCurrentUser = async () => {
         try {
-            const res = await fetchData(`${ProfileUrl}/`, 'GET', null as any, getAuthHeaders());
+            const res = await fetchData(`${ProfileUrl}/`, 'GET', null as any, {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('Token'),
+                org: localStorage.getItem('org'),
+            });
             if (res?.user_obj?.user_details?.email) {
                 setCurrentUserEmail(res.user_obj.user_details.email);
             }
@@ -94,24 +79,29 @@ export function EditUser() {
         if (!userId) return;
 
         setLoading(true);
-        const result = await getUserData(userId);
+        const result = await getUser(userId);
 
         if (result.success && result.data) {
+            const data = result.data;
             setFormData({
-                email: result.data.email,
-                first_name: result.data.first_name || '',
-                last_name: result.data.last_name || '',
-                role: result.data.role,
-                address_line: result.data.address_line,
-                street: result.data.street,
-                city: result.data.city,
-                state: result.data.state,
-                postcode: result.data.postcode,
-                country: result.data.country,
+                email: data.user_details.email,
+                first_name: data.first_name,
+                last_name: data.last_name,
+                role: data.role,
+                password: '',
+                is_active: data.is_active,
+                address_line: data.address.address_line,
+                street: data.address.street,
+                city: data.address.city,
+                state: data.address.state,
+                postcode: data.address.postcode,
+                country: data.address.country,
             });
-            setIsActive(result.data.is_active);
         } else {
             setError(true);
+            if (result.error) {
+                addNotification('error', 'Failed to load user', result.error);
+            }
         }
         setLoading(false);
     };
@@ -120,7 +110,7 @@ export function EditUser() {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
 
-        if (formErrors[name as keyof FormErrors]) {
+        if (formErrors[name]) {
             setFormErrors({ ...formErrors, [name]: undefined });
         }
     };
@@ -132,7 +122,10 @@ export function EditUser() {
     const handleSubmit = async () => {
         if (!userId) return;
 
-        const result = await updateUser(userId, formData, password);
+        const { password, ...dataToSend } = formData;
+        const dataWithPassword = password ? { ...formData, password: password.trim() } : dataToSend;
+
+        const result = await updateUser(userId, dataWithPassword);
 
         if (result.success) {
             addNotification('success', 'User updated successfully');
@@ -141,32 +134,10 @@ export function EditUser() {
             if (result.fieldErrors) {
                 setFormErrors(result.fieldErrors);
             }
-            addNotification('error', 'Failed to update user', result.error);
+            if (result.error) {
+                addNotification('error', 'Failed to update user', result.error);
+            }
         }
-    };
-
-    const handleToggleStatus = async () => {
-        if (!userId) return;
-
-        if (formData.email === currentUserEmail) {
-            addNotification('warning', 'Cannot deactivate your own account', 'You cannot deactivate yourself');
-            return;
-        }
-
-        setIsTogglingStatus(true);
-        const result = await toggleUserStatus(userId, isActive);
-
-        if (result.success) {
-            setIsActive(!isActive);
-            addNotification(
-                'success',
-                `User ${isActive ? 'deactivated' : 'activated'} successfully`,
-                `The user has been ${isActive ? 'deactivated' : 'activated'}`
-            );
-        } else {
-            addNotification('error', 'Failed to change user status', result.error);
-        }
-        setIsTogglingStatus(false);
     };
 
     const handleCancel = () => {
@@ -207,8 +178,8 @@ export function EditUser() {
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },
-        { type: 'cancel', onClick: handleCancel, disabled: isSubmitting || isTogglingStatus },
-        { type: 'save', onClick: handleSubmit, loading: isSubmitting, disabled: isTogglingStatus },
+        { type: 'cancel', onClick: handleCancel, disabled: isSubmitting },
+        { type: 'save', onClick: handleSubmit, loading: isSubmitting },
     ];
 
     return (
@@ -216,47 +187,12 @@ export function EditUser() {
             <ModernAppBar module="Users" crntPage="Edit User" actions={actions} />
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
-                <EditUserInfoSection
-                    formData={{
-                        email: formData.email,
-                        first_name: formData.first_name,
-                        last_name: formData.last_name,
-                        role: formData.role,
-                    }}
-                    password={password}
-                    isActive={isActive}
-                    isTogglingStatus={isTogglingStatus}
-                    isCurrentUser={isCurrentUser}
+                <IForm
+                    config={getEditUserFormConfig(isCurrentUser)}
+                    formData={formData}
+                    errors={formErrors}
                     onChange={handleChange}
-                    onPasswordChange={setPassword}
-                    onToggleStatus={handleToggleStatus}
-                    errors={{
-                        email: formErrors.email,
-                        first_name: formErrors.first_name,
-                        last_name: formErrors.last_name,
-                        role: formErrors.role,
-                        password: formErrors.password,
-                    }}
-                />
-
-                <EditUserAddressSection
-                    formData={{
-                        address_line: formData.address_line,
-                        street: formData.street,
-                        city: formData.city,
-                        state: formData.state,
-                        postcode: formData.postcode,
-                        country: formData.country,
-                    }}
-                    onChange={handleChange}
-                    errors={{
-                        address_line: formErrors.address_line,
-                        street: formErrors.street,
-                        city: formErrors.city,
-                        state: formErrors.state,
-                        postcode: formErrors.postcode,
-                        country: formErrors.country,
-                    }}
+                    disabled={isSubmitting}
                 />
             </Box>
         </Box>

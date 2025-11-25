@@ -95,8 +95,11 @@ export const INITIAL_LEAD_FORM_DATA: LeadFormData = {
 export function useLeadFormData(initialData: LeadFormData = INITIAL_LEAD_FORM_DATA) {
     const [formData, setFormData] = useState<LeadFormData>(initialData);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
+    ) => {
+        const { name, value } = e.target;
+        const type = 'type' in e.target ? e.target.type : undefined;
 
         if (type === 'number') {
             setFormData((prev) => ({
@@ -104,10 +107,10 @@ export function useLeadFormData(initialData: LeadFormData = INITIAL_LEAD_FORM_DA
                 [name]: value === '' ? '' : Number(value),
             }));
         } else if (type === 'checkbox') {
-            const target = e.target as HTMLInputElement;
+            const checked = 'checked' in e.target ? e.target.checked : false;
             setFormData((prev) => ({
                 ...prev,
-                [name]: target.checked,
+                [name]: checked,
             }));
         } else {
             setFormData((prev) => ({
