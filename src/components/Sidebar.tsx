@@ -78,11 +78,37 @@ export default function Sidebar() {
     const [userDetail, setUserDetail] = useState<any>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [organizationModal, setOrganizationModal] = useState(false);
-
+    const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
     const drawerWidth = isCollapsed ? 80 : 240;
 
     useEffect(() => {
         userProfile();
+    }, []);
+
+        useEffect(() => {
+      const token = localStorage.getItem('Token');
+      const org = localStorage.getItem('org');
+
+      if (!token || !org) return;
+
+      // Fetch role
+      fetchData(`${ProfileUrl}/`, 'GET', undefined, {
+        Authorization: token,
+        org,
+        Accept: 'application/json',
+      })
+        .then((profile: any) => {
+            console.log('Sidebar /profile/ response:', profile);
+            const newRole = profile?.user_obj?.role;
+            if (newRole) {
+                localStorage.setItem('role', newRole);
+                setRole(newRole);
+                }
+        })
+        .catch((err) => {
+          console.error("Error fetching profile:", err);
+        });
+
     }, []);
 
     const userProfile = () => {
@@ -96,6 +122,12 @@ export default function Sidebar() {
                 console.error('Error:', error);
             });
     };
+    const rawRole = role || '';
+    const isAdmin = rawRole.toUpperCase() === 'ADMIN';
+    const visibleNavItems = isAdmin
+      ? navItems
+      : navItems.filter((item) => item.key !== 'users');
+
 
     const getCurrentScreen = () => {
         const pathParts = location.pathname.split('/');
@@ -303,7 +335,7 @@ export default function Sidebar() {
 
                 {/* Navigation */}
                 <List sx={{ px: 1.5, py: 2, flex: 1 }}>
-                    {navItems.map((item) => {
+                    {visibleNavItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
 
@@ -476,10 +508,16 @@ export default function Sidebar() {
                         <Route path="/app/accounts/add-account" element={<AddAccount />} />
                         <Route path="/app/accounts/account-details" element={<AccountDetails />} />
                         <Route path="/app/accounts/edit-account" element={<EditAccount />} />
-                        <Route path="/app/users" element={<Users />} />
-                        <Route path="/app/users/add-users" element={<AddUsers />} />
-                        <Route path="/app/users/edit-user" element={<EditUser />} />
-                        <Route path="/app/users/user-details" element={<UserDetails />} />
+                        { isAdmin && (
+                            <>
+                                <Route path="/app/users" element={<Users />} />
+                                <Route path="/app/users/add-users" element={<AddUsers />} />
+                                <Route path="/app/users/edit-user" element={<EditUser />} />
+                                <Route path="/app/users/user-details" element={<UserDetails />} />
+                            </>
+                            )
+                        }
+
                         <Route path="/app/opportunities" element={<Opportunities />} />
                         <Route path="/app/opportunities/add-opportunity" element={<AddOpportunity />} />
                         <Route path="/app/opportunities/opportunity-details" element={<OpportunityDetails />} />
