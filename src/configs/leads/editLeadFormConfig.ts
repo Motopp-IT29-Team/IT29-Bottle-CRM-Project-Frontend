@@ -41,7 +41,6 @@ export const getEditLeadFormConfig = (params: GetEditLeadFormConfigParams = {}):
                               { value: 'AGRICULTURE', label: 'Agriculture' },
                               { value: 'BANKING', label: 'Banking' },
                               { value: 'BIOTECHNOLOGY', label: 'Biotechnology' },
-                              // Add more as needed
                           ],
                 },
                 {

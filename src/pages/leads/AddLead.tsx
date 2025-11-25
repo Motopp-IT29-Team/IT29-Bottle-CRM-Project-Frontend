@@ -12,7 +12,7 @@ import { getAddLeadFormConfig } from '../../configs/leads/addLeadFormConfig';
 
 export function AddLead() {
     const navigate = useNavigate();
-    const { state } = useLocation();
+
     const { addNotification } = useNotification();
     const { createLead, checkDuplicate, isLoading } = useLeadApi();
 
@@ -84,12 +84,7 @@ export function AddLead() {
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <IForm
-                    config={getAddLeadFormConfig({
-                        industries: state?.industries || [],
-                        statuses: state?.status || [],
-                        sources: state?.source || [],
-                        countries: state?.countries || [],
-                    })}
+                    config={getAddLeadFormConfig()}
                     formData={formData}
                     errors={allErrors}
                     onChange={handleChange}

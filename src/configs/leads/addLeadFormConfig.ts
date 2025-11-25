@@ -34,7 +34,14 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     label: 'Industry',
                     type: 'select',
                     placeholder: 'Select industry',
-                    options: params.industries || [],
+                    options: params.industries?.length
+                        ? params.industries
+                        : [
+                            { value: 'ADVERTISING', label: 'Advertising' },
+                            { value: 'AGRICULTURE', label: 'Agriculture' },
+                            { value: 'BANKING', label: 'Banking' },
+                            { value: 'BIOTECHNOLOGY', label: 'Biotechnology' },
+                        ],
                 },
                 {
                     name: 'status',
@@ -42,7 +49,15 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     required: true,
                     placeholder: 'Select status',
-                    options: params.statuses || [],
+                    options: params.statuses?.length
+                        ? params.statuses
+                        : [
+                            { value: 'assigned', label: 'Assigned' },
+                            { value: 'in process', label: 'In Process' },
+                            { value: 'converted', label: 'Converted' },
+                            { value: 'recycled', label: 'Recycled' },
+                            { value: 'closed', label: 'Closed' },
+                        ],
                 },
                 {
                     name: 'source',
@@ -50,7 +65,17 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     required: true,
                     placeholder: 'Select source',
-                    options: params.sources || [],
+                    options: params.sources?.length
+                        ? params.sources
+                        : [
+                            { value: 'call', label: 'Call' },
+                            { value: 'email', label: 'Email' },
+                            { value: 'existing customer', label: 'Existing Customer' },
+                            { value: 'partner', label: 'Partner' },
+                            { value: 'public relations', label: 'Public Relations' },
+                            { value: 'campaign', label: 'Campaign' },
+                            { value: 'other', label: 'Other' },
+                        ],
                 },
                 {
                     name: 'opportunity_amount',
