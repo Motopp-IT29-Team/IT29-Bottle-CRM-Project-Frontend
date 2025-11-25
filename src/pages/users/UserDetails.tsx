@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -12,24 +12,83 @@ import {
 import { UserProfileHeader } from '../../components/users/details/UserProfileHeader';
 import { UserInfoSection } from '../../components/users/details/UserInfoSection';
 import { UserAddressSection } from '../../components/users/details/UserAddressSection';
-import { useUserDetails } from '../../hooks/user/useUserDetails';
-import { DeleteModal } from '../../components/DeleteModal';
-import { useUsers } from '../../hooks/user/useUsers';
-import { useNotification } from '../../context/NotificationContext';
 import { UserActivitySection } from '../../components/users/details/UserActivitySection';
+import { DeleteModal } from '../../components/DeleteModal';
+import { useUserApi } from '../../hooks/users/useUserApi';
+import { useNotification } from '../../context/NotificationContext';
 
-export default function UserDetails() {
+export function UserDetails() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('id');
-    const [deleteModal, setDeleteModal] = useState(false);
-
     const { addNotification } = useNotification();
-    const { deleteUser } = useUsers();
-    const { loading, userDetails, isResending, resendInvitation } = useUserDetails(userId);
+    const { getUser, deleteUser, resendInvitation, isLoading } = useUserApi();
+
+    const [deleteModal, setDeleteModal] = useState(false);
+    const [isResending, setIsResending] = useState(false);
+    const [userDetails, setUserDetails] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (userId) {
+            fetchUserData();
+        } else {
+            navigate('/app/users');
+        }
+    }, [userId]);
+
+    const fetchUserData = async () => {
+        if (!userId) return;
+
+        setLoading(true);
+        const result = await getUser(userId);
+
+        if (result.success && result.data) {
+            setUserDetails(result.data);
+        } else {
+            addNotification('error', 'Failed to load user details');
+            navigate('/app/users');
+        }
+        setLoading(false);
+    };
 
     const handleBack = () => navigate('/app/users');
     const handleEdit = () => navigate(`/app/users/edit-user?id=${userId}`);
+
+    const openDeleteModal = () => {
+        setDeleteModal(true);
+    };
+
+    const modalClose = () => {
+        setDeleteModal(false);
+    };
+
+    const handleDeleteUser = async () => {
+        if (!userId) return;
+
+        const result = await deleteUser(userId);
+        if (result.success) {
+            navigate('/app/users');
+            addNotification('success', 'User deleted', 'The user has been deleted');
+            modalClose();
+        } else {
+            addNotification('error', 'Failed to delete user', result.error);
+        }
+    };
+
+    const handleResendInvitation = async () => {
+        if (!userId) return;
+
+        setIsResending(true);
+        const result = await resendInvitation(userId);
+        setIsResending(false);
+
+        if (result.success) {
+            addNotification('success', 'Resend invitation', 'The invitation has been resent');
+        } else {
+            addNotification('error', 'Failed to resend invitation', result.error);
+        }
+    };
 
     if (!userId) {
         navigate('/app/users');
@@ -49,35 +108,6 @@ export default function UserDetails() {
         navigate('/app/users');
         return null;
     }
-
-    const openDeleteModal = () => {
-        setDeleteModal(true);
-    };
-
-    const modalClose = () => {
-        setDeleteModal(false);
-    };
-
-    const handleDeleteUser = async () => {
-        const success = await deleteUser(userId);
-        if (success) {
-            navigate('/app/users');
-            addNotification('success', `User deleted`, `The user has been deleted`);
-            modalClose();
-        } else {
-            addNotification('error', 'Failed to delete user');
-        }
-    };
-
-    const handleResendInvitation = async () => {
-        const success = await resendInvitation();
-        if (success) {
-            addNotification('success', `Resend invitation`, `The invitation has been resend`);
-            modalClose();
-        } else {
-            addNotification('error', 'Failed to resend invitation');
-        }
-    };
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },

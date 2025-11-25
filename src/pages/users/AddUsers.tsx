@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { useUserFormData, UserFormData } from '../../hooks/user/useUserFormData';
-import { useUserValidation } from '../../hooks/user/useUserValidation';
-import { useSubmitUser } from '../../hooks/user/useSubmitUser';
+import { IForm, FormErrors } from '../../components/ui/form';
+import { getAddUserFormConfig } from '../../configs/users/addUserFormConfig';
+import { useUserFormData, UserFormData } from '../../hooks/users/useUserFormData';
+import { useUserValidation } from '../../hooks/users/useUserValidation';
+import { useUserApi } from '../../hooks/users/useUserApi';
 import { UsersLoadingBackdrop } from '../../components/users/create/UsersLoadingBackdrop';
-import { UsersInfoSection } from '../../components/users/create/UsersInfoSection';
-import { UsersAddressSection } from '../../components/users/create/UsersAddressSection';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
-import '../../styles/style.css';
 
 const INITIAL_FORM_DATA: UserFormData = {
     email: '',
@@ -26,13 +25,11 @@ const INITIAL_FORM_DATA: UserFormData = {
 
 export function AddUsers() {
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-    const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
-
+    const { addNotification } = useNotification();
     const { formData, handleChange, resetForm } = useUserFormData(INITIAL_FORM_DATA);
     const { validationErrors, validateForm } = useUserValidation();
-    const { submitForm } = useSubmitUser(resetForm);
-    const { addNotification } = useNotification();
+    const { createUser, isLoading } = useUserApi();
+    const [backendErrors, setBackendErrors] = useState<FormErrors>({});
 
     const handleBack = () => navigate('/app/users');
 
@@ -51,27 +48,30 @@ export function AddUsers() {
             return;
         }
 
-        setIsLoading(true);
-        try {
-            const result = await submitForm(formData);
+        const result = await createUser(formData);
 
-            if (result.success) {
-                addNotification('success', 'User created successfully!', 'Invitation email has been sent');
-                navigate('/app/users');
-            } else {
-                if (result.fieldErrors) {
-                    setBackendErrors(result.fieldErrors);
-                }
+        if (result.success) {
+            addNotification('success', 'User created successfully!', 'Invitation email has been sent');
+            resetForm();
+            navigate('/app/users');
+        } else {
+            if (result.fieldErrors) {
+                setBackendErrors(result.fieldErrors);
+            }
+            if (result.error) {
                 addNotification('error', 'Failed to create user', result.error);
             }
-        } catch (error: any) {
-            addNotification('error', 'Error', error.message || 'Something went wrong');
-        } finally {
-            setIsLoading(false);
         }
     };
 
-    const allErrors = { ...validationErrors, ...backendErrors };
+    const allErrors: FormErrors = Object.keys(validationErrors).reduce(
+        (acc, key) => {
+            const error = validationErrors[key];
+            acc[key] = error ? [error] : undefined;
+            return acc;
+        },
+        { ...backendErrors } as FormErrors
+    );
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },
@@ -80,37 +80,19 @@ export function AddUsers() {
     ];
 
     return (
-        <Box sx={{ mt: '60px' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
             <ModernAppBar module="Users" crntPage="Create User" actions={actions} />
 
             <UsersLoadingBackdrop open={isLoading} />
 
-            <Box sx={{ mt: '120px' }}>
-                <div style={{ padding: '10px' }}>
-                    <UsersInfoSection
-                        email={formData.email}
-                        first_name={formData.first_name}
-                        last_name={formData.last_name}
-                        role={formData.role}
-                        onChange={handleChange}
-                        errors={allErrors}
-                        disabled={isLoading}
-                    />
-
-                    <UsersAddressSection
-                        address={{
-                            address_line: formData.address_line,
-                            street: formData.street,
-                            city: formData.city,
-                            state: formData.state,
-                            postcode: formData.postcode,
-                            country: formData.country,
-                        }}
-                        onChange={handleChange}
-                        errors={allErrors}
-                        disabled={isLoading}
-                    />
-                </div>
+            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
+                <IForm
+                    config={getAddUserFormConfig()}
+                    formData={formData}
+                    errors={allErrors}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                />
             </Box>
         </Box>
     );

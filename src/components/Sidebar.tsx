@@ -35,24 +35,24 @@ import Company from '../pages/company/Company';
 import AddCompany from '../pages/company/AddCompany';
 import CompanyDetails from '../pages/company/CompanyDetails';
 import EditCompany from '../pages/company/EditCompany';
-import Leads from '../pages/leads/Leads';
-import AddContacts from '../pages/contacts/AddContacts';
+import { Leads } from '../pages/leads/Leads';
+import { AddLead } from '../pages/leads/AddLead';
 import { EditLead } from '../pages/leads/EditLead';
-import LeadDetails from '../pages/leads/LeadDetails';
+import { LeadDetails } from '../pages/leads/LeadDetails';
+import AddContacts from '../pages/contacts/AddContacts';
 import Contacts from '../pages/contacts/Contacts';
 import EditContact from '../pages/contacts/EditContacts';
 import ContactDetails from '../pages/contacts/ContactDetails';
 import Users from '../pages/users/Users';
 import Opportunities from '../pages/opportunities/Opportunities';
 import Cases from '../pages/cases/Cases';
-import { AddLeads } from '../pages/leads/AddLeads';
 import Accounts from '../pages/accounts/Accounts';
 import { AddAccount } from '../pages/accounts/AddAccount';
 import { EditAccount } from '../pages/accounts/EditAccount';
 import { AccountDetails } from '../pages/accounts/AccountDetails';
 import { AddUsers } from '../pages/users/AddUsers';
 import { EditUser } from '../pages/users/EditUser';
-import UserDetails from '../pages/users/UserDetails';
+import { UserDetails } from '../pages/users/UserDetails';
 import { AddOpportunity } from '../pages/opportunities/AddOpportunity';
 import { EditOpportunity } from '../pages/opportunities/EditOpportunity';
 import { OpportunityDetails } from '../pages/opportunities/OpportunityDetails';
@@ -461,7 +461,7 @@ export default function Sidebar() {
                     <Routes>
                         <Route index element={<Leads />} />
                         <Route path="/app/leads" element={<Leads />} />
-                        <Route path="/app/leads/add-leads" element={<AddLeads />} />
+                        <Route path="/app/leads/add-leads" element={<AddLead />} />
                         <Route path="/app/leads/edit-lead" element={<EditLead />} />
                         <Route path="/app/leads/lead-details" element={<LeadDetails />} />
                         <Route path="/app/companies" element={<Company />} />

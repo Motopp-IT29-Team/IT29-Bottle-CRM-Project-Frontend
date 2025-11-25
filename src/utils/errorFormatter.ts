@@ -1,26 +1,86 @@
-export const formatBackendErrors = (errors: any): { errorMessage: string; fieldErrors: Record<string, string[]> } => {
-    const fieldErrors: Record<string, string[]> = {};
-    const errorMessages: string[] = [];
+export type FormErrors = Record<string, string[] | undefined>;
 
-    if (errors && typeof errors === 'object') {
-        Object.keys(errors).forEach((errorType) => {
-            const errorGroup = errors[errorType];
+interface ApiErrorResponse {
+    error?: boolean;
+    profile_errors?: any[] | any;
+    user_errors?: any[] | any;
+    address_errors?: any[] | any;
+    lead_errors?: any[] | any;
+    [key: string]: any;
+}
 
-            if (typeof errorGroup === 'object' && errorGroup !== null) {
-                Object.keys(errorGroup).forEach((fieldName) => {
-                    const fieldError = errorGroup[fieldName];
+/**
+ * Parse API error response into FormErrors format
+ * Handles:
+ * - Array format: [{field: ["error"]}]
+ * - Object format: {field: ["error"]}
+ * - Nested format: {profile_errors: {field: ["error"]}}
+ */
+export const parseApiErrors = (response: ApiErrorResponse): FormErrors => {
+    const fieldErrors: FormErrors = {};
 
-                    if (Array.isArray(fieldError)) {
-                        fieldErrors[fieldName] = fieldError;
-                        errorMessages.push(...fieldError);
-                    }
-                });
-            }
-        });
-    }
+    const errorKeys = ['profile_errors', 'user_errors', 'address_errors', 'lead_errors'];
 
-    const errorMessage =
-        errorMessages.length > 0 ? errorMessages.join('. ') : 'Failed to create user. Please check the form.';
+    errorKeys.forEach((key) => {
+        const errors = response?.[key];
+
+        if (!errors) return;
+
+        // Array format: [{field: ["error"]}, {field2: ["error2"]}]
+        if (Array.isArray(errors)) {
+            errors.forEach((errorObj: any) => {
+                if (typeof errorObj === 'object' && errorObj !== null) {
+                    Object.keys(errorObj).forEach((fieldName) => {
+                        if (Array.isArray(errorObj[fieldName])) {
+                            fieldErrors[fieldName] = errorObj[fieldName];
+                        }
+                    });
+                }
+            });
+        }
+        // Object format: {field: ["error"], field2: ["error2"]}
+        else if (typeof errors === 'object' && errors !== null) {
+            Object.keys(errors).forEach((fieldName) => {
+                if (Array.isArray(errors[fieldName])) {
+                    fieldErrors[fieldName] = errors[fieldName];
+                }
+            });
+        }
+    });
+
+    return fieldErrors;
+};
+
+/**
+ * Extract all error messages from FormErrors
+ */
+export const getErrorMessages = (errors: FormErrors): string[] => {
+    const messages: string[] = [];
+
+    Object.values(errors).forEach((errorArray) => {
+        if (Array.isArray(errorArray)) {
+            messages.push(...errorArray);
+        }
+    });
+
+    return messages;
+};
+
+/**
+ * Format error messages as single string
+ */
+export const formatErrorMessage = (errors: FormErrors, defaultMessage: string = 'Validation failed'): string => {
+    const messages = getErrorMessages(errors);
+    return messages.length > 0 ? messages.join('. ') : defaultMessage;
+};
+
+/**
+ * Legacy format - for backward compatibility
+ * @deprecated Use parseApiErrors instead
+ */
+export const formatBackendErrors = (errors: any): { errorMessage: string; fieldErrors: FormErrors } => {
+    const fieldErrors = parseApiErrors(errors);
+    const errorMessage = formatErrorMessage(fieldErrors, 'Failed to process request. Please check the form.');
 
     return { errorMessage, fieldErrors };
 };

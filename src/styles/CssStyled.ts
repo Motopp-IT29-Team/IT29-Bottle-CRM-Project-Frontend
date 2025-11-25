@@ -224,37 +224,7 @@ export const StyledSelect = styled(Select)`
         margin-right: -7px;
     }
 `;
-// const CustomTextField = styled(({ arrowIcon, ...rest }) => <TextField {...rest} />)`
-//   position: relative;
-//   height: 40px;
-//   max-height: 40px;
 
-//   /* Custom dropdown arrow */
-//   &::after {
-//     content: '';
-//     position: absolute;
-//     top: 50%;
-//     right: 8px; /* Adjust the right position based on your design */
-//     width: 0;
-//     height: 0;
-//     border-top: 6px solid transparent;
-//     border-bottom: 6px solid transparent;
-//     border-left: 6px solid #888; /* Set the desired grey color */
-//     transform: translateY(-50%);
-//     pointer-events: none;
-//   }
-
-//   /* Optional: Hide default arrow */
-//   & select::-ms-expand {
-//     display: none;
-//   }
-//   & select {
-//     -webkit-appearance: none;
-//     -moz-appearance: none;
-//     appearance: none;
-//     padding-right: 24px; /* Allow space for custom arrow */
-//   }
-// `;
 export const FabLeft = styled(Fab)({
     height: '40px',
     minHeight: '40px',
