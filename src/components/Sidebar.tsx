@@ -476,10 +476,15 @@ export default function Sidebar() {
                         <Route path="/app/accounts/add-account" element={<AddAccount />} />
                         <Route path="/app/accounts/account-details" element={<AccountDetails />} />
                         <Route path="/app/accounts/edit-account" element={<EditAccount />} />
-                        <Route path="/app/users" element={<Users />} />
-                        <Route path="/app/users/add-users" element={<AddUsers />} />
-                        <Route path="/app/users/edit-user" element={<EditUser />} />
-                        <Route path="/app/users/user-details" element={<UserDetails />} />
+                        { isAdmin && (
+                            <>
+                                <Route path="/app/users" element={<Users />} />
+                                <Route path="/app/users/add-users" element={<AddUsers />} />
+                                <Route path="/app/users/edit-user" element={<EditUser />} />
+                                <Route path="/app/users/user-details" element={<UserDetails />} />
+                            </>
+                            )
+                        }
                         <Route path="/app/opportunities" element={<Opportunities />} />
                         <Route path="/app/opportunities/add-opportunity" element={<AddOpportunity />} />
                         <Route path="/app/opportunities/opportunity-details" element={<OpportunityDetails />} />
