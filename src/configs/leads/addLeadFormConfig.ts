@@ -52,11 +52,11 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     options: params.statuses?.length
                         ? params.statuses
                         : [
-                            { value: 'assigned', label: 'Assigned' },
-                            { value: 'in process', label: 'In Process' },
-                            { value: 'converted', label: 'Converted' },
-                            { value: 'recycled', label: 'Recycled' },
-                            { value: 'closed', label: 'Closed' },
+                            { value: 'new', label: 'New' },
+                            { value: 'working', label: 'Working' },
+                            { value: 'qualified', label: 'Qualified' },
+                            { value: 'unqualified', label: 'Unqualified' },
+                            { value: 'on hold', label: 'On Hold' },
                         ],
                 },
                 {
@@ -106,10 +106,10 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     placeholder: 'Select budget range',
                     options: [
-                        { value: '<$10k', label: '<$10k' },
-                        { value: '$10k-$50k', label: '$10k-$50k' },
-                        { value: '$50k-$100k', label: '$50k-$100k' },
-                        { value: '>$100k', label: '>$100k' },
+                        { value: 'less_than_5000', label: 'Less than €5,000' },
+                        { value: '5000_to_10000', label: '€5,000–€10,000' },
+                        { value: '10000_to_25000', label: '€10,000–€25,000' },
+                        { value: 'over_25000', label: 'Over €25,000' },
                     ],
                 },
                 {
@@ -118,10 +118,10 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     placeholder: 'Select timeframe',
                     options: [
-                        { value: 'Immediate', label: 'Immediate' },
-                        { value: '1-3 months', label: '1-3 months' },
-                        { value: '3-6 months', label: '3-6 months' },
-                        { value: '>6 months', label: '>6 months' },
+                        { value: 'within_1_week', label: 'Within 1 week' },
+                        { value: 'within_1_month', label: 'Within 1 month' },
+                        { value: 'within_3_months', label: 'Within 3 months' },
+                        { value: 'more_than_3_months', label: 'More than 3 months' },
                     ],
                 },
             ],
