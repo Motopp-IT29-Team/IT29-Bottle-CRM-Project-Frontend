@@ -12,11 +12,14 @@ import {
     USERS_SELECT_STYLES,
     USERS_MENU_ITEM_STYLES,
     USER_FIELD_CONTAINER_STYLES,
+    USERS_REQUIRED_ASTERISK_STYLES,
 } from '../../../styles/UsersStyles';
 
 interface EditUserInfoSectionProps {
     formData: {
         email: string;
+        first_name: string;
+        last_name: string;
         role: string;
     };
     password: string;
@@ -28,6 +31,8 @@ interface EditUserInfoSectionProps {
     onToggleStatus: () => void;
     errors: {
         email?: string[];
+        first_name?: string[];
+        last_name?: string[];
         role?: string[];
         password?: string[];
     };
@@ -70,10 +75,51 @@ export const EditUserInfoSection: React.FC<EditUserInfoSectionProps> = ({
             </Typography>
 
             <Box sx={USER_FIELD_CONTAINER_STYLES}>
+                {/* First Name */}
+                <Box sx={USERS_FIELD_BOX_STYLES}>
+                    <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                        <FiUser size={14} style={{ marginRight: '4px' }} />
+                        First Name <span style={USERS_REQUIRED_ASTERISK_STYLES}>*</span>
+                    </Typography>
+                    <TextField
+                        name="first_name"
+                        value={formData.first_name}
+                        onChange={onChange}
+                        placeholder="Enter first name"
+                        size="small"
+                        fullWidth
+                        required
+                        error={!!errors.first_name?.[0]}
+                        helperText={errors.first_name?.[0]}
+                        sx={USERS_TEXT_FIELD_STYLES}
+                    />
+                </Box>
+
+                {/* Last Name */}
+                <Box sx={USERS_FIELD_BOX_STYLES}>
+                    <Typography sx={USERS_FIELD_LABEL_STYLES}>
+                        <FiUser size={14} style={{ marginRight: '4px' }} />
+                        Last Name <span style={USERS_REQUIRED_ASTERISK_STYLES}>*</span>
+                    </Typography>
+                    <TextField
+                        name="last_name"
+                        value={formData.last_name}
+                        onChange={onChange}
+                        placeholder="Enter last name"
+                        size="small"
+                        fullWidth
+                        required
+                        error={!!errors.last_name?.[0]}
+                        helperText={errors.last_name?.[0]}
+                        sx={USERS_TEXT_FIELD_STYLES}
+                    />
+                </Box>
+
+                {/* Email */}
                 <Box sx={USERS_FIELD_BOX_STYLES}>
                     <Typography sx={USERS_FIELD_LABEL_STYLES}>
                         <FiMail size={14} style={{ marginRight: '4px' }} />
-                        Email
+                        Email <span style={USERS_REQUIRED_ASTERISK_STYLES}>*</span>
                     </Typography>
                     <TextField
                         name="email"
@@ -89,6 +135,7 @@ export const EditUserInfoSection: React.FC<EditUserInfoSectionProps> = ({
                     />
                 </Box>
 
+                {/* Role */}
                 <Box sx={USERS_FIELD_BOX_STYLES}>
                     <Typography sx={USERS_FIELD_LABEL_STYLES}>
                         <FiShield size={14} style={{ marginRight: '4px' }} />
@@ -106,6 +153,7 @@ export const EditUserInfoSection: React.FC<EditUserInfoSectionProps> = ({
                     </FormControl>
                 </Box>
 
+                {/* Password */}
                 <Box sx={USERS_FIELD_BOX_STYLES}>
                     <Typography sx={USERS_FIELD_LABEL_STYLES}>
                         <FiLock size={14} style={{ marginRight: '4px' }} />

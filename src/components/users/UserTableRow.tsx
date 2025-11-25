@@ -1,9 +1,10 @@
 import React from 'react';
-import { TableRow, TableCell, IconButton, Box } from '@mui/material';
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { TableRow, TableCell } from '@mui/material';
 
 interface User {
     id: string;
+    first_name: string;
+    last_name: string;
     user_details: { email: string };
     role: string;
 }
@@ -14,6 +15,8 @@ interface UserTableRowProps {
 }
 
 export const UserTableRow: React.FC<UserTableRowProps> = ({ user, onViewDetail }) => {
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || '---';
+
     return (
         <TableRow
             onClick={() => onViewDetail(user.id)}
@@ -24,6 +27,15 @@ export const UserTableRow: React.FC<UserTableRowProps> = ({ user, onViewDetail }
                 transition: 'background-color 0.2s',
             }}
         >
+            <TableCell
+                sx={{
+                    border: 0,
+                    color: '#1f2937',
+                    fontWeight: 500,
+                }}
+            >
+                {fullName}
+            </TableCell>
             <TableCell
                 sx={{
                     border: 0,

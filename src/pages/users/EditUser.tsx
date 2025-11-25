@@ -11,24 +11,28 @@ import { ProfileUrl } from '../../services/ApiUrls';
 
 interface FormErrors {
     email?: string[];
+    first_name?: string[];
+    last_name?: string[];
     password?: string[];
     role?: string[];
     address_line?: string[];
     street?: string[];
     city?: string[];
     state?: string[];
-    pincode?: string[];
+    postcode?: string[];
     country?: string[];
 }
 
 interface FormData {
     email: string;
+    first_name: string;
+    last_name: string;
     role: string;
     address_line: string;
     street: string;
     city: string;
     state: string;
-    pincode: string;
+    postcode: string;
     country: string;
 }
 
@@ -48,12 +52,14 @@ export function EditUser() {
     const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
     const [formData, setFormData] = useState<FormData>({
         email: '',
+        first_name: '',
+        last_name: '',
         role: 'ADMIN',
         address_line: '',
         street: '',
         city: '',
         state: '',
-        pincode: '',
+        postcode: '',
         country: '',
     });
 
@@ -93,12 +99,14 @@ export function EditUser() {
         if (result.success && result.data) {
             setFormData({
                 email: result.data.email,
+                first_name: result.data.first_name || '',
+                last_name: result.data.last_name || '',
                 role: result.data.role,
                 address_line: result.data.address_line,
                 street: result.data.street,
                 city: result.data.city,
                 state: result.data.state,
-                pincode: result.data.pincode,
+                postcode: result.data.postcode,
                 country: result.data.country,
             });
             setIsActive(result.data.is_active);
@@ -209,7 +217,12 @@ export function EditUser() {
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <EditUserInfoSection
-                    formData={{ email: formData.email, role: formData.role }}
+                    formData={{
+                        email: formData.email,
+                        first_name: formData.first_name,
+                        last_name: formData.last_name,
+                        role: formData.role,
+                    }}
                     password={password}
                     isActive={isActive}
                     isTogglingStatus={isTogglingStatus}
@@ -219,6 +232,8 @@ export function EditUser() {
                     onToggleStatus={handleToggleStatus}
                     errors={{
                         email: formErrors.email,
+                        first_name: formErrors.first_name,
+                        last_name: formErrors.last_name,
                         role: formErrors.role,
                         password: formErrors.password,
                     }}
@@ -230,7 +245,7 @@ export function EditUser() {
                         street: formData.street,
                         city: formData.city,
                         state: formData.state,
-                        pincode: formData.pincode,
+                        postcode: formData.postcode,
                         country: formData.country,
                     }}
                     onChange={handleChange}
@@ -239,7 +254,7 @@ export function EditUser() {
                         street: formErrors.street,
                         city: formErrors.city,
                         state: formErrors.state,
-                        pincode: formErrors.pincode,
+                        postcode: formErrors.postcode,
                         country: formErrors.country,
                     }}
                 />

@@ -91,8 +91,11 @@ export default function UserDetails() {
 
             <Box sx={USER_DETAILS_CONTAINER_STYLES}>
                 <UserProfileHeader
+                    firstName={userDetails.first_name}
+                    lastName={userDetails.last_name}
                     email={userDetails.user_details.email}
                     role={userDetails.role}
+                    profilePic={userDetails.user_details.profile_pic}
                     isActive={userDetails.user_details.is_active}
                     onResendInvitation={!userDetails.user_details.is_active ? handleResendInvitation : undefined}
                     isResending={isResending}
