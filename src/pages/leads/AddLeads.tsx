@@ -28,7 +28,7 @@ import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
 import '../../styles/style.css';
 import { LeadUrl } from '../../services/ApiUrls';
-import { fetchData, getHeader } from '../../components/FetchData';
+import { fetchData, Header } from '../../components/FetchData';
 import { CustomAppBar } from '../../components/CustomAppBar';
 import {
     FaArrowDown,
@@ -385,7 +385,7 @@ export function AddLeads() {
             data.status = formData.status.toLowerCase();
         }
 
-        fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), getHeader())
+        fetchData(`${LeadUrl}/`, 'POST', JSON.stringify(data), Header)
             .then((res: any) => {
                 // console.log('Form data:', res);
                 if (!res.error) {
