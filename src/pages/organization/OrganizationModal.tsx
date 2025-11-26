@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, Dialog, Divider, IconButton, List, ListItem, Stack, TextField, Typography } from '@mui/material';
-import { FaPlus, FaTimes } from 'react-icons/fa';
+import { Box, Dialog, Divider, IconButton, List, ListItem, Stack, TextField, Typography, Avatar } from '@mui/material';
+import { FiPlus, FiX, FiCheck, FiBriefcase } from 'react-icons/fi';
 import { fetchData } from '../../components/FetchData';
 import { OrgUrl } from '../../services/ApiUrls';
-import { StyledListItemButton, StyledListItemText } from '../../styles/CssStyled';
 
 interface Item {
     org: {
@@ -14,7 +12,6 @@ interface Item {
 }
 
 export default function OrganizationModal(props: any) {
-    const navigate = useNavigate();
     const { open, handleClose } = props;
 
     const [organization, setOrganization] = useState<Item[]>([]);
@@ -22,12 +19,15 @@ export default function OrganizationModal(props: any) {
     const [error, setError] = useState('');
 
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const currentOrgId = localStorage.getItem('org');
 
     useEffect(() => {
-        getOrganization();
-        setError('');
-        setNewOrganization('');
-    }, []);
+        if (open) {
+            getOrganization();
+            setError('');
+            setNewOrganization('');
+        }
+    }, [open]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -56,6 +56,8 @@ export default function OrganizationModal(props: any) {
     };
 
     const addOrganization = () => {
+        if (!newOrganization.trim()) return;
+
         const organizationName = { name: newOrganization };
         fetchData(`${OrgUrl}/`, 'POST', JSON.stringify(organizationName), headers)
             .then((res) => {
@@ -64,6 +66,7 @@ export default function OrganizationModal(props: any) {
                 } else if (res.status === 201) {
                     getOrganization();
                     setError('');
+                    setNewOrganization('');
                 }
             })
             .catch((err) => console.error(err));
@@ -76,106 +79,269 @@ export default function OrganizationModal(props: any) {
     };
 
     const selectedOrganization = (id: any) => {
+        if (id === currentOrgId) {
+            onHandleClose();
+            return;
+        }
+
         localStorage.setItem('org', id);
         onHandleClose();
-        if (localStorage.getItem('org')) {
-            navigate('/');
-        }
+        window.location.reload();
+    };
+
+    const getOrgInitial = (name: string) => {
+        return name?.charAt(0).toUpperCase() || 'O';
     };
 
     return (
-        <div>
-            <Dialog open={open} onClose={onHandleClose}>
-                <Box sx={{ width: '400px' }}>
-                    {localStorage.getItem('org') ? (
-                        <Stack
+        <Dialog
+            open={open}
+            onClose={onHandleClose}
+            PaperProps={{
+                sx: {
+                    borderRadius: '16px',
+                    width: '480px',
+                    maxWidth: '90vw',
+                },
+            }}
+        >
+            <Box>
+                {/* Header */}
+                <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{ p: 3, pb: 2 }}
+                >
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                        <Box
                             sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '10px',
+                                backgroundColor: '#f0f4ff',
                                 display: 'flex',
-                                flexDirection: 'row-reverse',
-                                m: '12px 10px -20px 0px',
-                            }}
-                        >
-                            <IconButton size="small" onClick={onHandleClose}>
-                                <FaTimes />
-                            </IconButton>
-                        </Stack>
-                    ) : null}
-                    <Stack sx={{ display: 'flex', textAlign: 'center', mt: 1.5 }}>
-                        <Typography sx={{ fontSize: '22px', fontWeight: 500, mb: 1.5 }}>Organizations</Typography>
-                    </Stack>
-                    <Divider flexItem />
-                    <Box
-                        sx={{
-                            height: '250px',
-                            maxHeight: '250px',
-                            overflowY: 'auto',
-                        }}
-                    >
-                        {organization?.length === 0 ? (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    height: '250px',
-                                }}
-                            >
-                                <Typography sx={{ fontSize: '18px', color: 'grey' }}>Create an Organization</Typography>
-                            </Box>
-                        ) : (
-                            <List sx={{ width: '100%' }}>
-                                {organization?.length > 0 &&
-                                    organization
-                                        .filter((item) => item?.org !== null)
-                                        .map((item, i) => (
-                                            <ListItem key={item.org!.id}>
-                                                <StyledListItemButton
-                                                    selected={item?.org?.id === localStorage?.getItem('org')}
-                                                    onClick={() => selectedOrganization(item?.org!.id)}
-                                                >
-                                                    <StyledListItemText>{item?.org!.name}</StyledListItemText>
-                                                </StyledListItemButton>
-                                            </ListItem>
-                                        ))}
-                            </List>
-                        )}
-                    </Box>
-                    <Divider flexItem />
-                    <Box sx={{ p: '10px 20px', mb: 2 }}>
-                        <Typography sx={{ color: '#3e79f7' }}>Add Organization</Typography>
-                        <Stack
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'row',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}
                         >
-                            <TextField
-                                autoFocus
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={newOrganization}
-                                onChange={(e: any) => setNewOrganization(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                error={!!error}
-                                helperText={error !== '' ? error : ''}
-                                sx={{ mt: !!error ? 2 : '0px' }}
-                            />
-                            <IconButton
-                                onClick={addOrganization}
-                                ref={buttonRef}
-                                disabled={newOrganization === ''}
-                                sx={{ ml: 1 }}
-                                size="medium"
-                            >
-                                <FaPlus fill={newOrganization === '' ? 'lightgrey' : '#3e79f7'} />
-                            </IconButton>
-                        </Stack>
-                    </Box>
+                            <FiBriefcase size={20} color="#667eea" />
+                        </Box>
+                        <Box>
+                            <Typography sx={{ fontSize: '20px', fontWeight: 700, color: '#111827' }}>
+                                Organizations
+                            </Typography>
+                            <Typography sx={{ fontSize: '13px', color: '#6b7280' }}>
+                                Switch between organizations
+                            </Typography>
+                        </Box>
+                    </Stack>
+                    {currentOrgId && (
+                        <IconButton
+                            onClick={onHandleClose}
+                            sx={{
+                                color: '#6b7280',
+                                '&:hover': {
+                                    backgroundColor: '#f3f4f6',
+                                },
+                            }}
+                        >
+                            <FiX size={20} />
+                        </IconButton>
+                    )}
+                </Stack>
+
+                <Divider />
+
+                {/* Organizations List */}
+                <Box
+                    sx={{
+                        maxHeight: '320px',
+                        overflowY: 'auto',
+                        '&::-webkit-scrollbar': {
+                            width: '6px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#d1d5db',
+                            borderRadius: '3px',
+                        },
+                    }}
+                >
+                    {organization?.length === 0 ? (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '200px',
+                                gap: 1,
+                            }}
+                        >
+                            <FiBriefcase size={48} color="#d1d5db" />
+                            <Typography sx={{ fontSize: '15px', color: '#9ca3af', fontWeight: 500 }}>
+                                No organizations yet
+                            </Typography>
+                            <Typography sx={{ fontSize: '13px', color: '#d1d5db' }}>
+                                Create your first organization below
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <List sx={{ p: 2, pt: 1.5 }}>
+                            {organization
+                                .filter((item) => item?.org !== null)
+                                .map((item) => {
+                                    const isSelected = item?.org?.id === currentOrgId;
+                                    return (
+                                        <ListItem key={item.org!.id} disablePadding sx={{ mb: 1 }}>
+                                            <Box
+                                                onClick={() => selectedOrganization(item?.org!.id)}
+                                                sx={{
+                                                    width: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 2,
+                                                    p: 2,
+                                                    borderRadius: '12px',
+                                                    cursor: 'pointer',
+                                                    border: isSelected ? '2px solid #667eea' : '2px solid transparent',
+                                                    backgroundColor: isSelected ? '#f0f4ff' : 'white',
+                                                    transition: 'all 0.2s ease',
+                                                    '&:hover': {
+                                                        backgroundColor: isSelected ? '#f0f4ff' : '#f9fafb',
+                                                        border: isSelected
+                                                            ? '2px solid #667eea'
+                                                            : '2px solid #e5e7eb',
+                                                    },
+                                                }}
+                                            >
+                                                <Avatar
+                                                    sx={{
+                                                        width: 44,
+                                                        height: 44,
+                                                        backgroundColor: isSelected ? '#667eea' : '#f3f4f6',
+                                                        color: isSelected ? 'white' : '#6b7280',
+                                                        fontSize: '16px',
+                                                        fontWeight: 600,
+                                                    }}
+                                                >
+                                                    {getOrgInitial(item?.org!.name)}
+                                                </Avatar>
+                                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                    <Typography
+                                                        sx={{
+                                                            fontSize: '15px',
+                                                            fontWeight: 600,
+                                                            color: '#111827',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                        }}
+                                                    >
+                                                        {item?.org!.name}
+                                                    </Typography>
+                                                    {isSelected && (
+                                                        <Typography
+                                                            sx={{
+                                                                fontSize: '12px',
+                                                                color: '#667eea',
+                                                                fontWeight: 500,
+                                                            }}
+                                                        >
+                                                            Current organization
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                                {isSelected && (
+                                                    <Box
+                                                        sx={{
+                                                            width: 24,
+                                                            height: 24,
+                                                            borderRadius: '50%',
+                                                            backgroundColor: '#667eea',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                        }}
+                                                    >
+                                                        <FiCheck size={14} color="white" />
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        </ListItem>
+                                    );
+                                })}
+                        </List>
+                    )}
                 </Box>
-            </Dialog>
-        </div>
+
+                <Divider />
+
+                {/* Add New Organization */}
+                <Box sx={{ p: 3, pt: 2.5 }}>
+                    <Typography
+                        sx={{
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            color: '#374151',
+                            mb: 1.5,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                        }}
+                    >
+                        Create New
+                    </Typography>
+                    <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                        <TextField
+                            autoFocus={organization?.length === 0}
+                            type="text"
+                            fullWidth
+                            placeholder="Enter organization name"
+                            value={newOrganization}
+                            onChange={(e: any) => setNewOrganization(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            error={!!error}
+                            helperText={error || ''}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '10px',
+                                    backgroundColor: '#f9fafb',
+                                    '&:hover': {
+                                        backgroundColor: 'white',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: 'white',
+                                    },
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    fontSize: '14px',
+                                    py: 1.5,
+                                },
+                            }}
+                        />
+                        <IconButton
+                            onClick={addOrganization}
+                            ref={buttonRef}
+                            disabled={!newOrganization.trim()}
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: '10px',
+                                backgroundColor: newOrganization.trim() ? '#667eea' : '#f3f4f6',
+                                color: newOrganization.trim() ? 'white' : '#9ca3af',
+                                '&:hover': {
+                                    backgroundColor: newOrganization.trim() ? '#5568d3' : '#f3f4f6',
+                                },
+                                '&:disabled': {
+                                    backgroundColor: '#f3f4f6',
+                                },
+                            }}
+                        >
+                            <FiPlus size={20} />
+                        </IconButton>
+                    </Stack>
+                </Box>
+            </Box>
+        </Dialog>
     );
 }

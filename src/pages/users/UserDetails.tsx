@@ -27,7 +27,6 @@ export function UserDetails() {
     const [deleteModal, setDeleteModal] = useState(false);
     const [isResending, setIsResending] = useState(false);
     const [userDetails, setUserDetails] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (userId) {
@@ -40,7 +39,6 @@ export function UserDetails() {
     const fetchUserData = async () => {
         if (!userId) return;
 
-        setLoading(true);
         const result = await getUser(userId);
 
         if (result.success && result.data) {
@@ -49,7 +47,6 @@ export function UserDetails() {
             addNotification('error', 'Failed to load user details');
             navigate('/app/users');
         }
-        setLoading(false);
     };
 
     const handleBack = () => navigate('/app/users');
@@ -95,7 +92,7 @@ export function UserDetails() {
         return null;
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <Box sx={USER_DETAILS_LOADING_CONTAINER_STYLES}>
                 <CircularProgress size={40} sx={USER_DETAILS_LOADING_SPINNER_STYLES} />

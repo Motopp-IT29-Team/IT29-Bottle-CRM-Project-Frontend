@@ -6,7 +6,8 @@ import { getAddUserFormConfig } from '../../configs/users/addUserFormConfig';
 import { useUserFormData, UserFormData } from '../../hooks/users/useUserFormData';
 import { useUserValidation } from '../../hooks/users/useUserValidation';
 import { useUserApi } from '../../hooks/users/useUserApi';
-import { UsersLoadingBackdrop } from '../../components/users/create/UsersLoadingBackdrop';
+import { useFormState } from '../../hooks/common/useFormState';
+import { UsersLoadingBackdrop } from '../../components/users/UsersLoadingBackdrop';
 import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 
@@ -30,6 +31,12 @@ export function AddUsers() {
     const { validationErrors, validateForm } = useUserValidation();
     const { createUser, isLoading } = useUserApi();
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
+
+    const { canSubmit } = useFormState({
+        formConfig: getAddUserFormConfig(),
+        formData,
+        isSubmitting: isLoading,
+    });
 
     const handleBack = () => navigate('/app/users');
 
@@ -76,7 +83,13 @@ export function AddUsers() {
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },
         { type: 'cancel', onClick: handleCancel, disabled: isLoading },
-        { type: 'save', label: 'Create', onClick: handleSubmit, loading: isLoading },
+        {
+            type: 'save',
+            label: 'Create',
+            onClick: handleSubmit,
+            loading: isLoading,
+            disabled: !canSubmit,
+        },
     ];
 
     return (

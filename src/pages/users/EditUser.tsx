@@ -8,6 +8,8 @@ import { ProfileUrl } from '../../services/ApiUrls';
 import { FormErrors, IForm } from '../../components/ui/form';
 import { getEditUserFormConfig } from '../../configs/users/editUserFormConfig';
 import { useUserApi } from '../../hooks/users/useUserApi';
+import { useFormState } from '../../hooks/common/useFormState';
+import { hasFormChanges } from '../../utils/form/formHelpers';
 
 interface FormData {
     email: string;
@@ -29,12 +31,13 @@ export function EditUser() {
     const userId = searchParams.get('id');
     const navigate = useNavigate();
     const { addNotification } = useNotification();
-    const { getUser, updateUser, isLoading: isSubmitting } = useUserApi();
+    const { getUser, updateUser, toggleUserStatus, isLoading: isSubmitting } = useUserApi();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+    const [initialFormData, setInitialFormData] = useState<FormData | null>(null);
     const [formData, setFormData] = useState<FormData>({
         email: '',
         first_name: '',
@@ -48,6 +51,33 @@ export function EditUser() {
         state: '',
         postcode: '',
         country: '',
+    });
+
+    const isCurrentUser = formData.email === currentUserEmail;
+    const formConfig = getEditUserFormConfig(isCurrentUser);
+
+    const { canSubmit } = useFormState({
+        formConfig,
+        formData,
+        initialData: initialFormData,
+        isSubmitting,
+        customValidation: (data) => {
+            const hasPasswordChange = data.password?.trim() !== '';
+            const hasDataChanges = hasFormChanges(data, initialFormData, [
+                'email',
+                'first_name',
+                'last_name',
+                'role',
+                'address_line',
+                'street',
+                'city',
+                'state',
+                'postcode',
+                'country',
+            ]);
+
+            return hasDataChanges || hasPasswordChange;
+        },
     });
 
     useEffect(() => {
@@ -83,7 +113,7 @@ export function EditUser() {
 
         if (result.success && result.data) {
             const data = result.data;
-            setFormData({
+            const loadedData = {
                 email: data.user_details.email,
                 first_name: data.first_name,
                 last_name: data.last_name,
@@ -96,7 +126,9 @@ export function EditUser() {
                 state: data.address.state,
                 postcode: data.address.postcode,
                 country: data.address.country,
-            });
+            };
+            setFormData(loadedData);
+            setInitialFormData(loadedData);
         } else {
             setError(true);
             if (result.error) {
@@ -106,8 +138,23 @@ export function EditUser() {
         setLoading(false);
     };
 
-    const handleChange = (e: any) => {
+    const handleChange = async (e: any) => {
         const { name, value } = e.target;
+
+        if (name === 'is_active' && userId) {
+            const newValue = value === true || value === 'true';
+            setFormData({ ...formData, [name]: newValue });
+            const result = await toggleUserStatus(userId);
+
+            if (result.success) {
+                addNotification('success', `User ${newValue ? 'activated' : 'deactivated'} successfully`);
+            } else {
+                setFormData({ ...formData, [name]: !newValue });
+                addNotification('error', 'Failed to change user status', result.error);
+            }
+            return;
+        }
+
         setFormData({ ...formData, [name]: value });
 
         if (formErrors[name]) {
@@ -122,8 +169,8 @@ export function EditUser() {
     const handleSubmit = async () => {
         if (!userId) return;
 
-        const { password, ...dataToSend } = formData;
-        const dataWithPassword = password ? { ...formData, password: password.trim() } : dataToSend;
+        const { password, is_active, ...dataToSend } = formData;
+        const dataWithPassword = password ? { ...formData, password: password.trim() } : { ...dataToSend, is_active };
 
         const result = await updateUser(userId, dataWithPassword);
 
@@ -174,12 +221,10 @@ export function EditUser() {
         );
     }
 
-    const isCurrentUser = formData.email === currentUserEmail;
-
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },
         { type: 'cancel', onClick: handleCancel, disabled: isSubmitting },
-        { type: 'save', onClick: handleSubmit, loading: isSubmitting },
+        { type: 'save', onClick: handleSubmit, loading: isSubmitting, disabled: !canSubmit }, // ✅ ЗМІНЕНО
     ];
 
     return (
@@ -188,7 +233,7 @@ export function EditUser() {
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <IForm
-                    config={getEditUserFormConfig(isCurrentUser)}
+                    config={formConfig}
                     formData={formData}
                     errors={formErrors}
                     onChange={handleChange}

@@ -11,7 +11,7 @@ interface ActivityItem {
     bgColor: string;
 }
 
-interface UserActivitySectionProps {
+interface Props {
     createdByEmail?: string;
     createdAt?: string;
     updatedByEmail?: string;
@@ -21,7 +21,7 @@ interface UserActivitySectionProps {
     isActive: boolean;
 }
 
-export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
+export const UserActivitySection: React.FC<Props> = ({
     createdByEmail,
     createdAt,
     updatedByEmail,
@@ -32,7 +32,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
 }) => {
     const activities: ActivityItem[] = [];
 
-    // Форматування дати
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleString('en-US', {
@@ -44,7 +43,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
         });
     };
 
-    // Якщо є дані про створення
     if (createdByEmail && createdAt) {
         activities.push({
             icon: <FiUserPlus size={18} />,
@@ -56,7 +54,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
         });
     }
 
-    // Якщо є дані про оновлення (і вони не співпадають з датою створення)
     if (updatedByEmail && updatedAt && updatedAt !== createdAt) {
         activities.push({
             icon: <FiEdit size={18} />,
@@ -68,7 +65,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
         });
     }
 
-    // Якщо користувач деактивований
     if (!isActive && deactivatedByEmail && deactivatedAt) {
         activities.push({
             icon: <FiUserX size={18} />,
@@ -80,7 +76,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
         });
     }
 
-    // Якщо користувач активний, але була деактивація (значить активували знову)
     if (isActive && deactivatedByEmail && deactivatedAt) {
         activities.push({
             icon: <FiUserCheck size={18} />,
@@ -92,7 +87,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
         });
     }
 
-    // Сортуємо від найновішого до найстарішого
     activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     if (activities.length === 0) {
@@ -101,7 +95,6 @@ export const UserActivitySection: React.FC<UserActivitySectionProps> = ({
 
     return (
         <Box>
-            {/* Заголовок секції - такий самий стиль як в UserAddressSection */}
             <Typography
                 sx={{
                     fontSize: '20px',

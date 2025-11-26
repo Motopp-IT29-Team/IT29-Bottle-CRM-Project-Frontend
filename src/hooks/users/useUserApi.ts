@@ -67,8 +67,8 @@ interface UserDetails {
 }
 
 interface UsersListParams {
-    offset: number;
-    limit: number;
+    offset?: number;
+    limit?: number;
     status?: 'active' | 'inactive';
 }
 

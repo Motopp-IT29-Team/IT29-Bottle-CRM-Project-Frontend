@@ -15,11 +15,11 @@ interface Address {
     country: string;
 }
 
-interface UserAddressSectionProps {
+interface Props {
     address?: Address;
 }
 
-export const UserAddressSection: React.FC<UserAddressSectionProps> = ({ address }) => {
+export const UserAddressSection: React.FC<Props> = ({ address }) => {
     return (
         <Box sx={{ mb: 3 }}>
             <Typography

@@ -67,7 +67,7 @@ export const NotesCard: React.FC<Props> = ({ comments, note, onNoteChange, onSen
                     </Box>
                     <Box>
                         <Typography variant="h6" fontWeight={700} color="#1a3353">
-                            Activity & Notes
+                            Notes
                         </Typography>
                         <Typography variant="caption" color="text.secondary" fontWeight={600}>
                             {comments.length} {comments.length === 1 ? 'note' : 'notes'}

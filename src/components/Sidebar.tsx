@@ -1,35 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     AppBar,
     Avatar,
     Box,
+    Divider,
     Drawer,
     IconButton,
     List,
     ListItem,
-    Menu,
-    MenuItem,
+    Stack,
     Toolbar,
-    Typography,
-    Divider,
     Tooltip,
+    Typography,
 } from '@mui/material';
 import {
-    FiUsers,
-    FiPhone,
-    FiTrendingUp,
-    FiFolder,
-    FiFile,
-    FiUserPlus,
     FiBriefcase,
-    FiMenu,
+    FiFile,
+    FiFolder,
+    FiGrid,
     FiLogOut,
+    FiMenu,
+    FiPhone,
     FiSettings,
+    FiTrendingUp,
+    FiUserPlus,
+    FiUsers,
 } from 'react-icons/fi';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { fetchData } from './FetchData';
+import { fetchData, Header1 } from './FetchData';
 import { ProfileUrl } from '../services/ApiUrls';
-import { Header1 } from './FetchData';
+import { Dashboard } from '../pages/dashboard/Dashboard';
 import OrganizationModal from '../pages/organization/OrganizationModal';
 import Company from '../pages/company/Company';
 import AddCompany from '../pages/company/AddCompany';
@@ -76,13 +76,40 @@ export default function Sidebar() {
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [userDetail, setUserDetail] = useState<any>(null);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [organizationModal, setOrganizationModal] = useState(false);
-
+    const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
+    const [orgName, setOrgName] = useState<string>('Loading...');
     const drawerWidth = isCollapsed ? 80 : 240;
 
     useEffect(() => {
         userProfile();
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem('Token');
+        const org = localStorage.getItem('org');
+
+        if (!token || !org) return;
+
+        fetchData(`${ProfileUrl}/`, 'GET', undefined, {
+            Authorization: token,
+            org,
+            Accept: 'application/json',
+        })
+            .then((profile: any) => {
+                const newRole = profile?.user_obj?.role;
+                if (newRole) {
+                    localStorage.setItem('role', newRole);
+                    setRole(newRole);
+                }
+
+                const organizationName = profile?.current_org?.name || 'Organization';
+                setOrgName(organizationName);
+            })
+            .catch((err) => {
+                console.error('Error fetching profile:', err);
+                setOrgName('Organization');
+            });
     }, []);
 
     const userProfile = () => {
@@ -97,22 +124,20 @@ export default function Sidebar() {
             });
     };
 
+    const rawRole = role || '';
+    const isAdmin = rawRole.toUpperCase() === 'ADMIN';
+    const visibleNavItems = isAdmin ? navItems : navItems.filter((item) => item.key !== 'users');
+
     const getCurrentScreen = () => {
         const pathParts = location.pathname.split('/');
-        const screen = pathParts[2] || 'leads';
-        return screen;
+        return pathParts[2] || 'dashboard';
     };
 
     const isActive = (path: string) => {
+        if (path === '/app') {
+            return location.pathname === '/app' || location.pathname === '/app/';
+        }
         return location.pathname.startsWith(path);
-    };
-
-    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
     };
 
     const handleLogout = () => {
@@ -153,7 +178,7 @@ export default function Sidebar() {
                     zIndex: (theme) => theme.zIndex.drawer + 1,
                 }}
             >
-                <Toolbar sx={{ minHeight: '60px !important', justifyContent: 'space-between' }}>
+                <Toolbar sx={{ minHeight: '60px !important' }}>
                     <Typography
                         sx={{
                             fontSize: '20px',
@@ -165,76 +190,6 @@ export default function Sidebar() {
                     >
                         {getCurrentScreen()}
                     </Typography>
-
-                    <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-                        <Avatar
-                            src={userDetail?.user_details?.profile_pic || undefined}
-                            sx={{
-                                width: 40,
-                                height: 40,
-                                backgroundColor: '#6366f1',
-                                fontSize: '16px',
-                                fontWeight: 600,
-                            }}
-                        >
-                            {getInitials()}
-                        </Avatar>
-                    </IconButton>
-
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleMenuClose}
-                        PaperProps={{
-                            sx: {
-                                mt: 1.5,
-                                borderRadius: '12px',
-                                minWidth: 220,
-                                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
-                            },
-                        }}
-                    >
-                        <Box sx={{ px: 2, py: 1.5 }}>
-                            {userDetail?.first_name || userDetail?.last_name ? (
-                                <>
-                                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
-                                        {`${userDetail?.first_name || ''} ${userDetail?.last_name || ''}`.trim()}
-                                    </Typography>
-                                    <Typography sx={{ fontSize: '12px', color: '#6b7280', mb: 0.5 }}>
-                                        {userDetail?.user_details?.email}
-                                    </Typography>
-                                </>
-                            ) : (
-                                <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#111827', mb: 0.5 }}>
-                                    {userDetail?.user_details?.email}
-                                </Typography>
-                            )}
-                            <Typography sx={{ fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
-                                {userDetail?.role?.toLowerCase()}
-                            </Typography>
-                        </Box>
-                        <Divider />
-                        <MenuItem
-                            onClick={() => {
-                                handleMenuClose();
-                                setOrganizationModal(true);
-                            }}
-                            sx={{ gap: 1.5, py: 1.5 }}
-                        >
-                            <FiSettings size={18} />
-                            Organization
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => {
-                                handleMenuClose();
-                                handleLogout();
-                            }}
-                            sx={{ gap: 1.5, py: 1.5, color: '#ef4444' }}
-                        >
-                            <FiLogOut size={18} />
-                            Sign Out
-                        </MenuItem>
-                    </Menu>
                 </Toolbar>
             </AppBar>
 
@@ -303,7 +258,7 @@ export default function Sidebar() {
 
                 {/* Navigation */}
                 <List sx={{ px: 1.5, py: 2, flex: 1 }}>
-                    {navItems.map((item) => {
+                    {visibleNavItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
 
@@ -374,28 +329,144 @@ export default function Sidebar() {
                     })}
                 </List>
 
-                {/* User Profile at Bottom */}
-                <Box sx={{ p: 1.5, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <Tooltip
-                        title={
-                            isCollapsed
-                                ? `${userDetail?.first_name || ''} ${userDetail?.last_name || ''}`.trim() ||
-                                  userDetail?.user_details?.email
-                                : ''
-                        }
-                        placement="right"
+                {/* User Section at Bottom */}
+                {!isCollapsed && (
+                    <Box sx={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        {/* User Profile */}
+                        <Box sx={{ p: 2 }}>
+                            <Stack direction="row" spacing={1.5} alignItems="center">
+                                <Avatar
+                                    src={userDetail?.user_details?.profile_pic || undefined}
+                                    sx={{
+                                        width: 40,
+                                        height: 40,
+                                        backgroundColor: '#6366f1',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {getInitials()}
+                                </Avatar>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            color: 'white',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                        }}
+                                    >
+                                        {getDisplayName()}
+                                    </Typography>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '12px',
+                                            color: 'rgba(255, 255, 255, 0.5)',
+                                            textTransform: 'capitalize',
+                                        }}
+                                    >
+                                        {userDetail?.role?.toLowerCase() || 'User'}
+                                    </Typography>
+                                </Box>
+                            </Stack>
+
+                            {/* Organization */}
+                            <Box
+                                sx={{
+                                    mt: 1.5,
+                                    p: 1,
+                                    borderRadius: '8px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                }}
+                            >
+                                <Typography
+                                    sx={{
+                                        fontSize: '11px',
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                        mb: 0.25,
+                                    }}
+                                >
+                                    Organization
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontSize: '13px',
+                                        color: 'white',
+                                        fontWeight: 500,
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                    }}
+                                >
+                                    {orgName}
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.08)' }} />
+
+                        {/* Menu Actions */}
+                        <Box sx={{ p: 1 }}>
+                            <Box
+                                onClick={() => setOrganizationModal(true)}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1.5,
+                                    px: 1.5,
+                                    py: 1.25,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                        color: 'white',
+                                    },
+                                }}
+                            >
+                                <FiSettings size={18} />
+                                <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Organization</Typography>
+                            </Box>
+
+                            <Box
+                                onClick={handleLogout}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1.5,
+                                    px: 1.5,
+                                    py: 1.25,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    color: '#ef4444',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    },
+                                }}
+                            >
+                                <FiLogOut size={18} />
+                                <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Sign Out</Typography>
+                            </Box>
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Collapsed State User Icon */}
+                {isCollapsed && (
+                    <Box
+                        sx={{
+                            p: 1.5,
+                            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                        }}
                     >
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                p: 1.5,
-                                borderRadius: '10px',
-                                transition: 'all 0.2s ease',
-                                overflow: 'hidden',
-                            }}
-                        >
+                        <Tooltip title={getDisplayName()} placement="right">
                             <Avatar
                                 src={userDetail?.user_details?.profile_pic || undefined}
                                 sx={{
@@ -404,48 +475,14 @@ export default function Sidebar() {
                                     backgroundColor: '#6366f1',
                                     fontSize: '14px',
                                     fontWeight: 600,
-                                    flexShrink: 0,
+                                    cursor: 'pointer',
                                 }}
                             >
                                 {getInitials()}
                             </Avatar>
-                            <Box
-                                sx={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    opacity: isCollapsed ? 0 : 1,
-                                    transition: 'opacity 0.2s ease',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <Typography
-                                    sx={{
-                                        fontSize: '13px',
-                                        fontWeight: 600,
-                                        color: 'white',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                    }}
-                                >
-                                    {getDisplayName()}
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        fontSize: '11px',
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                        textTransform: 'capitalize',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                    }}
-                                >
-                                    {userDetail?.role?.toLowerCase() || 'User'}
-                                </Typography>
-                            </Box>
-                        </Box>
-                    </Tooltip>
-                </Box>
+                        </Tooltip>
+                    </Box>
+                )}
             </Drawer>
 
             {/* Main Content */}
@@ -459,7 +496,6 @@ export default function Sidebar() {
                     }}
                 >
                     <Routes>
-                        <Route index element={<Leads />} />
                         <Route path="/app/leads" element={<Leads />} />
                         <Route path="/app/leads/add-leads" element={<AddLead />} />
                         <Route path="/app/leads/edit-lead" element={<EditLead />} />
@@ -476,10 +512,15 @@ export default function Sidebar() {
                         <Route path="/app/accounts/add-account" element={<AddAccount />} />
                         <Route path="/app/accounts/account-details" element={<AccountDetails />} />
                         <Route path="/app/accounts/edit-account" element={<EditAccount />} />
-                        <Route path="/app/users" element={<Users />} />
-                        <Route path="/app/users/add-users" element={<AddUsers />} />
-                        <Route path="/app/users/edit-user" element={<EditUser />} />
-                        <Route path="/app/users/user-details" element={<UserDetails />} />
+                        {isAdmin && (
+                            <>
+                                <Route path="/app/users" element={<Users />} />
+                                <Route path="/app/users/add-users" element={<AddUsers />} />
+                                <Route path="/app/users/edit-user" element={<EditUser />} />
+                                <Route path="/app/users/user-details" element={<UserDetails />} />
+                            </>
+                        )}
+
                         <Route path="/app/opportunities" element={<Opportunities />} />
                         <Route path="/app/opportunities/add-opportunity" element={<AddOpportunity />} />
                         <Route path="/app/opportunities/opportunity-details" element={<OpportunityDetails />} />

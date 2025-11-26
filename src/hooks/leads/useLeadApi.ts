@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { fetchData } from '../../components/FetchData';
 import { LeadUrl, SERVER } from '../../services/ApiUrls';
 import { formatErrorMessage, parseApiErrors } from '../../utils/errorFormatter';
-import { FormErrors } from '../../components/ui/form';
+import { FormErrors, UploadedFile } from '../../components/ui/form'; // ✅ ДОДАНО UploadedFile
 
 interface ApiResult<T = any> {
     success: boolean;
@@ -39,7 +39,7 @@ interface LeadFormData {
     postcode: string;
     country: string;
     description: string;
-    actualFile?: File | null;
+    attachments: UploadedFile[] | null;
     assigned_to: string[];
     contacts: string[];
     tags: string[];
@@ -103,6 +103,7 @@ interface LeadDetails {
     };
     tags: any[];
     assigned_to: any[];
+    lead_attachment: UploadedFile[] | null;
 }
 
 interface LeadsListParams {
@@ -254,8 +255,12 @@ export const useLeadApi = () => {
             formDataObj.append('postcode', formData.postcode);
             formDataObj.append('country', formData.country);
 
-            if (formData.actualFile) {
-                formDataObj.append('lead_attachment', formData.actualFile);
+            if (formData.attachments && formData.attachments.length > 0) {
+                formData.attachments.forEach((fileObj) => {
+                    if (fileObj.isNew && fileObj.file) {
+                        formDataObj.append('lead_attachment', fileObj.file);
+                    }
+                });
             }
 
             formData.assigned_to.forEach((id) => formDataObj.append('assigned_to', id));
@@ -302,13 +307,21 @@ export const useLeadApi = () => {
             if (org) headers.org = org;
 
             const formDataObj = new FormData();
+
             Object.keys(formData).forEach((key) => {
                 const value = (formData as any)[key];
-                if (key === 'actualFile' && value) {
-                    formDataObj.append('lead_attachment', value);
+
+                if (key === 'attachments') {
+                    if (value && value.length > 0) {
+                        value.forEach((fileObj: UploadedFile) => {
+                            if (fileObj.isNew && fileObj.file) {
+                                formDataObj.append('lead_attachment', fileObj.file);
+                            }
+                        });
+                    }
                 } else if (key === 'assigned_to' || key === 'contacts' || key === 'tags') {
                     value.forEach((item: string) => formDataObj.append(key, item));
-                } else if (key !== 'actualFile') {
+                } else {
                     formDataObj.append(key, value?.toString() || '');
                 }
             });

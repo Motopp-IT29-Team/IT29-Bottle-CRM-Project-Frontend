@@ -5,6 +5,8 @@ import { IToggle } from '../IToggle';
 import { IAutocomplete } from '../IAutocomplete';
 import { IFileUpload } from '../IFileUpload';
 import { IFormFieldProps } from './types';
+import { IMultiFileUpload, UploadedFile } from '../IMultiFileUpload';
+import { IDatePicker } from '../IDatePicker';
 
 export const IFormField: React.FC<IFormFieldProps> = ({ field, value, error, onChange, disabled = false }) => {
     const errorMessage = error?.[0];
@@ -103,6 +105,39 @@ export const IFormField: React.FC<IFormFieldProps> = ({ field, value, error, onC
                     disabled={disabled || field.disabled}
                     placeholder={field.placeholder}
                     accept={field.accept}
+                />
+            );
+
+        case 'multifile':
+            return (
+                <IMultiFileUpload
+                    label={field.label}
+                    value={value || []}
+                    onChange={(files: UploadedFile[]) =>
+                        onChange({ target: { name: field.name, value: files } } as any)
+                    }
+                    error={errorMessage}
+                    disabled={disabled || field.disabled}
+                    placeholder={field.placeholder}
+                    accept={field.accept}
+                    maxFiles={field.maxFiles}
+                    maxSizeInMB={field.maxSizeInMB}
+                />
+            );
+
+        case 'date':
+            return (
+                <IDatePicker
+                    label={field.label}
+                    name={field.name}
+                    value={value || null}
+                    onChange={onChange}
+                    error={errorMessage}
+                    disabled={disabled || field.disabled}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                    minDate={field.minDate}
+                    maxDate={field.maxDate}
                 />
             );
 

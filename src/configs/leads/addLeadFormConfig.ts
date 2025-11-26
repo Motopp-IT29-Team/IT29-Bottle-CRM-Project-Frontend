@@ -2,14 +2,15 @@ import { FiUser, FiBriefcase, FiMapPin, FiFileText } from 'react-icons/fi';
 import { IFormConfig } from '../../components/ui/form';
 import { COUNTRIES } from '../../constants/countries';
 
-interface GetLeadFormConfigParams {
+interface Params {
     industries?: Array<{ value: string; label: string }>;
     statuses?: Array<{ value: string; label: string }>;
     sources?: Array<{ value: string; label: string }>;
     countries?: Array<{ code: string; name: string }>;
+    users?: Array<{ id: string; user__email: string }>;
 }
 
-export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFormConfig => ({
+export const getAddLeadFormConfig = (params: Params = {}): IFormConfig => ({
     sections: [
         {
             title: 'Lead Information',
@@ -37,11 +38,24 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     options: params.industries?.length
                         ? params.industries
                         : [
-                            { value: 'ADVERTISING', label: 'Advertising' },
-                            { value: 'AGRICULTURE', label: 'Agriculture' },
-                            { value: 'BANKING', label: 'Banking' },
-                            { value: 'BIOTECHNOLOGY', label: 'Biotechnology' },
-                        ],
+                              { value: 'ADVERTISING', label: 'Advertising' },
+                              { value: 'AGRICULTURE', label: 'Agriculture' },
+                              { value: 'BANKING', label: 'Banking' },
+                              { value: 'BIOTECHNOLOGY', label: 'Biotechnology' },
+                              { value: 'COMPUTER', label: 'Computer' },
+                              { value: 'EDUCATION', label: 'Education' },
+                              { value: 'ELECTRONICS', label: 'Electronics' },
+                              { value: 'ENERGY', label: 'Energy' },
+                              { value: 'FINANCE', label: 'Finance' },
+                              { value: 'HEALTHCARE', label: 'Healthcare' },
+                              { value: 'INSURANCE', label: 'Insurance' },
+                              { value: 'LEGAL', label: 'Legal' },
+                              { value: 'MANUFACTURING', label: 'Manufacturing' },
+                              { value: 'REAL ESTATE', label: 'Real Estate' },
+                              { value: 'SOFTWARE', label: 'Software' },
+                              { value: 'TECHNOLOGY', label: 'Technology' },
+                              { value: 'TELECOMMUNICATIONS', label: 'Telecommunications' },
+                          ],
                 },
                 {
                     name: 'status',
@@ -52,12 +66,12 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     options: params.statuses?.length
                         ? params.statuses
                         : [
-                            { value: 'assigned', label: 'Assigned' },
-                            { value: 'in process', label: 'In Process' },
-                            { value: 'converted', label: 'Converted' },
-                            { value: 'recycled', label: 'Recycled' },
-                            { value: 'closed', label: 'Closed' },
-                        ],
+                              { value: 'new', label: 'New' },
+                              { value: 'working', label: 'Working' },
+                              { value: 'qualified', label: 'Qualified' },
+                              { value: 'unqualified', label: 'Unqualified' },
+                              { value: 'on hold', label: 'On Hold' },
+                          ],
                 },
                 {
                     name: 'source',
@@ -68,14 +82,14 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     options: params.sources?.length
                         ? params.sources
                         : [
-                            { value: 'call', label: 'Call' },
-                            { value: 'email', label: 'Email' },
-                            { value: 'existing customer', label: 'Existing Customer' },
-                            { value: 'partner', label: 'Partner' },
-                            { value: 'public relations', label: 'Public Relations' },
-                            { value: 'campaign', label: 'Campaign' },
-                            { value: 'other', label: 'Other' },
-                        ],
+                              { value: 'call', label: 'Call' },
+                              { value: 'email', label: 'Email' },
+                              { value: 'existing customer', label: 'Existing Customer' },
+                              { value: 'partner', label: 'Partner' },
+                              { value: 'public relations', label: 'Public Relations' },
+                              { value: 'compaign', label: 'Campaign' },
+                              { value: 'other', label: 'Other' },
+                          ],
                 },
                 {
                     name: 'opportunity_amount',
@@ -106,10 +120,10 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     placeholder: 'Select budget range',
                     options: [
-                        { value: '<$10k', label: '<$10k' },
-                        { value: '$10k-$50k', label: '$10k-$50k' },
-                        { value: '$50k-$100k', label: '$50k-$100k' },
-                        { value: '>$100k', label: '>$100k' },
+                        { value: 'less_5k', label: 'Less than €5,000' },
+                        { value: '5k_10k', label: '€5,000–€10,000' },
+                        { value: '10k_25k', label: '€10,000–€25,000' },
+                        { value: 'over_25k', label: 'Over €25,000' },
                     ],
                 },
                 {
@@ -118,11 +132,29 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     placeholder: 'Select timeframe',
                     options: [
-                        { value: 'Immediate', label: 'Immediate' },
-                        { value: '1-3 months', label: '1-3 months' },
-                        { value: '3-6 months', label: '3-6 months' },
-                        { value: '>6 months', label: '>6 months' },
+                        { value: '1_week', label: 'Within 1 week' },
+                        { value: '1_month', label: 'Within 1 month' },
+                        { value: '3_months', label: 'Within 3 months' },
+                        { value: 'more_3_months', label: 'More than 3 months' },
                     ],
+                },
+                {
+                    name: 'close_date',
+                    label: 'Expected Close Date',
+                    type: 'date',
+                    placeholder: 'Select date',
+                },
+                {
+                    name: 'assigned_to',
+                    label: 'Assigned To',
+                    type: 'autocomplete',
+                    placeholder: 'Select users',
+                    options:
+                        params.users?.map((user) => ({
+                            value: user.id,
+                            label: user.user__email,
+                        })) || [],
+                    getOptionLabel: (option: any) => option.label || option.user__email || option,
                 },
             ],
         },
@@ -137,9 +169,10 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     options: [
                         { value: 'Mr', label: 'Mr' },
-                        { value: 'Mrs', label: 'Mrs' },
                         { value: 'Ms', label: 'Ms' },
+                        { value: 'Mrs', label: 'Mrs' },
                         { value: 'Dr', label: 'Dr' },
+                        { value: 'Prof', label: 'Prof' },
                     ],
                 },
                 {
@@ -184,8 +217,7 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     options: [
                         { value: 'Sales', label: 'Sales' },
                         { value: 'Marketing', label: 'Marketing' },
-                        { value: 'IT', label: 'IT' },
-                        { value: 'HR', label: 'HR' },
+                        { value: 'Support', label: 'Support' },
                         { value: 'Finance', label: 'Finance' },
                         { value: 'Operations', label: 'Operations' },
                     ],
@@ -196,10 +228,11 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     options: [
                         { value: 'English', label: 'English' },
-                        { value: 'Spanish', label: 'Spanish' },
-                        { value: 'French', label: 'French' },
+                        { value: 'Dutch', label: 'Dutch' },
+                        { value: 'Arabic', label: 'Arabic' },
                         { value: 'German', label: 'German' },
-                        { value: 'Chinese', label: 'Chinese' },
+                        { value: 'French', label: 'French' },
+                        { value: 'Spanish', label: 'Spanish' },
                     ],
                 },
                 {
@@ -277,10 +310,13 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     rows: 6,
                 },
                 {
-                    name: 'lead_attachment',
-                    label: 'Attachment',
-                    type: 'file',
-                    accept: 'image/*,application/pdf,.doc,.docx',
+                    name: 'attachments',
+                    label: 'Attachments',
+                    type: 'multifile',
+                    placeholder: 'Upload documents, images, or PDFs',
+                    accept: 'image/*,application/pdf,.doc,.docx,.xls,.xlsx',
+                    maxFiles: 10,
+                    maxSizeInMB: 10,
                 },
             ],
         },
