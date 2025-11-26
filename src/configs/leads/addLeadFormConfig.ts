@@ -73,7 +73,7 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                             { value: 'existing customer', label: 'Existing Customer' },
                             { value: 'partner', label: 'Partner' },
                             { value: 'public relations', label: 'Public Relations' },
-                            { value: 'campaign', label: 'Campaign' },
+                            { value: 'compaign', label: 'Campaign' },
                             { value: 'other', label: 'Other' },
                         ],
                 },
@@ -137,9 +137,10 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     options: [
                         { value: 'Mr', label: 'Mr' },
-                        { value: 'Mrs', label: 'Mrs' },
                         { value: 'Ms', label: 'Ms' },
+                        { value: 'Mrs', label: 'Mrs' },
                         { value: 'Dr', label: 'Dr' },
+                        { value: 'Prof', label: 'Prof' },
                     ],
                 },
                 {
@@ -184,8 +185,7 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     options: [
                         { value: 'Sales', label: 'Sales' },
                         { value: 'Marketing', label: 'Marketing' },
-                        { value: 'IT', label: 'IT' },
-                        { value: 'HR', label: 'HR' },
+                        { value: 'Support', label: 'Support' },
                         { value: 'Finance', label: 'Finance' },
                         { value: 'Operations', label: 'Operations' },
                     ],
@@ -196,10 +196,11 @@ export const getAddLeadFormConfig = (params: GetLeadFormConfigParams = {}): IFor
                     type: 'select',
                     options: [
                         { value: 'English', label: 'English' },
-                        { value: 'Spanish', label: 'Spanish' },
-                        { value: 'French', label: 'French' },
+                        { value: 'Dutch', label: 'Dutch' },
+                        { value: 'Arabic', label: 'Arabic' },
                         { value: 'German', label: 'German' },
-                        { value: 'Chinese', label: 'Chinese' },
+                        { value: 'French', label: 'French' },
+                        { value: 'Spanish', label: 'Spanish' },
                     ],
                 },
                 {
