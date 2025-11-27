@@ -196,7 +196,7 @@ export function EditLead() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Leads" crntPage="Edit Lead" actions={actions} />
 
             <LeadLoadingBackdrop open={isSubmitting} />

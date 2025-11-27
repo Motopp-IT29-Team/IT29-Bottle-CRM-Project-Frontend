@@ -224,11 +224,11 @@ export function EditUser() {
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Users', onClick: handleBack },
         { type: 'cancel', onClick: handleCancel, disabled: isSubmitting },
-        { type: 'save', onClick: handleSubmit, loading: isSubmitting, disabled: !canSubmit }, // ✅ ЗМІНЕНО
+        { type: 'save', onClick: handleSubmit, loading: isSubmitting, disabled: !canSubmit },
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Users" crntPage="Edit User" actions={actions} />
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
