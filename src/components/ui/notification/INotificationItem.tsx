@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { FiX, FiCheckCircle, FiAlertCircle, FiAlertTriangle, FiInfo } from 'react-icons/fi';
-import { Notification } from '../types/notification';
+import { Notification } from '../../../types/notification';
 
-interface NotificationItemProps {
+interface Props {
     notification: Notification;
     onClose: (id: string) => void;
 }
@@ -39,7 +39,7 @@ const notificationConfig = {
     },
 };
 
-export const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onClose }) => {
+export const INotificationItem: React.FC<Props> = ({ notification, onClose }) => {
     const [isLeaving, setIsLeaving] = useState(false);
     const config = notificationConfig[notification.type];
     const Icon = config.icon;

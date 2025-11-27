@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useLeadFormData } from '../../hooks/lead/useLeadFormData';
-import { useLeadValidation } from '../../hooks/lead/useLeadValidation';
+import { useLeadFormData } from '../../hooks/leads/useLeadFormData';
+import { useLeadValidation } from '../../hooks/leads/useLeadValidation';
 import { useLeadApi } from '../../hooks/leads/useLeadApi';
 import { useFormState } from '../../hooks/common/useFormState';
 import { IForm, FormErrors } from '../../components/ui/form';
 import { getEditLeadFormConfig } from '../../configs/leads/editLeadFormConfig';
 import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 import { COUNTRIES } from '../../constants/countries';
 

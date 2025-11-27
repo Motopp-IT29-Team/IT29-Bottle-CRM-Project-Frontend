@@ -4,7 +4,7 @@ import Login from './pages/auth/Login';
 import { Home } from './pages/home/Home';
 import { ActivateUser } from './pages/auth/ActivateUser';
 import { NotificationProvider } from './context/NotificationContext';
-import { NotificationContainer } from './components/NotificationContainer';
+import { INotificationContainer } from './components/ui/notification/INotificationContainer';
 
 function App() {
     return (
@@ -19,7 +19,7 @@ function App() {
                     </Routes>
                 </Router>
 
-                <NotificationContainer />
+                <INotificationContainer />
             </NotificationProvider>
         </>
     );

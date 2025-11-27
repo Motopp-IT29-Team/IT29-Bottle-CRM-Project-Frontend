@@ -8,7 +8,7 @@ import { useUserValidation } from '../../hooks/users/useUserValidation';
 import { useUserApi } from '../../hooks/users/useUserApi';
 import { useFormState } from '../../hooks/common/useFormState';
 import { UsersLoadingBackdrop } from '../../components/users/UsersLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 
 const INITIAL_FORM_DATA: UserFormData = {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     USER_DETAILS_PAGE_STYLES,

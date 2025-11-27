@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import Sidebar from '../../components/Sidebar';
 import Organization from '../organization/Organization';
+import { ISidebar } from '../../components/ui';
 
 export const Home = () => {
     const navigate = useNavigate();
@@ -18,5 +18,5 @@ export const Home = () => {
         }
     }, [navigate]);
 
-    return <Box sx={{}}>{org ? <Sidebar /> : <Organization />}</Box>;
+    return <Box sx={{}}>{org ? <ISidebar /> : <Organization />}</Box>;
 };

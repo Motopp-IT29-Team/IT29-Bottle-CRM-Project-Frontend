@@ -2,7 +2,7 @@ import React from 'react';
 import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
 import { FaBriefcase, FaDollarSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
 import FormateTime from '../../FormateTime';
-import { useLeadColors } from '../../../hooks/lead/useLeadColors';
+import { useLeadColors } from '../../../hooks/leads/useLeadColors';
 
 interface Props {
     salutation: string;

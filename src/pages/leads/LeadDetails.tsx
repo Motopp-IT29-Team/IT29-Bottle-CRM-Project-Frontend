@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
 import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt } from 'react-icons/fa';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
 import { IActionModal } from '../../components/ui';
-import { useLeadDetails } from '../../hooks/lead/useLeadDetails';
-import { useLeadActions } from '../../hooks/lead/useLeadActions';
+import { useLeadDetails } from '../../hooks/leads/useLeadDetails';
+import { useLeadActions } from '../../hooks/leads/useLeadActions';
 import { useNotification } from '../../context/NotificationContext';
 
 export function LeadDetails() {
