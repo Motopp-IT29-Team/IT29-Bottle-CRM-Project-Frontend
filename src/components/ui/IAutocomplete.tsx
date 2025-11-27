@@ -45,6 +45,11 @@ export const IAutocomplete: React.FC<Props> = ({
                     size="small"
                     limitTags={limitTags}
                     filterSelectedOptions
+                    isOptionEqualToValue={(option, value) => {
+                        const optionId = option.value || option.id || option;
+                        const valueId = value.value || value.id || value;
+                        return optionId === valueId;
+                    }}
                     renderTags={(tagValue, getTagProps) =>
                         tagValue.map((option, index) => (
                             <Chip

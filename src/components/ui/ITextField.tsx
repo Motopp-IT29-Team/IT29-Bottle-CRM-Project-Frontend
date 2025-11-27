@@ -1,5 +1,6 @@
-import React from 'react';
-import { Box, Typography, TextField, InputAdornment } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, TextField, InputAdornment, IconButton } from '@mui/material';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { RequiredTextField } from '../../styles/CssStyled';
 import { TEXT_FIELD_STYLES } from '../../styles/ITextFieldStyles';
 import { FIELD_BOX_STYLES, FIELD_LABEL_STYLES, REQUIRED_ASTERISK_STYLES } from '../../styles/UIStyles';
@@ -13,7 +14,7 @@ interface Props {
     disabled?: boolean;
     required?: boolean;
     placeholder?: string;
-    type?: 'text' | 'email' | 'number' | 'tel';
+    type?: 'text' | 'email' | 'number' | 'tel' | 'password';
     multiline?: boolean;
     rows?: number;
     endAdornment?: React.ReactNode;
@@ -35,6 +36,38 @@ export const ITextField: React.FC<Props> = ({
 }) => {
     const TextFieldComponent = required ? RequiredTextField : TextField;
 
+    const [showPassword, setShowPassword] = useState(false);
+
+    const inputType = type === 'password' && showPassword ? 'text' : type;
+
+    const getEndAdornment = () => {
+        if (type === 'password') {
+            return (
+                <InputAdornment position="end">
+                    <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        sx={{
+                            color: '#9ca3af',
+                            '&:hover': {
+                                color: '#6b7280',
+                                backgroundColor: 'transparent',
+                            },
+                        }}
+                    >
+                        {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                    </IconButton>
+                </InputAdornment>
+            );
+        }
+
+        if (endAdornment) {
+            return <InputAdornment position="end">{endAdornment}</InputAdornment>;
+        }
+
+        return undefined;
+    };
+
     return (
         <Box sx={FIELD_BOX_STYLES}>
             <Typography sx={FIELD_LABEL_STYLES}>
@@ -46,20 +79,16 @@ export const ITextField: React.FC<Props> = ({
                 onChange={onChange}
                 placeholder={placeholder}
                 size="small"
-                type={type}
+                type={inputType}
                 multiline={multiline}
                 rows={rows}
                 error={!!error}
                 helperText={error}
                 disabled={disabled}
                 required={required}
-                InputProps={
-                    endAdornment
-                        ? {
-                              endAdornment: <InputAdornment position="end">{endAdornment}</InputAdornment>,
-                          }
-                        : undefined
-                }
+                InputProps={{
+                    endAdornment: getEndAdornment(),
+                }}
                 sx={TEXT_FIELD_STYLES}
             />
         </Box>

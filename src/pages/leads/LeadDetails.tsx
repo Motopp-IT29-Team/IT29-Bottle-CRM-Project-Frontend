@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
 import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt } from 'react-icons/fa';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
 import { IActionModal } from '../../components/ui';
-import { useLeadDetails } from '../../hooks/lead/useLeadDetails';
-import { useLeadActions } from '../../hooks/lead/useLeadActions';
+import { useLeadDetails } from '../../hooks/leads/useLeadDetails';
+import { useLeadActions } from '../../hooks/leads/useLeadActions';
 import { useNotification } from '../../context/NotificationContext';
 
 export function LeadDetails() {
@@ -182,11 +182,10 @@ export function LeadDetails() {
 
                     <DetailSection title="Lead Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
                         <DetailField label="Company Name" value={leadDetails.account_name} />
-                        <DetailField label="Industry" value={leadDetails.industry} />
-                        <DetailField label="Department" value={leadDetails.department} />
-                        <DetailField label="Rating" value={leadDetails.rating} />
-                        <DetailField label="Budget Range" value={leadDetails.budget_range} />
-                        <DetailField label="Decision Timeframe" value={leadDetails.decision_timeframe} />
+                        <DetailField label="Industry" value={leadDetails.industry_display} />
+                        <DetailField label="Department" value={leadDetails.department_display} />
+                        <DetailField label="Budget Range" value={leadDetails.budget_range_display} />
+                        <DetailField label="Decision Timeframe" value={leadDetails.decision_timeframe_display} />
                         <DetailField
                             label="Website"
                             value={
@@ -199,13 +198,11 @@ export function LeadDetails() {
                                 )
                             }
                         />
-                        <DetailField label="Preferred Language" value={leadDetails.preferred_language} />
                     </DetailSection>
 
                     <DetailSection title="Contact Information" icon={<FaUser style={{ color: '#6366f1' }} />}>
                         <DetailField label="First Name" value={leadDetails.first_name} />
                         <DetailField label="Last Name" value={leadDetails.last_name} />
-                        <DetailField label="Job Title" value={leadDetails.title} />
                         <DetailField
                             label="Email"
                             value={
@@ -217,6 +214,7 @@ export function LeadDetails() {
                             }
                         />
                         <DetailField label="Phone" value={leadDetails.phone} />
+                        <DetailField label="Preferred Language" value={leadDetails.preferred_language} />
                         <DetailField label="Do Not Call" value={leadDetails.do_not_call ? 'Yes' : 'No'} />
                     </DetailSection>
 

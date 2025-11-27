@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useLeadFormData } from '../../hooks/lead/useLeadFormData';
-import { useLeadValidation } from '../../hooks/lead/useLeadValidation';
+import { useLeadFormData } from '../../hooks/leads/useLeadFormData';
+import { useLeadValidation } from '../../hooks/leads/useLeadValidation';
 import { useLeadApi } from '../../hooks/leads/useLeadApi';
+import { useFormState } from '../../hooks/common/useFormState';
 import { IForm, FormErrors } from '../../components/ui/form';
 import { getEditLeadFormConfig } from '../../configs/leads/editLeadFormConfig';
 import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 import { COUNTRIES } from '../../constants/countries';
 
@@ -22,9 +23,17 @@ export function EditLead() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
+    const [initialFormData, setInitialFormData] = useState<any>(null);
 
     const { formData, handleChange, setFormData } = useLeadFormData();
     const { validationErrors, validateForm, setValidationErrors } = useLeadValidation();
+
+    const { canSubmit } = useFormState({
+        formConfig: getEditLeadFormConfig(),
+        formData,
+        initialData: initialFormData,
+        isSubmitting,
+    });
 
     useEffect(() => {
         if (leadId) {
@@ -36,9 +45,8 @@ export function EditLead() {
 
     const getCountryCode = (countryNameOrCode: string): string => {
         if (!countryNameOrCode) return '';
-        // If it's already a code (2 letters), return as is
         if (countryNameOrCode.length === 2) return countryNameOrCode.toUpperCase();
-        // Find code from name
+
         const country = COUNTRIES.find((c) => c.name.toLowerCase() === countryNameOrCode.toLowerCase());
         return country?.code || '';
     };
@@ -51,7 +59,16 @@ export function EditLead() {
 
         if (result.success && result.data) {
             const lead = result.data.lead;
-            setFormData({
+
+            const attachments = result.data.attachments || [];
+            const formattedAttachments = attachments.map((att: any) => ({
+                id: att.id,
+                name: att.file_name,
+                url: att.file_path,
+                isNew: false,
+            }));
+
+            const loadedData = {
                 first_name: lead.first_name || '',
                 last_name: lead.last_name || '',
                 title: lead.title || '',
@@ -79,12 +96,14 @@ export function EditLead() {
                 postcode: lead.postcode || '',
                 country: getCountryCode(lead.country) || '',
                 description: lead.description || '',
-                lead_attachment: null,
+                attachments: formattedAttachments,
                 actualFile: null,
                 assigned_to: lead.assigned_to?.map((u: any) => u.id) || [],
                 contacts: [],
                 tags: lead.tags || [],
-            });
+            };
+            setFormData(loadedData);
+            setInitialFormData(loadedData);
         } else {
             setError(true);
             if (result.error) {
@@ -173,11 +192,11 @@ export function EditLead() {
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Lead Details', onClick: handleBack },
         { type: 'cancel', onClick: handleCancel, disabled: isSubmitting },
-        { type: 'save', onClick: handleSubmit, loading: isSubmitting },
+        { type: 'save', onClick: handleSubmit, loading: isSubmitting, disabled: !canSubmit },
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Leads" crntPage="Edit Lead" actions={actions} />
 
             <LeadLoadingBackdrop open={isSubmitting} />

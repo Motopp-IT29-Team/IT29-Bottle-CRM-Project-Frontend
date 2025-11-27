@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { useLeadFormData, INITIAL_LEAD_FORM_DATA } from '../../hooks/lead/useLeadFormData';
-import { useLeadValidation } from '../../hooks/lead/useLeadValidation';
+import { useLeadFormData, INITIAL_LEAD_FORM_DATA } from '../../hooks/leads/useLeadFormData';
+import { useLeadValidation } from '../../hooks/leads/useLeadValidation';
 import { useLeadApi } from '../../hooks/leads/useLeadApi';
+import { useFormState } from '../../hooks/common/useFormState';
 import { IForm, FormErrors } from '../../components/ui/form';
 import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ModernAppBar';
+import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 import { getAddLeadFormConfig } from '../../configs/leads/addLeadFormConfig';
 
@@ -14,12 +15,31 @@ export function AddLead() {
     const navigate = useNavigate();
 
     const { addNotification } = useNotification();
-    const { createLead, checkDuplicate, isLoading } = useLeadApi();
+    const { getLeads, createLead, checkDuplicate, isLoading } = useLeadApi();
 
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
+    const [users, setUsers] = useState<any[]>([]);
 
     const { formData, handleChange, resetForm } = useLeadFormData(INITIAL_LEAD_FORM_DATA);
     const { validationErrors, validateForm, setValidationErrors } = useLeadValidation();
+
+    const formConfig = getAddLeadFormConfig({ users });
+
+    const { canSubmit } = useFormState({
+        formConfig,
+        formData,
+        isSubmitting: isLoading,
+    });
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const result = await getLeads();
+            if (result.success && result.data?.users) {
+                setUsers(result.data.users);
+            }
+        };
+        fetchUsers();
+    }, []);
 
     const handleBack = () => navigate('/app/leads');
 
@@ -73,7 +93,13 @@ export function AddLead() {
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Leads', onClick: handleBack },
         { type: 'cancel', onClick: handleCancel, disabled: isLoading },
-        { type: 'save', label: 'Create Lead', onClick: handleSubmit, loading: isLoading },
+        {
+            type: 'save',
+            label: 'Create Lead',
+            onClick: handleSubmit,
+            loading: isLoading,
+            disabled: !canSubmit,
+        },
     ];
 
     return (
@@ -84,7 +110,7 @@ export function AddLead() {
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <IForm
-                    config={getAddLeadFormConfig()}
+                    config={formConfig}
                     formData={formData}
                     errors={allErrors}
                     onChange={handleChange}

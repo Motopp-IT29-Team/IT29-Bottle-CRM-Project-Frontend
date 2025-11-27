@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { useNotification } from '../context/NotificationContext';
-import { NotificationItem } from './NotificationItem';
+import { useNotification } from '../../../context/NotificationContext';
+import { INotificationItem } from './INotificationItem';
 
-export const NotificationContainer: React.FC = () => {
+export const INotificationContainer: React.FC = () => {
     const { notifications, removeNotification } = useNotification();
 
     if (notifications.length === 0) return null;
@@ -25,7 +25,7 @@ export const NotificationContainer: React.FC = () => {
             }}
         >
             {notifications.map((notification) => (
-                <NotificationItem key={notification.id} notification={notification} onClose={removeNotification} />
+                <INotificationItem key={notification.id} notification={notification} onClose={removeNotification} />
             ))}
         </Box>
     );

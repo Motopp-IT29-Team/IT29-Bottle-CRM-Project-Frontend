@@ -10,12 +10,23 @@ export type FieldType =
     | 'toggle'
     | 'textarea'
     | 'autocomplete'
-    | 'file';
+    | 'file'
+    | 'multifile'
+    | 'date';
 
 export interface SelectOption {
     value: string | number;
     label: string;
     badge?: string;
+}
+
+export interface UploadedFile {
+    id?: string;
+    name: string;
+    size?: number;
+    url?: string;
+    file?: File;
+    isNew?: boolean;
 }
 
 export interface IFormFieldConfig {
@@ -38,6 +49,11 @@ export interface IFormFieldConfig {
     fullWidth?: boolean;
 
     accept?: string;
+    maxFiles?: number;
+    maxSizeInMB?: number;
+
+    minDate?: string;
+    maxDate?: string;
 }
 
 export interface IFormSectionConfig {

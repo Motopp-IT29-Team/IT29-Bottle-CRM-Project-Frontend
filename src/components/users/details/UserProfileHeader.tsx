@@ -20,7 +20,7 @@ import {
     RESEND_INVITATION_BUTTON_STYLES,
 } from '../../../styles/UsersStyles';
 
-interface UserProfileHeaderProps {
+interface Props {
     firstName: string;
     lastName: string;
     email: string;
@@ -31,7 +31,7 @@ interface UserProfileHeaderProps {
     isResending?: boolean;
 }
 
-export const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
+export const UserProfileHeader: React.FC<Props> = ({
     firstName,
     lastName,
     email,

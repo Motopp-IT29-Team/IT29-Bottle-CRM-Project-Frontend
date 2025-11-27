@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from 'react';
+import { UploadedFile } from '../../components/ui/form';
 
 export interface LeadFormData {
     // Contact Information
@@ -37,7 +38,7 @@ export interface LeadFormData {
 
     // Additional
     description: string;
-    lead_attachment: string | null;
+    attachments: UploadedFile[] | null;
     actualFile: File | null;
 
     // Relations (arrays of IDs)
@@ -83,7 +84,7 @@ export const INITIAL_LEAD_FORM_DATA: LeadFormData = {
 
     // Additional
     description: '',
-    lead_attachment: null,
+    attachments: null,
     actualFile: null,
 
     // Relations

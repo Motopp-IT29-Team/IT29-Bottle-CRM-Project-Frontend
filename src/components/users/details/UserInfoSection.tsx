@@ -11,13 +11,13 @@ import {
     USER_SECTION_GRID_STYLES,
 } from '../../../styles/UsersStyles';
 
-interface UserInfoSectionProps {
+interface Props {
     email: string;
     role: string;
     dateOfJoining: string;
 }
 
-export const UserInfoSection: React.FC<UserInfoSectionProps> = ({ email, role, dateOfJoining }) => {
+export const UserInfoSection: React.FC<Props> = ({ email, role, dateOfJoining }) => {
     return (
         <Box sx={USER_SECTION_CONTAINER_STYLES}>
             <Typography sx={USER_SECTION_TITLE_STYLES}>
