@@ -226,6 +226,13 @@ export const useLeadApi = () => {
             if (token) headers.Authorization = token;
             if (org) headers.org = org;
 
+            const extractValue = (item: any): string => {
+                if (typeof item === 'object' && item !== null) {
+                    return item.value || item.id || item;
+                }
+                return item;
+            };
+
             const formDataObj = new FormData();
             formDataObj.append('title', formData.title);
             formDataObj.append('first_name', formData.first_name);
@@ -262,9 +269,17 @@ export const useLeadApi = () => {
                     }
                 });
             }
+            const assignedToValues = formData.assigned_to.map((item) => extractValue(item));
+            const contactsValues = formData.contacts.map((item) => extractValue(item));
 
-            formData.assigned_to.forEach((id) => formDataObj.append('assigned_to', id));
-            formData.contacts.forEach((id) => formDataObj.append('contacts', id));
+            assignedToValues.forEach((value) => {
+                formDataObj.append('assigned_to', value);
+            });
+
+            contactsValues.forEach((value) => {
+                formDataObj.append('contacts', value);
+            });
+
             formData.tags.forEach((tag) => formDataObj.append('tags', tag));
 
             const response = await fetch(`${SERVER}${LeadUrl}/`, {
