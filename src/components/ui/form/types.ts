@@ -78,6 +78,7 @@ export interface IFormProps {
     onChange: (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
     ) => void;
+    onAutocompleteChange?: (name: string, value: any[]) => void;
     disabled?: boolean;
 }
 
@@ -88,6 +89,7 @@ export interface IFormSectionProps {
     onChange: (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
     ) => void;
+    onAutocompleteChange?: (name: string, value: any[]) => void;
     disabled?: boolean;
 }
 
@@ -98,5 +100,6 @@ export interface IFormFieldProps {
     onChange: (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
     ) => void;
+    onAutocompleteChange?: (name: string, value: any[]) => void;
     disabled?: boolean;
 }

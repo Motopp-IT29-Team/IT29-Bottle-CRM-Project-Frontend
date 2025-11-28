@@ -8,7 +8,14 @@ import { IFormFieldProps } from './types';
 import { IMultiFileUpload, UploadedFile } from '../IMultiFileUpload';
 import { IDatePicker } from '../IDatePicker';
 
-export const IFormField: React.FC<IFormFieldProps> = ({ field, value, error, onChange, disabled = false }) => {
+export const IFormField: React.FC<IFormFieldProps> = ({
+    field,
+    value,
+    error,
+    onChange,
+    onAutocompleteChange,
+    disabled = false,
+}) => {
     const errorMessage = error?.[0];
 
     switch (field.type) {
@@ -84,7 +91,13 @@ export const IFormField: React.FC<IFormFieldProps> = ({ field, value, error, onC
                     name={field.name}
                     value={value || []}
                     options={field.options || []}
-                    onChange={(name, newValue) => onChange({ target: { name, value: newValue } } as any)}
+                    onChange={(name, newValue) => {
+                        if (onAutocompleteChange) {
+                            onAutocompleteChange(name, newValue);
+                        } else {
+                            onChange({ target: { name, value: newValue } } as any);
+                        }
+                    }}
                     getOptionLabel={field.getOptionLabel || ((option: any) => option.label || option)}
                     error={errorMessage}
                     disabled={disabled || field.disabled}

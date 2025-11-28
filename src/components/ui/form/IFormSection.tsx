@@ -10,6 +10,7 @@ export const IFormSection: React.FC<IFormSectionProps> = ({
     formData,
     errors,
     onChange,
+    onAutocompleteChange,
     disabled = false,
 }) => {
     const [isExpanded, setIsExpanded] = useState(section.defaultExpanded ?? true);
@@ -79,6 +80,7 @@ export const IFormSection: React.FC<IFormSectionProps> = ({
                             value={formData[field.name]}
                             error={errors?.[field.name]}
                             onChange={onChange}
+                            onAutocompleteChange={onAutocompleteChange}
                             disabled={disabled}
                         />
                     ))}

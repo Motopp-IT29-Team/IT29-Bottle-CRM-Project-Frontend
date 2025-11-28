@@ -133,7 +133,7 @@ export function useLeadFormData(initialData: LeadFormData = INITIAL_LEAD_FORM_DA
         if (name === 'contacts' || name === 'assigned_to') {
             setFormData((prev) => ({
                 ...prev,
-                [name]: value.map((item) => item.id),
+                [name]: value,
             }));
         } else if (name === 'tags') {
             setFormData((prev) => ({

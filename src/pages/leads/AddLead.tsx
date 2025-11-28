@@ -21,7 +21,7 @@ export function AddLead() {
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
     const [users, setUsers] = useState<any[]>([]);
 
-    const { formData, handleChange, resetForm } = useLeadFormData(INITIAL_LEAD_FORM_DATA);
+    const { formData, handleChange, resetForm, handleAutocompleteChange } = useLeadFormData(INITIAL_LEAD_FORM_DATA);
     const { validationErrors, validateForm, setValidationErrors } = useLeadValidation();
 
     const formConfig = getAddLeadFormConfig({ users });
@@ -114,6 +114,7 @@ export function AddLead() {
                     config={formConfig}
                     formData={formData}
                     errors={allErrors}
+                    onAutocompleteChange={handleAutocompleteChange}
                     onChange={handleChange}
                     disabled={isLoading}
                 />

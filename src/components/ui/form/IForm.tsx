@@ -3,7 +3,14 @@ import { Box } from '@mui/material';
 import { IFormProps } from './types';
 import { IFormSection } from './IFormSection';
 
-export const IForm: React.FC<IFormProps> = ({ config, formData, errors, onChange, disabled = false }) => {
+export const IForm: React.FC<IFormProps> = ({
+    config,
+    formData,
+    errors,
+    onChange,
+    onAutocompleteChange,
+    disabled = false,
+}) => {
     return (
         <Box>
             {config.sections.map((section, index) => (
@@ -13,6 +20,7 @@ export const IForm: React.FC<IFormProps> = ({ config, formData, errors, onChange
                     formData={formData}
                     errors={errors}
                     onChange={onChange}
+                    onAutocompleteChange={onAutocompleteChange}
                     disabled={disabled}
                 />
             ))}
