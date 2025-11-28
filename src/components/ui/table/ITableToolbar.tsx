@@ -77,22 +77,20 @@ export const ITableToolbar: React.FC<ITableToolbarProps> = ({
 
     return (
         <CustomToolbar>
-            {tabs && tabs.length > 0 && (
-                <Tabs
-                    value={currentTab}
-                    onChange={onTabChange}
-                    sx={{
-                        mt: '26px',
-                        '& .MuiTabs-indicator': {
-                            display: 'none',
-                        },
-                    }}
-                >
-                    {tabs.map((tab) => (
-                        <CustomTab key={tab.value} value={tab.value} label={tab.label} sx={getTabStyle(tab.value)} />
-                    ))}
-                </Tabs>
-            )}
+            <Tabs
+                value={currentTab}
+                onChange={onTabChange}
+                sx={{
+                    mt: '26px',
+                    '& .MuiTabs-indicator': {
+                        display: 'none',
+                    },
+                }}
+            >
+                {tabs?.map((tab) => (
+                    <CustomTab key={tab.value} value={tab.value} label={tab.label} sx={getTabStyle(tab.value)} />
+                ))}
+            </Tabs>
 
             <Stack direction="row" spacing={1.5} alignItems="center">
                 {children}

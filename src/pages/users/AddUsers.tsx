@@ -10,6 +10,7 @@ import { useFormState } from '../../hooks/common/useFormState';
 import { UsersLoadingBackdrop } from '../../components/users/UsersLoadingBackdrop';
 import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
+import { routes } from '../../constants/routes';
 
 const INITIAL_FORM_DATA: UserFormData = {
     email: '',
@@ -38,7 +39,7 @@ export function AddUsers() {
         isSubmitting: isLoading,
     });
 
-    const handleBack = () => navigate('/app/users');
+    const handleBack = () => navigate(routes.users.main);
 
     const handleCancel = () => {
         resetForm();
@@ -60,7 +61,7 @@ export function AddUsers() {
         if (result.success) {
             addNotification('success', 'User created successfully!', 'Invitation email has been sent');
             resetForm();
-            navigate('/app/users');
+            navigate(routes.users.main);
         } else {
             if (result.fieldErrors) {
                 setBackendErrors(result.fieldErrors);

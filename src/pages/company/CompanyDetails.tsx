@@ -4,12 +4,13 @@ import { CustomAppBar } from '../../components/CustomAppBar';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CompanyUrl, ContactUrl } from '../../services/ApiUrls';
 import { fetchData, Header } from '../../components/FetchData';
+import { routes } from '../../constants/routes';
 
 type response = {
     name: string;
 };
 
-export default function CompanyDetails() {
+export function CompanyDetails() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const [companyDetails, setCompanyDetails] = useState<response | null>(null);
@@ -33,11 +34,11 @@ export default function CompanyDetails() {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/companies');
+        navigate(routes.companies.main);
     };
 
     const editHandle = () => {
-        navigate('/app/companies/edit-company', {
+        navigate(routes.companies.edit, {
             state: {
                 value: { name: companyDetails?.name },
                 id: state?.companyId?.id,

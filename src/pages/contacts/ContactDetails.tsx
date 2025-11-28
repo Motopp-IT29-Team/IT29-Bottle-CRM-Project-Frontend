@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AntSwitch } from '../../styles/CssStyled';
 import { ContactUrl } from '../../services/ApiUrls';
 import { fetchData } from '../../components/FetchData';
+import { routes } from '../../constants/routes';
 
 type response = {
     created_by: string;
@@ -50,7 +51,7 @@ export const formatDate = (dateString: any) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-export default function ContactDetails() {
+export function ContactDetails() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const [contactDetails, setContactDetails] = useState<response | null>(null);
@@ -98,12 +99,11 @@ export default function ContactDetails() {
     //   }, [])
 
     const backbtnHandle = () => {
-        navigate('/app/contacts');
+        navigate(routes.contacts.main);
     };
 
     const editHandle = () => {
-        // navigate('/contacts/edit-contacts', { state: { value: contactDetails, address: newAddress } })
-        navigate('/app/contacts/edit-contact', {
+        navigate(routes.contacts.edit, {
             state: {
                 value: {
                     salutation: contactDetails?.salutation,

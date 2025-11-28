@@ -8,6 +8,7 @@ import { IActionModal } from '../../components/ui';
 import { useLeadDetails } from '../../hooks/leads/useLeadDetails';
 import { useLeadActions } from '../../hooks/leads/useLeadActions';
 import { useNotification } from '../../context/NotificationContext';
+import { routes } from '../../constants/routes';
 
 export function LeadDetails() {
     const [searchParams] = useSearchParams();
@@ -28,19 +29,19 @@ export function LeadDetails() {
     const { addNotification } = useNotification();
 
     if (!leadId) {
-        navigate('/app/leads');
+        navigate(routes.leads.main);
         return null;
     }
 
     if (!isLoading && !leadDetails) {
-        navigate('/app/leads');
+        navigate(routes.leads.main);
         return null;
     }
 
-    const handleBack = () => navigate('/app/leads');
+    const handleBack = () => navigate(routes.leads.main);
 
     const handleEdit = () => {
-        navigate(`/app/leads/edit-lead?id=${leadId}`);
+        navigate(`${routes.leads.edit}?id=${leadId}`);
     };
 
     const handleDeleteClick = () => {
@@ -55,7 +56,7 @@ export function LeadDetails() {
         if (success) {
             setDeleteLeadModalOpen(false);
             addNotification('success', 'Lead deleted successfully', '');
-            navigate('/app/leads');
+            navigate(routes.leads.main);
         } else {
             setDeleteLeadModalOpen(false);
             addNotification('error', 'Failed to delete lead', '');

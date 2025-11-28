@@ -48,6 +48,7 @@ import { DeleteModal } from '../../components/DeleteModal';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { EnhancedTableHead } from '../../components/EnchancedTableHead';
+import { routes } from '../../constants/routes';
 // import { DeleteModal } from './DeleteModal';
 
 interface HeadCell {
@@ -78,7 +79,7 @@ const headCells: readonly HeadCell[] = [
     },
 ];
 
-export default function Company() {
+export function Company() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [companyList, setCompanyList] = useState([]);
@@ -189,12 +190,12 @@ export default function Company() {
 
     const addCompany = () => {
         if (!loading) {
-            navigate('/app/companies/add-company');
+            navigate(routes.companies.create);
         }
     };
 
     const companyDetail = (companyId: any) => {
-        navigate(`/app/companies/company-details`, {
+        navigate(routes.companies.details, {
             state: { companyId, detail: true },
         });
     };

@@ -8,12 +8,13 @@ import { fetchData, Header } from '../../components/FetchData';
 import { AntSwitch, CustomSelectField, RequiredTextField } from '../../styles/CssStyled';
 import '../../styles/style.css';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
 };
 
-function AddCompany() {
+export function AddCompany() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const [error, setError] = useState(false);
@@ -46,7 +47,7 @@ function AddCompany() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     resetForm();
-                    navigate('/app/companies');
+                    navigate(routes.companies.main);
                 }
                 if (res.error) {
                     // console.log(res);
@@ -62,7 +63,7 @@ function AddCompany() {
         setErrors({});
     };
     const backbtnHandle = () => {
-        navigate('/app/companies');
+        navigate(routes.companies.main);
     };
     const module = 'Companies';
     const crntPage = 'Add Company';
@@ -126,5 +127,3 @@ function AddCompany() {
         </Box>
     );
 }
-
-export default AddCompany;

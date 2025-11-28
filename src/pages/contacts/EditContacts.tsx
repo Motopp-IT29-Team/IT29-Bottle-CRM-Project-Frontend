@@ -25,6 +25,7 @@ import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import '../../styles/style.css';
+import { routes } from '../../constants/routes';
 
 // interface FormErrors {
 //   [key: string]: string;
@@ -58,7 +59,7 @@ type FormErrors = {
 //   salutation: string;
 //   // Add other form fields as needed
 // }
-function EditContact() {
+export function EditContact() {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
@@ -217,7 +218,6 @@ function EditContact() {
                 if (!res.error) {
                     backbtnHandle();
                     // setResponceError(data.error)
-                    // navigate('/contacts')
                     // resetForm()
                 }
                 if (res.error) {
@@ -229,7 +229,7 @@ function EditContact() {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/contacts/contact-details', {
+        navigate(routes.contacts.details, {
             state: { contactId: { id: state?.id }, detail: true },
         });
     };
@@ -827,5 +827,3 @@ function EditContact() {
         </Box>
     );
 }
-
-export default EditContact;

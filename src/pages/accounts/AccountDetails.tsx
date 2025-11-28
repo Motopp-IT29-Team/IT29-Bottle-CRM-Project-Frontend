@@ -10,6 +10,7 @@ import { FaPlus, FaStar } from 'react-icons/fa';
 import FormateTime from '../../components/FormateTime';
 import { Label } from '../../components/Label';
 import { AntSwitch } from '../../styles/CssStyled';
+import { routes } from '../../constants/routes';
 
 export const formatDate = (dateString: any) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -147,8 +148,8 @@ export const AccountDetails = (props: any) => {
             })
             .catch((err) => {
                 // console.error('Error:', err)
-                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate('/app/accounts')}>
-                    <Alert onClose={() => navigate('/app/accounts')} severity="error" sx={{ width: '100%' }}>
+                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate(routes.accounts.main)}>
+                    <Alert onClose={() => navigate(routes.accounts.main)} severity="error" sx={{ width: '100%' }}>
                         Failed to load!
                     </Alert>
                 </Snackbar>;
@@ -165,7 +166,6 @@ export const AccountDetails = (props: any) => {
         return countryName?.[1];
     };
     const editHandle = () => {
-        // navigate('/contacts/edit-contacts', { state: { value: contactDetails, address: newAddress } })
         let country: string[] | undefined;
         for (country of countries) {
             if (Array.isArray(country) && country.includes(accountDetails?.country || '')) {
@@ -173,7 +173,7 @@ export const AccountDetails = (props: any) => {
                 break;
             }
         }
-        navigate('/app/accounts/edit-account', {
+        navigate(routes.accounts.edit, {
             state: {
                 value: {
                     name: accountDetails?.name,
@@ -208,7 +208,7 @@ export const AccountDetails = (props: any) => {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/accounts');
+        navigate(routes.accounts.main);
     };
 
     const module = 'Accounts';

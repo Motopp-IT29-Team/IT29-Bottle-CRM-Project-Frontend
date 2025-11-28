@@ -26,6 +26,7 @@ import { FaFileUpload, FaPlus, FaTimes, FaUpload } from 'react-icons/fa';
 import { CustomPopupIcon, RequiredSelect, RequiredTextField } from '../../styles/CssStyled';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
@@ -148,7 +149,7 @@ export function AddAccount() {
         }
     };
     const backbtnHandle = () => {
-        navigate('/app/accounts');
+        navigate(routes.accounts.main);
     };
     const handleSubmit = (e: any) => {
         e.preventDefault();
@@ -187,7 +188,7 @@ export function AddAccount() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     resetForm();
-                    navigate('/app/accounts');
+                    navigate(routes.accounts.main);
                 }
                 if (res.error) {
                     setError(true);

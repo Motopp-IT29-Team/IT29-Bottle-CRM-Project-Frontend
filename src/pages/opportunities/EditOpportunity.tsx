@@ -29,6 +29,7 @@ import { CustomPopupIcon, RequiredSelect, RequiredTextField } from '../../styles
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import '../../styles/style.css';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
@@ -157,9 +158,9 @@ export function EditOpportunity() {
 
     const backbtnHandle = () => {
         if (state?.edit) {
-            navigate('/app/opportunities');
+            navigate(routes.opportunities.main);
         } else {
-            navigate('/app/opportunities/opportunity-details', {
+            navigate(routes.opportunities.details, {
                 state: { opportunityId: state?.id, detail: true },
             });
         }
@@ -264,7 +265,7 @@ export function EditOpportunity() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     resetForm();
-                    navigate('/app/opportunities');
+                    navigate(routes.opportunities.main);
                 }
                 if (res.error) {
                     setError(true);

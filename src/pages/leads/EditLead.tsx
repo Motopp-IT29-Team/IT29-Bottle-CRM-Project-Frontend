@@ -11,6 +11,7 @@ import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop'
 import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 import { COUNTRIES } from '../../constants/countries';
+import { routes } from '../../constants/routes';
 
 export function EditLead() {
     const navigate = useNavigate();
@@ -39,7 +40,7 @@ export function EditLead() {
         if (leadId) {
             fetchLeadData();
         } else {
-            navigate('/app/leads');
+            navigate(routes.leads.main);
         }
     }, [leadId]);
 
@@ -114,7 +115,7 @@ export function EditLead() {
     };
 
     const handleBack = () => {
-        navigate(`/app/leads/lead-details?id=${leadId}`);
+        navigate(`${routes.leads.details}?id=${leadId}`);
     };
 
     const handleCancel = () => {
@@ -139,7 +140,7 @@ export function EditLead() {
 
         if (result.success) {
             addNotification('success', 'Lead updated successfully!');
-            navigate(`/app/leads/lead-details?id=${leadId}`);
+            navigate(`${routes.leads.details}?id=${leadId}`);
         } else {
             if (result.fieldErrors) {
                 setBackendErrors(result.fieldErrors);

@@ -10,6 +10,7 @@ import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop'
 import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
 import { useNotification } from '../../context/NotificationContext';
 import { getAddLeadFormConfig } from '../../configs/leads/addLeadFormConfig';
+import { routes } from '../../constants/routes';
 
 export function AddLead() {
     const navigate = useNavigate();
@@ -41,7 +42,7 @@ export function AddLead() {
         fetchUsers();
     }, []);
 
-    const handleBack = () => navigate('/app/leads');
+    const handleBack = () => navigate(routes.leads.main);
 
     const handleCancel = () => {
         resetForm();
@@ -70,7 +71,7 @@ export function AddLead() {
         if (result.success) {
             addNotification('success', 'Lead created successfully!', 'The lead has been added to your CRM');
             handleCancel();
-            navigate('/app/leads');
+            navigate(routes.leads.main);
         } else {
             if (result.fieldErrors) {
                 setBackendErrors(result.fieldErrors);

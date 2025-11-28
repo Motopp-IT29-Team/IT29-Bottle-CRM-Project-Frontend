@@ -25,6 +25,7 @@ import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import '../../styles/style.css';
+import { routes } from '../../constants/routes';
 
 // interface FormErrors {
 //   [key: string]: string;
@@ -58,7 +59,7 @@ type FormErrors = {
 //   salutation: string;
 //   // Add other form fields as needed
 // }
-function AddContacts() {
+export function AddContacts() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const { quill, quillRef } = useQuill();
@@ -209,7 +210,7 @@ function AddContacts() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     // setResponceError(data.error)
-                    navigate('/app/contacts');
+                    navigate(routes.contacts.main);
                     resetForm();
                 }
                 if (res.error) {
@@ -249,7 +250,7 @@ function AddContacts() {
         setErrors({});
     };
     const backbtnHandle = () => {
-        navigate('/app/contacts');
+        navigate(routes.contacts.main);
     };
     const module = 'Contacts';
     const crntPage = 'Add Contacts';
@@ -883,5 +884,3 @@ function AddContacts() {
         </Box>
     );
 }
-
-export default AddContacts;

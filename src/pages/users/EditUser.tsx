@@ -10,6 +10,7 @@ import { getEditUserFormConfig } from '../../configs/users/editUserFormConfig';
 import { useUserApi } from '../../hooks/users/useUserApi';
 import { useFormState } from '../../hooks/common/useFormState';
 import { hasFormChanges } from '../../utils/form/formHelpers';
+import { routes } from '../../constants/routes';
 
 interface FormData {
     email: string;
@@ -85,7 +86,7 @@ export function EditUser() {
             fetchUserData();
             fetchCurrentUser();
         } else {
-            navigate('/app/users');
+            navigate(routes.users.main);
         }
     }, [userId, navigate]);
 
@@ -163,7 +164,7 @@ export function EditUser() {
     };
 
     const handleBack = () => {
-        navigate('/app/users');
+        navigate(routes.users.main);
     };
 
     const handleSubmit = async () => {
@@ -176,7 +177,7 @@ export function EditUser() {
 
         if (result.success) {
             addNotification('success', 'User updated successfully');
-            navigate('/app/users');
+            navigate(routes.users.main);
         } else {
             if (result.fieldErrors) {
                 setFormErrors(result.fieldErrors);

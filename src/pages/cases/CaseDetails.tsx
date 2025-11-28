@@ -8,6 +8,7 @@ import { CustomAppBar } from '../../components/CustomAppBar';
 import { FaPlus, FaStar } from 'react-icons/fa';
 import FormateTime from '../../components/FormateTime';
 import { Label } from '../../components/Label';
+import { routes } from '../../constants/routes';
 
 type response = {
     created_by: {
@@ -119,8 +120,8 @@ export const CaseDetails = (props: any) => {
             })
             .catch((err) => {
                 // console.error('Error:', err)
-                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate('/app/cases')}>
-                    <Alert onClose={() => navigate('/app/cases')} severity="error" sx={{ width: '100%' }}>
+                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate(routes.cases.main)}>
+                    <Alert onClose={() => navigate(routes.cases.main)} severity="error" sx={{ width: '100%' }}>
                         Failed to load!
                     </Alert>
                 </Snackbar>;
@@ -144,7 +145,7 @@ export const CaseDetails = (props: any) => {
         //         break;
         //     }
         // }
-        navigate('/app/cases/edit-case', {
+        navigate(routes.cases.edit, {
             state: {
                 value: {
                     name: caseDetails?.name,
@@ -171,7 +172,7 @@ export const CaseDetails = (props: any) => {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/cases');
+        navigate(routes.cases.main);
     };
 
     const module = 'Cases';

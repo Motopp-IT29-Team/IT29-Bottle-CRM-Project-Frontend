@@ -5,6 +5,7 @@ import { ITable, ITableColumn, IPagination } from '../../components/ui';
 import { ITableToolbar } from '../../components/ui';
 import { UserTableRow } from '../../components/users/UserTableRow';
 import { useUserApi } from '../../hooks/users/useUserApi';
+import { routes } from '../../constants/routes';
 
 interface User {
     id: string;
@@ -25,7 +26,7 @@ const tabs = [
     { value: 'inactive', label: 'Inactive' },
 ];
 
-export default function Users() {
+export function Users() {
     const navigate = useNavigate();
     const { getUsers, isLoading } = useUserApi();
 
@@ -71,11 +72,11 @@ export default function Users() {
     };
 
     const navigateToUserDetail = (userId: string) => {
-        navigate(`/app/users/user-details?id=${userId}`);
+        navigate(`${routes.users.details}?id=${userId}`);
     };
 
     const navigateToAddUser = () => {
-        if (!isLoading) navigate('/app/users/add-users');
+        if (!isLoading) navigate(routes.users.create);
     };
 
     const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {

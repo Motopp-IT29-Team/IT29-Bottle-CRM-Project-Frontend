@@ -16,6 +16,7 @@ import { UserActivitySection } from '../../components/users/details/UserActivity
 import { DeleteModal } from '../../components/DeleteModal';
 import { useUserApi } from '../../hooks/users/useUserApi';
 import { useNotification } from '../../context/NotificationContext';
+import { routes } from '../../constants/routes';
 
 export function UserDetails() {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ export function UserDetails() {
         if (userId) {
             fetchUserData();
         } else {
-            navigate('/app/users');
+            navigate(routes.users.main);
         }
     }, [userId]);
 
@@ -45,12 +46,12 @@ export function UserDetails() {
             setUserDetails(result.data);
         } else {
             addNotification('error', 'Failed to load user details');
-            navigate('/app/users');
+            navigate(routes.users.main);
         }
     };
 
-    const handleBack = () => navigate('/app/users');
-    const handleEdit = () => navigate(`/app/users/edit-user?id=${userId}`);
+    const handleBack = () => navigate(routes.users.main);
+    const handleEdit = () => navigate(`${routes.users.edit}?id=${userId}`);
 
     const openDeleteModal = () => {
         setDeleteModal(true);
@@ -65,7 +66,7 @@ export function UserDetails() {
 
         const result = await deleteUser(userId);
         if (result.success) {
-            navigate('/app/users');
+            navigate(routes.users.main);
             addNotification('success', 'User deleted', 'The user has been deleted');
             modalClose();
         } else {
@@ -88,7 +89,7 @@ export function UserDetails() {
     };
 
     if (!userId) {
-        navigate('/app/users');
+        navigate(routes.users.main);
         return null;
     }
 
@@ -102,7 +103,7 @@ export function UserDetails() {
     }
 
     if (!userDetails) {
-        navigate('/app/users');
+        navigate(routes.users.main);
         return null;
     }
 

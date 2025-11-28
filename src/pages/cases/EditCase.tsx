@@ -29,6 +29,7 @@ import { CustomPopupIcon, RequiredTextField } from '../../styles/CssStyled';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import '../../styles/style.css';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
@@ -148,9 +149,9 @@ export function EditCase() {
 
     const backbtnHandle = () => {
         if (state?.edit) {
-            navigate('/app/cases');
+            navigate(routes.cases.main);
         } else {
-            navigate('/app/cases/case-details', {
+            navigate(routes.cases.details, {
                 state: { caseId: state?.id, detail: true },
             });
         }
@@ -252,7 +253,7 @@ export function EditCase() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     // setReset(!reset)
-                    navigate('/app/cases');
+                    navigate(routes.cases.main);
                 }
                 if (res.error) {
                     setError(true);

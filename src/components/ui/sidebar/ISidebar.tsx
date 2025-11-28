@@ -2,22 +2,22 @@ import React, { useState } from 'react';
 import { AppBar, Box, Drawer, Toolbar, Typography } from '@mui/material';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import OrganizationModal from '../../../pages/organization/OrganizationModal';
-import Company from '../../../pages/company/Company';
-import AddCompany from '../../../pages/company/AddCompany';
-import CompanyDetails from '../../../pages/company/CompanyDetails';
-import EditCompany from '../../../pages/company/EditCompany';
+import { Company } from '../../../pages/company/Company';
+import { AddCompany } from '../../../pages/company/AddCompany';
+import { CompanyDetails } from '../../../pages/company/CompanyDetails';
+import { EditCompany } from '../../../pages/company/EditCompany';
 import { Leads } from '../../../pages/leads/Leads';
 import { AddLead } from '../../../pages/leads/AddLead';
 import { EditLead } from '../../../pages/leads/EditLead';
 import { LeadDetails } from '../../../pages/leads/LeadDetails';
-import AddContacts from '../../../pages/contacts/AddContacts';
-import Contacts from '../../../pages/contacts/Contacts';
-import EditContact from '../../../pages/contacts/EditContacts';
-import ContactDetails from '../../../pages/contacts/ContactDetails';
-import Users from '../../../pages/users/Users';
-import Opportunities from '../../../pages/opportunities/Opportunities';
-import Cases from '../../../pages/cases/Cases';
-import Accounts from '../../../pages/accounts/Accounts';
+import { AddContacts } from '../../../pages/contacts/AddContacts';
+import { Contacts } from '../../../pages/contacts/Contacts';
+import { EditContact } from '../../../pages/contacts/EditContacts';
+import { ContactDetails } from '../../../pages/contacts/ContactDetails';
+import { Users } from '../../../pages/users/Users';
+import { Opportunities } from '../../../pages/opportunities/Opportunities';
+import { Cases } from '../../../pages/cases/Cases';
+import { Accounts } from '../../../pages/accounts/Accounts';
 import { AddAccount } from '../../../pages/accounts/AddAccount';
 import { EditAccount } from '../../../pages/accounts/EditAccount';
 import { AccountDetails } from '../../../pages/accounts/AccountDetails';
@@ -30,13 +30,14 @@ import { OpportunityDetails } from '../../../pages/opportunities/OpportunityDeta
 import { AddCase } from '../../../pages/cases/AddCase';
 import { EditCase } from '../../../pages/cases/EditCase';
 import { CaseDetails } from '../../../pages/cases/CaseDetails';
-import MyContext from '../../../context/Context';
 import { getVisibleNavItems } from '../../../configs/sidebar/sidebarConfig';
 import { ISidebarHeader } from './ISidebarHeader';
 import { ISidebarNavigation } from './ISidebarNavigation';
 import { ISidebarUserSection } from './ISidebarUserSection';
 import { ISidebarCollapsedUser } from './ISidebarCollapsedUser';
 import { useProfile } from '../../../hooks/profile/useSidebarProfile';
+import MyContext from '../../../context/Context';
+import { routes } from '../../../constants/routes';
 
 export const ISidebar = () => {
     const location = useLocation();
@@ -50,7 +51,7 @@ export const ISidebar = () => {
 
     const getCurrentScreen = () => {
         const pathParts = location.pathname.split('/');
-        return pathParts[2] || 'leads';
+        return pathParts[1] || 'leads';
     };
 
     const context = { drawerWidth, screen: getCurrentScreen() };
@@ -134,46 +135,46 @@ export const ISidebar = () => {
                     }}
                 >
                     <Routes>
-                        <Route path="/" element={<Navigate to="/app/leads" replace />} />
+                        <Route path="/" element={<Navigate to={routes.leads.main} replace />} />
 
-                        <Route path="/app/leads" element={<Leads />} />
-                        <Route path="/app/leads/add-leads" element={<AddLead />} />
-                        <Route path="/app/leads/edit-lead" element={<EditLead />} />
-                        <Route path="/app/leads/lead-details" element={<LeadDetails />} />
+                        <Route path={routes.leads.main} element={<Leads />} />
+                        <Route path={routes.leads.create} element={<AddLead />} />
+                        <Route path={routes.leads.edit} element={<EditLead />} />
+                        <Route path={routes.leads.details} element={<LeadDetails />} />
 
-                        <Route path="/app/companies" element={<Company />} />
-                        <Route path="/app/companies/add-company" element={<AddCompany />} />
-                        <Route path="/app/companies/edit-company" element={<EditCompany />} />
-                        <Route path="/app/companies/company-details" element={<CompanyDetails />} />
+                        <Route path={routes.companies.main} element={<Company />} />
+                        <Route path={routes.companies.create} element={<AddCompany />} />
+                        <Route path={routes.companies.edit} element={<EditCompany />} />
+                        <Route path={routes.companies.details} element={<CompanyDetails />} />
 
-                        <Route path="/app/contacts" element={<Contacts />} />
-                        <Route path="/app/contacts/add-contacts" element={<AddContacts />} />
-                        <Route path="/app/contacts/contact-details" element={<ContactDetails />} />
-                        <Route path="/app/contacts/edit-contact" element={<EditContact />} />
+                        <Route path={routes.contacts.main} element={<Contacts />} />
+                        <Route path={routes.contacts.create} element={<AddContacts />} />
+                        <Route path={routes.contacts.details} element={<ContactDetails />} />
+                        <Route path={routes.contacts.edit} element={<EditContact />} />
 
-                        <Route path="/app/accounts" element={<Accounts />} />
-                        <Route path="/app/accounts/add-account" element={<AddAccount />} />
-                        <Route path="/app/accounts/account-details" element={<AccountDetails />} />
-                        <Route path="/app/accounts/edit-account" element={<EditAccount />} />
+                        <Route path={routes.accounts.main} element={<Accounts />} />
+                        <Route path={routes.accounts.create} element={<AddAccount />} />
+                        <Route path={routes.accounts.details} element={<AccountDetails />} />
+                        <Route path={routes.accounts.edit} element={<EditAccount />} />
 
                         {isAdmin && (
                             <>
-                                <Route path="/app/users" element={<Users />} />
-                                <Route path="/app/users/add-users" element={<AddUsers />} />
-                                <Route path="/app/users/edit-user" element={<EditUser />} />
-                                <Route path="/app/users/user-details" element={<UserDetails />} />
+                                <Route path={routes.users.main} element={<Users />} />
+                                <Route path={routes.users.create} element={<AddUsers />} />
+                                <Route path={routes.users.edit} element={<EditUser />} />
+                                <Route path={routes.users.details} element={<UserDetails />} />
                             </>
                         )}
 
-                        <Route path="/app/opportunities" element={<Opportunities />} />
-                        <Route path="/app/opportunities/add-opportunity" element={<AddOpportunity />} />
-                        <Route path="/app/opportunities/opportunity-details" element={<OpportunityDetails />} />
-                        <Route path="/app/opportunities/edit-opportunity" element={<EditOpportunity />} />
+                        <Route path={routes.opportunities.main} element={<Opportunities />} />
+                        <Route path={routes.opportunities.create} element={<AddOpportunity />} />
+                        <Route path={routes.opportunities.details} element={<OpportunityDetails />} />
+                        <Route path={routes.opportunities.edit} element={<EditOpportunity />} />
 
-                        <Route path="/app/cases" element={<Cases />} />
-                        <Route path="/app/cases/add-case" element={<AddCase />} />
-                        <Route path="/app/cases/edit-case" element={<EditCase />} />
-                        <Route path="/app/cases/case-details" element={<CaseDetails />} />
+                        <Route path={routes.cases.main} element={<Cases />} />
+                        <Route path={routes.cases.create} element={<AddCase />} />
+                        <Route path={routes.cases.edit} element={<EditCase />} />
+                        <Route path={routes.cases.details} element={<CaseDetails />} />
                     </Routes>
                 </Box>
             </MyContext.Provider>

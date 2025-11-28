@@ -5,6 +5,7 @@ import { ITable, ITableColumn, IPagination } from '../../components/ui';
 import { ITableToolbar } from '../../components/ui';
 import { LeadTableRow } from '../../components/leads/LeadTableRow';
 import { Lead, useLeadApi } from '../../hooks/leads/useLeadApi';
+import { routes } from '../../constants/routes';
 
 const columns: ITableColumn[] = [
     { id: 'title', label: 'Lead Name', sortable: true },
@@ -29,9 +30,6 @@ export function Leads() {
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
 
-    // Filter data for AddLead navigation
-    const [filterData, setFilterData] = useState<any>({});
-
     const fetchLeads = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
         const result = await getLeads({
@@ -54,19 +52,6 @@ export function Leads() {
                 setLeads(closedLeadsData);
                 setTotalPages(Math.ceil(closedLeadsCount / recordsPerPage));
             }
-
-            // Store filter data for AddLead navigation
-            setFilterData({
-                detail: false,
-                contacts: result.data.contacts || [],
-                status: result.data.status || [],
-                source: result.data.source || [],
-                companies: result.data.companies || [],
-                tags: result.data.tags || [],
-                users: result.data.users || [],
-                countries: result.data.countries || [],
-                industries: result.data.industries || [],
-            });
         }
     }, [tab, currentPage, recordsPerPage]);
 
@@ -98,14 +83,12 @@ export function Leads() {
     };
 
     const navigateToLeadDetail = (leadId: string) => {
-        navigate(`/app/leads/lead-details?id=${leadId}`);
+        navigate(`${routes.leads.details}?id=${leadId}`);
     };
 
     const navigateToAddLead = () => {
         if (!isLoading) {
-            navigate('/app/leads/add-leads', {
-                state: filterData,
-            });
+            navigate(routes.leads.create);
         }
     };
 
