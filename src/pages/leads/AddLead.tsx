@@ -1,30 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { useLeadFormData, INITIAL_LEAD_FORM_DATA } from '../../hooks/leads/useLeadFormData';
-import { useLeadValidation } from '../../hooks/leads/useLeadValidation';
-import { useLeadApi } from '../../hooks/leads/useLeadApi';
-import { useFormState } from '../../hooks/common/useFormState';
+import { useFormState } from '../../hooks/useFormState';
 import { IForm, FormErrors } from '../../components/ui/form';
 import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
-import { useNotification } from '../../context/NotificationContext';
-import { getAddLeadFormConfig } from '../../configs/leads/addLeadFormConfig';
+import { ModernAppBar, AppBarAction } from '../../components/ui';
 import { routes } from '../../constants/routes';
+import { useLeads, LeadFormData, validateLeadForm, getLeadConfig } from '../../api';
+
+const INITIAL_LEAD_FORM_DATA: LeadFormData = {
+    first_name: '',
+    last_name: '',
+    title: '',
+    phone: '',
+    email: '',
+    account_name: '',
+    opportunity_amount: '',
+    website: '',
+    industry: '',
+    status: '',
+    source: '',
+    probability: 50,
+    close_date: '',
+    salutation: 'Mr',
+    department: 'Sales',
+    preferred_language: 'English',
+    rating: '',
+    budget_range: '',
+    decision_timeframe: '',
+    do_not_call: false,
+    address_line: '',
+    street: '',
+    city: '',
+    state: '',
+    postcode: '',
+    country: 'NL',
+    description: '',
+    attachments: null,
+    assigned_to: [],
+    contacts: [],
+    tags: [],
+};
 
 export function AddLead() {
     const navigate = useNavigate();
+    const { getAll, create, checkDuplicate, isLoading } = useLeads();
 
-    const { addNotification } = useNotification();
-    const { getLeads, createLead, checkDuplicate, isLoading } = useLeadApi();
-
+    const [formData, setFormData] = useState<LeadFormData>(INITIAL_LEAD_FORM_DATA);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
     const [users, setUsers] = useState<any[]>([]);
 
-    const { formData, handleChange, resetForm, handleAutocompleteChange } = useLeadFormData(INITIAL_LEAD_FORM_DATA);
-    const { validationErrors, validateForm, setValidationErrors } = useLeadValidation();
-
-    const formConfig = getAddLeadFormConfig({ users });
+    const formConfig = getLeadConfig({ users });
 
     const { canSubmit } = useFormState({
         formConfig,
@@ -34,7 +61,7 @@ export function AddLead() {
 
     useEffect(() => {
         const fetchUsers = async () => {
-            const result = await getLeads();
+            const result = await getAll();
             if (result.success && result.data?.users) {
                 setUsers(result.data.users);
             }
@@ -42,42 +69,81 @@ export function AddLead() {
         fetchUsers();
     }, []);
 
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
+    ) => {
+        const { name, value } = e.target;
+        const type = 'type' in e.target ? e.target.type : undefined;
+
+        if (type === 'number') {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value === '' ? '' : Number(value),
+            }));
+        } else if (type === 'checkbox') {
+            const checked = 'checked' in e.target ? e.target.checked : false;
+            setFormData((prev) => ({
+                ...prev,
+                [name]: checked,
+            }));
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
+
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleAutocompleteChange = (name: string, value: any[]) => {
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const resetForm = () => {
+        setFormData(INITIAL_LEAD_FORM_DATA);
+        setValidationErrors({});
+    };
+
     const handleBack = () => navigate(routes.leads.main);
 
     const handleCancel = () => {
         resetForm();
         setBackendErrors({});
-        setValidationErrors({});
         handleBack();
     };
 
     const handleSubmit = async () => {
         setBackendErrors({});
 
-        const errors = validateForm(formData);
+        const errors = validateLeadForm(formData);
         if (Object.keys(errors).length > 0) {
-            addNotification('warning', 'Validation Error', 'Please fill in all required fields correctly');
+            setValidationErrors(errors);
             return;
         }
 
         const duplicateResult = await checkDuplicate(formData.email, formData.phone);
         if (duplicateResult.success && duplicateResult.data?.duplicate) {
-            addNotification('warning', 'Duplicate Lead', 'A lead with this email or phone number already exists');
             return;
         }
 
-        const result = await createLead(formData);
+        const result = await create(formData);
 
         if (result.success) {
-            addNotification('success', 'Lead created successfully!', 'The lead has been added to your CRM');
-            handleCancel();
+            resetForm();
             navigate(routes.leads.main);
         } else {
             if (result.fieldErrors) {
                 setBackendErrors(result.fieldErrors);
-            }
-            if (result.error) {
-                addNotification('error', 'Failed to create lead', result.error);
             }
         }
     };
@@ -104,12 +170,12 @@ export function AddLead() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Leads" crntPage="Create Lead" actions={actions} />
 
             <LeadLoadingBackdrop open={isLoading} />
 
-            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
+            <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
                 <IForm
                     config={formConfig}
                     formData={formData}

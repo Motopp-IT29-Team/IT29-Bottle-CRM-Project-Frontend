@@ -1,8 +1,7 @@
 import React from 'react';
-import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
+import { Paper, Typography, Stack, Chip, Avatar, Box, Divider, Tooltip } from '@mui/material';
 import { FaBriefcase, FaDollarSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
 import FormateTime from '../../FormateTime';
-import { useLeadColors } from '../../../hooks/leads/useLeadColors';
 
 interface Props {
     salutation: string;
@@ -42,7 +41,55 @@ export const HeroCard: React.FC<Props> = ({
     createdBy,
     createdAt,
 }) => {
-    const { getStatusColor, getSourceColor, getRatingColor } = useLeadColors();
+    const getStatusColor = (status: string): string => {
+        const colors: Record<string, string> = {
+            assigned: '#3b82f6',
+            'in process': '#f59e0b',
+            converted: '#10b981',
+            recycled: '#6366f1',
+            closed: '#ef4444',
+        };
+        return colors[status?.toLowerCase()] || '#6b7280';
+    };
+
+    const getSourceColor = (source: string): string => {
+        const colors: Record<string, string> = {
+            call: '#8b5cf6',
+            email: '#3b82f6',
+            'existing customer': '#10b981',
+            partner: '#f59e0b',
+            'public relations': '#ec4899',
+            campaign: '#6366f1',
+            other: '#6b7280',
+        };
+        return colors[source?.toLowerCase()] || '#6b7280';
+    };
+
+    const getRatingColor = (rating: string): string => {
+        const colors: Record<string, string> = {
+            hot: '#ef4444',
+            warm: '#f59e0b',
+            cold: '#3b82f6',
+        };
+        return colors[rating?.toLowerCase()] || '#6b7280';
+    };
+
+    const getUserDisplayName = (user: any): string => {
+        if (user.first_name || user.last_name) {
+            return `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        }
+        return user.user_details?.email || user.email || 'Unknown User';
+    };
+
+    const getUserInitials = (user: any): string => {
+        if (user.first_name || user.last_name) {
+            const firstInitial = user.first_name?.charAt(0)?.toUpperCase() || '';
+            const lastInitial = user.last_name?.charAt(0)?.toUpperCase() || '';
+            return `${firstInitial}${lastInitial}`;
+        }
+        const email = user.user_details?.email || user.email || 'U';
+        return email.charAt(0).toUpperCase();
+    };
 
     return (
         <Paper
@@ -281,31 +328,47 @@ export const HeroCard: React.FC<Props> = ({
                         {assignedTo?.length > 0 ? (
                             <Stack direction="row" spacing={-1}>
                                 {assignedTo.slice(0, 4).map((user: any, index: number) => (
-                                    <Avatar
-                                        key={index}
-                                        src={user.user_details?.profile_pic}
-                                        alt={user.user_details?.email}
-                                        sx={{
-                                            width: 36,
-                                            height: 36,
-                                            border: '2px solid white',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                        }}
-                                    />
+                                    <Tooltip key={index} title={getUserDisplayName(user)} arrow>
+                                        <Avatar
+                                            src={user.user_details?.profile_pic}
+                                            alt={getUserDisplayName(user)}
+                                            sx={{
+                                                width: 36,
+                                                height: 36,
+                                                border: '2px solid white',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                bgcolor: user.user_details?.profile_pic ? 'transparent' : '#667eea',
+                                                fontSize: '14px',
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            {!user.user_details?.profile_pic && getUserInitials(user)}
+                                        </Avatar>
+                                    </Tooltip>
                                 ))}
                                 {assignedTo.length > 4 && (
-                                    <Avatar
-                                        sx={{
-                                            width: 36,
-                                            height: 36,
-                                            backgroundColor: '#6366f1',
-                                            border: '2px solid white',
-                                            fontSize: '13px',
-                                            fontWeight: 700,
-                                        }}
+                                    <Tooltip
+                                        title={assignedTo
+                                            .slice(4)
+                                            .map((u: any) => getUserDisplayName(u))
+                                            .join(', ')}
+                                        arrow
                                     >
-                                        +{assignedTo.length - 4}
-                                    </Avatar>
+                                        <Avatar
+                                            sx={{
+                                                width: 36,
+                                                height: 36,
+                                                backgroundColor: '#6366f1',
+                                                border: '2px solid white',
+                                                fontSize: '13px',
+                                                fontWeight: 700,
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            +{assignedTo.length - 4}
+                                        </Avatar>
+                                    </Tooltip>
                                 )}
                             </Stack>
                         ) : (

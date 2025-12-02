@@ -2,7 +2,7 @@ import React from 'react';
 import { TableRow, TableCell, Box, Stack, Avatar, AvatarGroup, Link } from '@mui/material';
 import { Label } from '../Label';
 import FormateTime from '../FormateTime';
-import { Lead } from '../../hooks/leads/useLeadApi';
+import { Lead } from '../../api';
 
 interface Props {
     lead: Lead;

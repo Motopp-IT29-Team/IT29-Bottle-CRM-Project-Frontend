@@ -1,51 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
+import { Box } from '@mui/material';
+import { ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-    USER_DETAILS_PAGE_STYLES,
-    USER_DETAILS_CONTAINER_STYLES,
-    USER_DETAILS_LOADING_CONTAINER_STYLES,
-    USER_DETAILS_LOADING_TEXT_STYLES,
-    USER_DETAILS_LOADING_SPINNER_STYLES,
-} from '../../styles/UsersStyles';
 import { UserProfileHeader } from '../../components/users/details/UserProfileHeader';
 import { UserInfoSection } from '../../components/users/details/UserInfoSection';
 import { UserAddressSection } from '../../components/users/details/UserAddressSection';
 import { UserActivitySection } from '../../components/users/details/UserActivitySection';
 import { DeleteModal } from '../../components/DeleteModal';
-import { useUserApi } from '../../hooks/users/useUserApi';
-import { useNotification } from '../../context/NotificationContext';
+import { useUsers, User } from '../../api';
 import { routes } from '../../constants/routes';
 
 export function UserDetails() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('id');
-    const { addNotification } = useNotification();
-    const { getUser, deleteUser, resendInvitation, isLoading } = useUserApi();
+    const { getById, deleteUser, resendInvitation, isLoading } = useUsers();
 
     const [deleteModal, setDeleteModal] = useState(false);
     const [isResending, setIsResending] = useState(false);
-    const [userDetails, setUserDetails] = useState<any>(null);
+    const [userDetails, setUserDetails] = useState<User | null>(null);
 
     useEffect(() => {
-        if (userId) {
-            fetchUserData();
-        } else {
+        if (!userId) {
             navigate(routes.users.main);
+            return;
         }
-    }, [userId]);
+        fetchUserData();
+    }, [userId, navigate]);
 
     const fetchUserData = async () => {
         if (!userId) return;
 
-        const result = await getUser(userId);
+        const result = await getById(userId);
 
         if (result.success && result.data) {
             setUserDetails(result.data);
         } else {
-            addNotification('error', 'Failed to load user details');
             navigate(routes.users.main);
         }
     };
@@ -67,10 +57,7 @@ export function UserDetails() {
         const result = await deleteUser(userId);
         if (result.success) {
             navigate(routes.users.main);
-            addNotification('success', 'User deleted', 'The user has been deleted');
             modalClose();
-        } else {
-            addNotification('error', 'Failed to delete user', result.error);
         }
     };
 
@@ -78,33 +65,16 @@ export function UserDetails() {
         if (!userId) return;
 
         setIsResending(true);
-        const result = await resendInvitation(userId);
+        await resendInvitation(userId);
         setIsResending(false);
-
-        if (result.success) {
-            addNotification('success', 'Resend invitation', 'The invitation has been resent');
-        } else {
-            addNotification('error', 'Failed to resend invitation', result.error);
-        }
     };
 
-    if (!userId) {
-        navigate(routes.users.main);
-        return null;
-    }
-
     if (isLoading) {
-        return (
-            <Box sx={USER_DETAILS_LOADING_CONTAINER_STYLES}>
-                <CircularProgress size={40} sx={USER_DETAILS_LOADING_SPINNER_STYLES} />
-                <Typography sx={USER_DETAILS_LOADING_TEXT_STYLES}>Loading user details...</Typography>
-            </Box>
-        );
+        return <LoadingState message="Loading user details..." />;
     }
 
-    if (!userDetails) {
-        navigate(routes.users.main);
-        return null;
+    if (!userId || !userDetails) {
+        return <ErrorState message="Error loading user data. Please try again." />;
     }
 
     const actions: AppBarAction[] = [
@@ -114,10 +84,10 @@ export function UserDetails() {
     ];
 
     return (
-        <Box sx={USER_DETAILS_PAGE_STYLES}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Users" crntPage="User Details" actions={actions} />
 
-            <Box sx={USER_DETAILS_CONTAINER_STYLES}>
+            <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
                 <UserProfileHeader
                     firstName={userDetails.first_name}
                     lastName={userDetails.last_name}

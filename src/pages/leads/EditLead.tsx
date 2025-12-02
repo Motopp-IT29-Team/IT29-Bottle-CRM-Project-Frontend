@@ -1,37 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { useLeadFormData } from '../../hooks/leads/useLeadFormData';
-import { useLeadValidation } from '../../hooks/leads/useLeadValidation';
-import { useLeadApi } from '../../hooks/leads/useLeadApi';
-import { useFormState } from '../../hooks/common/useFormState';
-import { IForm, FormErrors } from '../../components/ui/form';
-import { getEditLeadFormConfig } from '../../configs/leads/editLeadFormConfig';
+import { Box } from '@mui/material';
+import { useFormState } from '../../hooks/useFormState';
 import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
-import { useNotification } from '../../context/NotificationContext';
+import { ModernAppBar, AppBarAction, LoadingState, ErrorState, IForm, FormErrors } from '../../components/ui';
 import { COUNTRIES } from '../../constants/countries';
 import { routes } from '../../constants/routes';
+import { useLeads, LeadFormData, validateLeadForm, getLeadConfig } from '../../api';
 
 export function EditLead() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const leadId = searchParams.get('id');
 
-    const { addNotification } = useNotification();
-    const { getLead, updateLead, isLoading: isSubmitting } = useLeadApi();
+    const { getAll, getById, update, isLoading: isSubmitting } = useLeads();
 
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
-    const [initialFormData, setInitialFormData] = useState<any>(null);
-
-    const { formData, handleChange, setFormData } = useLeadFormData();
-    const { validationErrors, validateForm, setValidationErrors } = useLeadValidation();
+    const [initialFormData, setInitialFormData] = useState<LeadFormData | null>(null);
+    const [formData, setFormData] = useState<LeadFormData>();
+    const [users, setUsers] = useState<any[]>([]);
 
     const { canSubmit } = useFormState({
-        formConfig: getEditLeadFormConfig(),
-        formData,
+        formConfig: getLeadConfig({ users }),
+        formData: formData || ({} as LeadFormData),
         initialData: initialFormData,
         isSubmitting,
     });
@@ -55,13 +49,18 @@ export function EditLead() {
     const fetchLeadData = async () => {
         if (!leadId) return;
 
-        setLoading(true);
-        const result = await getLead(leadId);
+        setIsLoading(true);
+        const result = await getById(leadId);
 
         if (result.success && result.data) {
             const lead = result.data.lead;
-
             const attachments = result.data.attachments || [];
+
+            const allUsers = await getAll();
+            if (allUsers.success && allUsers.data?.users) {
+                setUsers(allUsers.data.users);
+            }
+
             const formattedAttachments = attachments.map((att: any) => ({
                 id: att.id,
                 name: att.file_name,
@@ -69,7 +68,7 @@ export function EditLead() {
                 isNew: false,
             }));
 
-            const loadedData = {
+            const loadedData: LeadFormData = {
                 first_name: lead.first_name || '',
                 last_name: lead.last_name || '',
                 title: lead.title || '',
@@ -82,7 +81,6 @@ export function EditLead() {
                 status: lead.status || '',
                 source: lead.source || '',
                 probability: lead.probability || 50,
-                skype_ID: lead.skype_ID || '',
                 salutation: lead.salutation || 'Mr',
                 department: lead.department || 'Sales',
                 preferred_language: lead.preferred_language || 'English',
@@ -91,6 +89,7 @@ export function EditLead() {
                 decision_timeframe: lead.decision_timeframe || '',
                 do_not_call: lead.do_not_call || false,
                 address_line: lead.address_line || '',
+                close_date: lead.close_date || '',
                 street: lead.street || '',
                 city: lead.city || '',
                 state: lead.state || '',
@@ -98,8 +97,11 @@ export function EditLead() {
                 country: getCountryCode(lead.country) || '',
                 description: lead.description || '',
                 attachments: formattedAttachments,
-                actualFile: null,
-                assigned_to: lead.assigned_to?.map((u: any) => u.id) || [],
+                assigned_to:
+                    lead.assigned_to?.map((u: any) => ({
+                        value: u.id,
+                        label: u.user_details?.email || u.email || `User ${u.id}`,
+                    })) || [],
                 contacts: [],
                 tags: lead.tags || [],
             };
@@ -107,11 +109,43 @@ export function EditLead() {
             setInitialFormData(loadedData);
         } else {
             setError(true);
-            if (result.error) {
-                addNotification('error', 'Failed to load lead', result.error);
-            }
         }
-        setLoading(false);
+        setIsLoading(false);
+    };
+
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
+    ) => {
+        const { name, value } = e.target;
+        const type = 'type' in e.target ? e.target.type : undefined;
+
+        if (!formData) return;
+
+        if (type === 'number') {
+            setFormData((prev) => ({
+                ...prev!,
+                [name]: value === '' ? '' : Number(value),
+            }));
+        } else if (type === 'checkbox') {
+            const checked = 'checked' in e.target ? e.target.checked : false;
+            setFormData((prev) => ({
+                ...prev!,
+                [name]: checked,
+            }));
+        } else {
+            setFormData((prev) => ({
+                ...prev!,
+                [name]: value,
+            }));
+        }
+
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
     };
 
     const handleBack = () => {
@@ -126,59 +160,33 @@ export function EditLead() {
     };
 
     const handleSubmit = async () => {
-        if (!leadId) return;
+        if (!leadId || !formData) return;
 
         setBackendErrors({});
 
-        const errors = validateForm(formData);
+        const errors = validateLeadForm(formData);
         if (Object.keys(errors).length > 0) {
-            addNotification('warning', 'Validation Error', 'Please fill in all required fields correctly');
+            setValidationErrors(errors);
             return;
         }
 
-        const result = await updateLead(leadId, formData);
+        const result = await update(leadId, formData);
 
         if (result.success) {
-            addNotification('success', 'Lead updated successfully!');
             navigate(`${routes.leads.details}?id=${leadId}`);
         } else {
             if (result.fieldErrors) {
                 setBackendErrors(result.fieldErrors);
             }
-            if (result.error) {
-                addNotification('error', 'Failed to update lead', result.error);
-            }
         }
     };
 
-    if (loading) {
-        return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh',
-                    flexDirection: 'column',
-                    gap: 2,
-                }}
-            >
-                <CircularProgress size={40} sx={{ color: '#667eea' }} />
-                <Typography sx={{ color: '#6b7280', fontSize: '14px', fontWeight: 500 }}>
-                    Loading lead data...
-                </Typography>
-            </Box>
-        );
+    if (isLoading) {
+        return <LoadingState message="Loading lead data..." />;
     }
 
-    if (error) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Typography sx={{ color: '#ef4444', fontSize: '16px', fontWeight: 500 }}>
-                    Error loading lead data. Please try again.
-                </Typography>
-            </Box>
-        );
+    if (error || !formData) {
+        return <ErrorState message="Error loading lead data. Please try again." onRetry={fetchLeadData} />;
     }
 
     const allErrors: FormErrors = Object.keys(validationErrors).reduce(
@@ -202,9 +210,9 @@ export function EditLead() {
 
             <LeadLoadingBackdrop open={isSubmitting} />
 
-            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
+            <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
                 <IForm
-                    config={getEditLeadFormConfig()}
+                    config={getLeadConfig({ users })}
                     formData={formData}
                     errors={allErrors}
                     onChange={handleChange}

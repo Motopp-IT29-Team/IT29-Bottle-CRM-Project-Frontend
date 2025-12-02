@@ -1,63 +1,49 @@
-import { Box, Container } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Contact, useContactsApi } from '../../hooks/contacts/useContactsApi';
-import { IPagination, ITable, ITableColumn, ITableToolbar } from '../../components/ui';
+import { Box, Container } from '@mui/material';
+import { ITable, ITableColumn, IPagination, ITableToolbar } from '../../components/ui';
+import { useContacts, Contact } from '../../api';
 import { routes } from '../../constants/routes';
+import { ContactTableRow } from '../../components/contacts/ContactsTableRow';
 
 const columns: ITableColumn[] = [
-    {
-        id: 'first_name',
-        label: 'Name',
-        sortable: false,
-    },
-    // {
-    //     id: 'first_name',
-    //     sortable: false,
-    //     label: 'First Name',
-    // },
-    // {
-    //     id: 'last_name',
-    //     sortable: false,
-    //     label: 'Last Name',
-    // },
-    {
-        id: 'primary_email',
-        label: 'Email Address',
-        sortable: false,
-    },
-    {
-        id: 'mobile_number',
-        label: 'Phone Number',
-        sortable: false,
-    },
+    { id: 'name', label: 'Name', sortable: true },
+    { id: 'email', label: 'Email Address', sortable: true },
+    { id: 'phone', label: 'Phone Number', sortable: false },
+    { id: 'account', label: 'Account', sortable: false },
+    { id: 'created_at', label: 'Created', sortable: true },
 ];
 
 export function Contacts() {
     const navigate = useNavigate();
+    const { getAll, isLoading } = useContacts();
+
     const [contacts, setContacts] = useState<Contact[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [recordsPerPage, setRecordsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(0);
 
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [recordsPerPage, setRecordsPerPage] = useState<number>(10);
-    const [totalPages, setTotalPages] = useState<number>(0);
-
-    const { getContacts, isLoading } = useContactsApi();
-
-    useEffect(() => {
-        fetchLeads();
-    }, []);
-
-    const fetchLeads = useCallback(async () => {
+    const fetchContacts = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
-        const result = await getContacts({
+        const result = await getAll({
             offset,
             limit: recordsPerPage,
         });
 
-        if (result.data?.contacts) {
-            setContacts(result.data?.contacts);
+        if (result.success && result.data) {
+            setContacts(result.data.contact_obj_list || []);
+            setTotalPages(Math.ceil((result.data.total_count || 0) / recordsPerPage));
         }
-    }, [currentPage, recordsPerPage]);
+    }, [currentPage, recordsPerPage, getAll]);
+
+    useEffect(() => {
+        fetchContacts();
+    }, []);
+
+    const handleRecordsPerPage = (value: number) => {
+        setRecordsPerPage(value);
+        setCurrentPage(1);
+    };
 
     const handlePreviousPage = () => {
         setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -67,38 +53,37 @@ export function Contacts() {
         setCurrentPage((prev) => Math.min(prev + 1, totalPages));
     };
 
-    const handleRecordsPerPage = (value: number) => {
-        setRecordsPerPage(value);
-        setCurrentPage(1);
+    const navigateToContactDetail = (contactId: string) => {
+        navigate(`${routes.contacts.details}?id=${contactId}`);
     };
 
-    const navigateToContactLead = () => {
+    const navigateToAddContact = () => {
         if (!isLoading) {
-            navigate(routes.contacts.edit);
+            navigate(routes.contacts.create);
         }
     };
 
-    const navigateToContactDetail = (id: string) => {
-        navigate(`${routes.contacts.details}?id=${id}`);
-    };
+    const sortContacts = (contacts: Contact[], order: 'asc' | 'desc', orderBy: string) => {
+        if (!Array.isArray(contacts) || contacts.length === 0) {
+            return [];
+        }
 
-    const sort = (contacts: Contact[], order: 'asc' | 'desc', orderBy: string) => {
         return [...contacts].sort((a, b) => {
             let aValue: any;
             let bValue: any;
 
-            // if (orderBy === 'title') {
-            //     aValue = a.title?.toLowerCase() || '';
-            //     bValue = b.title?.toLowerCase() || '';
-            // } else if (orderBy === 'status') {
-            //     aValue = a.status?.toLowerCase() || '';
-            //     bValue = b.status?.toLowerCase() || '';
-            // } else if (orderBy === 'created_at') {
-            //     aValue = new Date(a.created_at).getTime();
-            //     bValue = new Date(b.created_at).getTime();
-            // } else {
-            //     return 0;
-            // }
+            if (orderBy === 'name') {
+                aValue = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
+                bValue = `${b.first_name || ''} ${b.last_name || ''}`.toLowerCase();
+            } else if (orderBy === 'email') {
+                aValue = a.primary_email?.toLowerCase() || '';
+                bValue = b.primary_email?.toLowerCase() || '';
+            } else if (orderBy === 'created_at') {
+                aValue = new Date(a.created_at).getTime();
+                bValue = new Date(b.created_at).getTime();
+            } else {
+                return 0;
+            }
 
             if (order === 'asc') {
                 return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
@@ -110,7 +95,7 @@ export function Contacts() {
 
     return (
         <Box sx={{ mt: '60px' }}>
-            <ITableToolbar addButtonLabel="Add Contact" onAdd={navigateToContactLead} loading={isLoading}>
+            <ITableToolbar addButtonLabel="Add Contact" onAdd={navigateToAddContact} loading={isLoading}>
                 <IPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -126,13 +111,15 @@ export function Contacts() {
                     data={contacts}
                     columns={columns}
                     loading={isLoading}
-                    emptyMessage={`No contacts found`}
-                    renderRow={(contact) => <></>}
+                    emptyMessage="No contacts found"
+                    renderRow={(contact) => (
+                        <ContactTableRow key={contact.id} contact={contact} onViewDetail={navigateToContactDetail} />
+                    )}
                     getRowKey={(contact) => contact.id}
                     sortable={true}
                     defaultOrderBy="created_at"
                     defaultOrder="desc"
-                    customSort={sort}
+                    customSort={sortContacts}
                 />
             </Container>
         </Box>

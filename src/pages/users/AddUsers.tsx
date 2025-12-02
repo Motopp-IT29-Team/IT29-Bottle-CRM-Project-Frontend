@@ -1,43 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { IForm, FormErrors } from '../../components/ui/form';
-import { getAddUserFormConfig } from '../../configs/users/addUserFormConfig';
-import { useUserFormData, UserFormData } from '../../hooks/users/useUserFormData';
-import { useUserValidation } from '../../hooks/users/useUserValidation';
-import { useUserApi } from '../../hooks/users/useUserApi';
-import { useFormState } from '../../hooks/common/useFormState';
-import { UsersLoadingBackdrop } from '../../components/users/UsersLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
-import { useNotification } from '../../context/NotificationContext';
+import { useUsers, UserFormData, validateUserForm, getUserConfig } from '../../api';
+import { useFormState } from '../../hooks/useFormState';
+import { LoadingBackdrop, ModernAppBar, AppBarAction } from '../../components/ui';
 import { routes } from '../../constants/routes';
 
 const INITIAL_FORM_DATA: UserFormData = {
-    email: '',
     first_name: '',
     last_name: '',
     role: 'ADMIN',
+    date_of_joining: '',
     address_line: '',
     street: '',
     city: '',
     state: '',
     postcode: '',
     country: '',
+    email: '',
 };
 
 export function AddUsers() {
     const navigate = useNavigate();
-    const { addNotification } = useNotification();
-    const { formData, handleChange, resetForm } = useUserFormData(INITIAL_FORM_DATA);
-    const { validationErrors, validateForm } = useUserValidation();
-    const { createUser, isLoading } = useUserApi();
+    const [formData, setFormData] = useState<UserFormData>(INITIAL_FORM_DATA);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    const { create, isLoading } = useUsers();
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
 
     const { canSubmit } = useFormState({
-        formConfig: getAddUserFormConfig(),
+        formConfig: getUserConfig(),
         formData,
         isSubmitting: isLoading,
     });
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const resetForm = () => {
+        setFormData(INITIAL_FORM_DATA);
+        setValidationErrors({});
+    };
 
     const handleBack = () => navigate(routes.users.main);
 
@@ -50,24 +63,20 @@ export function AddUsers() {
     const handleSubmit = async () => {
         setBackendErrors({});
 
-        const errors = validateForm(formData);
+        const errors = validateUserForm(formData);
         if (Object.keys(errors).length > 0) {
-            addNotification('warning', 'Validation Error', 'Please fix the form errors');
+            setValidationErrors(errors);
             return;
         }
 
-        const result = await createUser(formData);
+        const result = await create(formData);
 
         if (result.success) {
-            addNotification('success', 'User created successfully!', 'Invitation email has been sent');
             resetForm();
             navigate(routes.users.main);
         } else {
             if (result.fieldErrors) {
                 setBackendErrors(result.fieldErrors);
-            }
-            if (result.error) {
-                addNotification('error', 'Failed to create user', result.error);
             }
         }
     };
@@ -94,14 +103,14 @@ export function AddUsers() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Users" crntPage="Create User" actions={actions} />
 
-            <UsersLoadingBackdrop open={isLoading} />
+            <LoadingBackdrop open={isLoading} />
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <IForm
-                    config={getAddUserFormConfig()}
+                    config={getUserConfig()}
                     formData={formData}
                     errors={allErrors}
                     onChange={handleChange}

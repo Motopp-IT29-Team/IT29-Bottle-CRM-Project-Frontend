@@ -37,7 +37,17 @@ export const DetailSection: React.FC<Props> = ({ title, icon, defaultExpanded = 
                 </Stack>
             </AccordionSummary>
             <AccordionDetails sx={{ p: 3 }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3 }}>{children}</Box>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: 3,
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                    }}
+                >
+                    {children}
+                </Box>
             </AccordionDetails>
         </Accordion>
     );

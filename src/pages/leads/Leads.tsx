@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
-import { ITable, ITableColumn, IPagination } from '../../components/ui';
-import { ITableToolbar } from '../../components/ui';
+import { ITableToolbar, ITable, ITableColumn, IPagination } from '../../components/ui';
 import { LeadTableRow } from '../../components/leads/LeadTableRow';
-import { Lead, useLeadApi } from '../../hooks/leads/useLeadApi';
+import { useLeads, Lead } from '../../api';
 import { routes } from '../../constants/routes';
 
 const columns: ITableColumn[] = [
@@ -22,7 +21,7 @@ const tabs = [
 
 export function Leads() {
     const navigate = useNavigate();
-    const { getLeads, isLoading } = useLeadApi();
+    const { getAll, isLoading } = useLeads();
 
     const [tab, setTab] = useState<'open' | 'closed'>('open');
     const [leads, setLeads] = useState<Lead[]>([]);
@@ -32,13 +31,12 @@ export function Leads() {
 
     const fetchLeads = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
-        const result = await getLeads({
+        const result = await getAll({
             offset,
             limit: recordsPerPage,
         });
 
         if (result.success && result.data) {
-            // Separate open and closed leads
             const openLeadsData = result.data.open_leads?.open_leads || [];
             const closedLeadsData = result.data.close_leads?.close_leads || [];
 
@@ -53,7 +51,7 @@ export function Leads() {
                 setTotalPages(Math.ceil(closedLeadsCount / recordsPerPage));
             }
         }
-    }, [tab, currentPage, recordsPerPage]);
+    }, [tab, currentPage, recordsPerPage, getAll]);
 
     useEffect(() => {
         if (localStorage.getItem('org')) {

@@ -4,7 +4,7 @@ import Login from './pages/auth/Login';
 import { Home } from './pages/home/Home';
 import { ActivateUser } from './pages/auth/ActivateUser';
 import { NotificationProvider } from './context/NotificationContext';
-import { INotificationContainer } from './components/ui/notification/INotificationContainer';
+import { INotificationContainer } from './components/ui';
 
 function App() {
     return (

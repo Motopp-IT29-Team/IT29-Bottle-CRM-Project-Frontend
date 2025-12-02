@@ -4,7 +4,7 @@ import { Box, Container } from '@mui/material';
 import { ITable, ITableColumn, IPagination } from '../../components/ui';
 import { ITableToolbar } from '../../components/ui';
 import { UserTableRow } from '../../components/users/UserTableRow';
-import { useUserApi } from '../../hooks/users/useUserApi';
+import { useUsers } from '../../api';
 import { routes } from '../../constants/routes';
 
 interface User {
@@ -28,7 +28,7 @@ const tabs = [
 
 export function Users() {
     const navigate = useNavigate();
-    const { getUsers, isLoading } = useUserApi();
+    const { getAll, isLoading } = useUsers();
 
     const [tab, setTab] = useState<'active' | 'inactive'>('active');
     const [users, setUsers] = useState<User[]>([]);
@@ -39,7 +39,7 @@ export function Users() {
     useEffect(() => {
         const fetchUsers = async () => {
             const offset = (currentPage - 1) * recordsPerPage;
-            const result = await getUsers({ offset, limit: recordsPerPage, status: tab });
+            const result = await getAll({ offset, limit: recordsPerPage, status: tab });
 
             if (result.success && result.data) {
                 setUsers(result.data.users);
@@ -48,7 +48,7 @@ export function Users() {
         };
 
         fetchUsers();
-    }, [tab, currentPage, recordsPerPage]);
+    }, [tab, currentPage, recordsPerPage, getAll]);
 
     useEffect(() => {
         setCurrentPage(1);
