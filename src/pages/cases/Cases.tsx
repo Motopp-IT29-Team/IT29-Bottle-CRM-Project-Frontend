@@ -42,6 +42,7 @@ import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { Priority } from '../../components/Priority';
 import { EnhancedTableHead } from '../../components/EnchancedTableHead';
+import { routes } from '../../constants/routes';
 
 interface HeadCell {
     disablePadding: boolean;
@@ -98,7 +99,7 @@ type Item = {
     id: string;
 };
 
-export default function Cases(props: any) {
+export function Cases(props: any) {
     const navigate = useNavigate();
     const [tab, setTab] = useState('Active');
     const [loading, setLoading] = useState(true);
@@ -175,7 +176,7 @@ export default function Cases(props: any) {
 
     const onAddCases = () => {
         if (!loading) {
-            navigate('/app/cases/add-case', {
+            navigate(routes.cases.create, {
                 state: {
                     detail: false,
                     contacts: contacts || [],
@@ -202,7 +203,7 @@ export default function Cases(props: any) {
     const caseDetail = (caseId: any) => {
         // console.log(contacts,priority,typeOfCases,account,'list');
 
-        navigate(`/app/cases/case-details`, {
+        navigate(routes.cases.details, {
             state: {
                 caseId,
                 detail: true,

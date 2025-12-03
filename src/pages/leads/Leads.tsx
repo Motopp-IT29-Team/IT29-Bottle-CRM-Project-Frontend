@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
-import { ITable, ITableColumn, IPagination } from '../../components/ui';
-import { ITableToolbar } from '../../components/ui';
+import { ITableToolbar, ITable, ITableColumn, IPagination } from '../../components/ui';
 import { LeadTableRow } from '../../components/leads/LeadTableRow';
-import { Lead, useLeadApi } from '../../hooks/leads/useLeadApi';
+import { useLeads, Lead } from '../../api';
+import { routes } from '../../constants/routes';
 
 const columns: ITableColumn[] = [
     { id: 'title', label: 'Lead Name', sortable: true },
@@ -21,7 +21,7 @@ const tabs = [
 
 export function Leads() {
     const navigate = useNavigate();
-    const { getLeads, isLoading } = useLeadApi();
+    const { getAll, isLoading } = useLeads();
 
     const [tab, setTab] = useState<'open' | 'closed'>('open');
     const [leads, setLeads] = useState<Lead[]>([]);
@@ -29,18 +29,14 @@ export function Leads() {
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
 
-    // Filter data for AddLead navigation
-    const [filterData, setFilterData] = useState<any>({});
-
     const fetchLeads = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
-        const result = await getLeads({
+        const result = await getAll({
             offset,
             limit: recordsPerPage,
         });
 
         if (result.success && result.data) {
-            // Separate open and closed leads
             const openLeadsData = result.data.open_leads?.open_leads || [];
             const closedLeadsData = result.data.close_leads?.close_leads || [];
 
@@ -54,21 +50,8 @@ export function Leads() {
                 setLeads(closedLeadsData);
                 setTotalPages(Math.ceil(closedLeadsCount / recordsPerPage));
             }
-
-            // Store filter data for AddLead navigation
-            setFilterData({
-                detail: false,
-                contacts: result.data.contacts || [],
-                status: result.data.status || [],
-                source: result.data.source || [],
-                companies: result.data.companies || [],
-                tags: result.data.tags || [],
-                users: result.data.users || [],
-                countries: result.data.countries || [],
-                industries: result.data.industries || [],
-            });
         }
-    }, [tab, currentPage, recordsPerPage]);
+    }, [tab, currentPage, recordsPerPage, getAll]);
 
     useEffect(() => {
         if (localStorage.getItem('org')) {
@@ -98,14 +81,12 @@ export function Leads() {
     };
 
     const navigateToLeadDetail = (leadId: string) => {
-        navigate(`/app/leads/lead-details?id=${leadId}`);
+        navigate(`${routes.leads.details}?id=${leadId}`);
     };
 
     const navigateToAddLead = () => {
         if (!isLoading) {
-            navigate('/app/leads/add-leads', {
-                state: filterData,
-            });
+            navigate(routes.leads.create);
         }
     };
 

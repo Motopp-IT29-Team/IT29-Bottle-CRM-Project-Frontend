@@ -4,7 +4,8 @@ import { Box, Container } from '@mui/material';
 import { ITable, ITableColumn, IPagination } from '../../components/ui';
 import { ITableToolbar } from '../../components/ui';
 import { UserTableRow } from '../../components/users/UserTableRow';
-import { useUserApi } from '../../hooks/users/useUserApi';
+import { useUsers } from '../../api';
+import { routes } from '../../constants/routes';
 
 interface User {
     id: string;
@@ -25,9 +26,9 @@ const tabs = [
     { value: 'inactive', label: 'Inactive' },
 ];
 
-export default function Users() {
+export function Users() {
     const navigate = useNavigate();
-    const { getUsers, isLoading } = useUserApi();
+    const { getAll, isLoading } = useUsers();
 
     const [tab, setTab] = useState<'active' | 'inactive'>('active');
     const [users, setUsers] = useState<User[]>([]);
@@ -38,7 +39,7 @@ export default function Users() {
     useEffect(() => {
         const fetchUsers = async () => {
             const offset = (currentPage - 1) * recordsPerPage;
-            const result = await getUsers({ offset, limit: recordsPerPage, status: tab });
+            const result = await getAll({ offset, limit: recordsPerPage, status: tab });
 
             if (result.success && result.data) {
                 setUsers(result.data.users);
@@ -47,7 +48,7 @@ export default function Users() {
         };
 
         fetchUsers();
-    }, [tab, currentPage, recordsPerPage]);
+    }, [tab, currentPage, recordsPerPage, getAll]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -71,11 +72,11 @@ export default function Users() {
     };
 
     const navigateToUserDetail = (userId: string) => {
-        navigate(`/app/users/user-details?id=${userId}`);
+        navigate(`${routes.users.details}?id=${userId}`);
     };
 
     const navigateToAddUser = () => {
-        if (!isLoading) navigate('/app/users/add-users');
+        if (!isLoading) navigate(routes.users.create);
     };
 
     const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {

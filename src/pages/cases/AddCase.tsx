@@ -29,6 +29,7 @@ import { FaCheckCircle, FaFileUpload, FaPlus, FaTimes, FaTimesCircle, FaUpload }
 import { CustomPopupIcon, RequiredSelect, RequiredTextField } from '../../styles/CssStyled';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
@@ -197,7 +198,7 @@ export function AddCase() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     resetForm();
-                    navigate('/app/cases');
+                    navigate(routes.cases.main);
                 }
                 if (res.error) {
                     setError(true);
@@ -233,7 +234,7 @@ export function AddCase() {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/cases');
+        navigate(routes.cases.main);
     };
 
     const module = 'Cases';

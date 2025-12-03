@@ -223,7 +223,7 @@ export function ModernAppBar({ module, crntPage, actions = [] }: ModernAppBarPro
                     </Link>
                     <Link
                         underline="hover"
-                        onClick={() => navigate(`/app/${moduleLink}`)}
+                        onClick={() => navigate(`/${moduleLink}`)}
                         sx={{
                             color: 'rgba(255, 255, 255, 0.7)',
                             fontSize: '14px',

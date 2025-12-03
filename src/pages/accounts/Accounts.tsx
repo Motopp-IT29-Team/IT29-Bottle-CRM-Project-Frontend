@@ -45,6 +45,7 @@ import { Spinner } from '../../components/Spinner';
 import styled from '@emotion/styled';
 import '../../styles/style.css';
 import { EnhancedTableHead } from '../../components/EnchancedTableHead';
+import { routes } from '../../constants/routes';
 
 interface HeadCell {
     disablePadding: boolean;
@@ -157,7 +158,7 @@ const headCells: readonly HeadCell[] = [
 type Item = {
     id: string;
 };
-export default function Accounts() {
+export function Accounts() {
     const navigate = useNavigate();
 
     const [tab, setTab] = useState('open');
@@ -261,7 +262,7 @@ export default function Accounts() {
     };
 
     const accountDetail = (accountId: any) => {
-        navigate(`/app/accounts/account-details`, {
+        navigate(routes.accounts.details, {
             state: {
                 accountId,
                 detail: true,
@@ -347,7 +348,7 @@ export default function Accounts() {
 
     const onAddAccount = () => {
         if (!loading) {
-            navigate('/app/accounts/add-account', {
+            navigate(routes.accounts.create, {
                 state: {
                     detail: false,
                     contacts: contacts || [],
@@ -447,10 +448,9 @@ export default function Accounts() {
             org: localStorage.getItem('org'),
         };
         fetchData(`${AccountsUrl}/${id}/`, 'GET', null as any, Header).then((res) => {
-            console.log(res, 'resDetail');
             if (!res.error) {
                 const data = res?.account_obj;
-                navigate('/app/accounts/edit-account', {
+                navigate(routes.accounts.edit, {
                     state: {
                         value: {
                             // email: data?.email,

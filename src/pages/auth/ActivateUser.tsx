@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, TextField, Button, CircularProgress, Alert } from '@mui/material';
 import { fetchData } from '../../components/FetchData';
+import { routes } from '../../constants/routes';
 
 export const ActivateUser = () => {
     const { uid, token, activationKey } = useParams();
@@ -67,7 +68,7 @@ export const ActivateUser = () => {
                 localStorage.setItem('user_id', res.user.id);
                 localStorage.setItem('email', res.user.email);
 
-                window.location.href = '/app/dashboard';
+                window.location.href = routes.app.main;
             } else {
                 setError(res.error || 'Failed to activate account');
             }

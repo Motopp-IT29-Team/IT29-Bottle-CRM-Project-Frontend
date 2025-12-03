@@ -1,60 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
-import { useNotification } from '../../context/NotificationContext';
-import { fetchData } from '../../components/FetchData';
-import { ProfileUrl } from '../../services/ApiUrls';
-import { FormErrors, IForm } from '../../components/ui/form';
-import { getEditUserFormConfig } from '../../configs/users/editUserFormConfig';
-import { useUserApi } from '../../hooks/users/useUserApi';
-import { useFormState } from '../../hooks/common/useFormState';
+import { Box } from '@mui/material';
+import { ModernAppBar, AppBarAction, LoadingState, ErrorState, IForm, FormErrors } from '../../components/ui';
+import { useUsers, UserFormData, apiClient, ENDPOINTS, getUserConfig } from '../../api';
+import { useFormState } from '../../hooks/useFormState';
 import { hasFormChanges } from '../../utils/form/formHelpers';
-
-interface FormData {
-    email: string;
-    first_name: string;
-    last_name: string;
-    role: string;
-    password: string;
-    is_active: boolean;
-    address_line: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-}
+import { routes } from '../../constants/routes';
 
 export function EditUser() {
     const [searchParams] = useSearchParams();
     const userId = searchParams.get('id');
     const navigate = useNavigate();
-    const { addNotification } = useNotification();
-    const { getUser, updateUser, toggleUserStatus, isLoading: isSubmitting } = useUserApi();
+    const { getById, update, toggleStatus, isLoading: isSubmitting } = useUsers();
 
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
-    const [initialFormData, setInitialFormData] = useState<FormData | null>(null);
-    const [formData, setFormData] = useState<FormData>({
-        email: '',
+    const [initialFormData, setInitialFormData] = useState<UserFormData | null>(null);
+    const [formData, setFormData] = useState<UserFormData>({
         first_name: '',
         last_name: '',
         role: 'ADMIN',
-        password: '',
-        is_active: true,
+        date_of_joining: '',
         address_line: '',
         street: '',
         city: '',
         state: '',
         postcode: '',
         country: '',
+        email: '',
     });
 
     const isCurrentUser = formData.email === currentUserEmail;
-    const formConfig = getEditUserFormConfig(isCurrentUser);
+    const formConfig = getUserConfig(isCurrentUser);
 
     const { canSubmit } = useFormState({
         formConfig,
@@ -62,12 +41,12 @@ export function EditUser() {
         initialData: initialFormData,
         isSubmitting,
         customValidation: (data) => {
-            const hasPasswordChange = data.password?.trim() !== '';
+            const hasPasswordChange = data.user_details?.password?.trim() !== '';
             const hasDataChanges = hasFormChanges(data, initialFormData, [
-                'email',
                 'first_name',
                 'last_name',
                 'role',
+                'phone',
                 'address_line',
                 'street',
                 'city',
@@ -85,20 +64,15 @@ export function EditUser() {
             fetchUserData();
             fetchCurrentUser();
         } else {
-            navigate('/app/users');
+            navigate(routes.users.main);
         }
     }, [userId, navigate]);
 
     const fetchCurrentUser = async () => {
         try {
-            const res = await fetchData(`${ProfileUrl}/`, 'GET', null as any, {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: localStorage.getItem('Token'),
-                org: localStorage.getItem('org'),
-            });
-            if (res?.user_obj?.user_details?.email) {
-                setCurrentUserEmail(res.user_obj.user_details.email);
+            const response = await apiClient.get(ENDPOINTS.PROFILE);
+            if (response.data?.user_obj?.user_details?.email) {
+                setCurrentUserEmail(response.data.user_obj.user_details.email);
             }
         } catch (error) {
             console.error('Error fetching current user:', error);
@@ -108,51 +82,42 @@ export function EditUser() {
     const fetchUserData = async () => {
         if (!userId) return;
 
-        setLoading(true);
-        const result = await getUser(userId);
-
+        setIsLoading(true);
+        const result = await getById(userId);
         if (result.success && result.data) {
             const data = result.data;
-            const loadedData = {
-                email: data.user_details.email,
+
+            const loadedData: UserFormData = {
                 first_name: data.first_name,
                 last_name: data.last_name,
                 role: data.role,
-                password: '',
-                is_active: data.is_active,
-                address_line: data.address.address_line,
-                street: data.address.street,
-                city: data.address.city,
-                state: data.address.state,
-                postcode: data.address.postcode,
-                country: data.address.country,
+                date_of_joining: data.date_of_joining || '',
+                address_line: data.address?.address_line || '',
+                street: data.address?.street || '',
+                city: data.address?.city || '',
+                state: data.address?.state || '',
+                postcode: data.address?.postcode || '',
+                country: data.address?.country || '',
+                is_active: data.user_details.is_active,
+                email: data.user_details.email,
             };
             setFormData(loadedData);
             setInitialFormData(loadedData);
         } else {
             setError(true);
-            if (result.error) {
-                addNotification('error', 'Failed to load user', result.error);
-            }
         }
-        setLoading(false);
+        setIsLoading(false);
     };
 
     const handleChange = async (e: any) => {
         const { name, value } = e.target;
 
         if (name === 'is_active' && userId) {
-            const newValue = value === true || value === 'true';
-            setFormData({ ...formData, [name]: newValue });
-            const result = await toggleUserStatus(userId);
+            const result = await toggleStatus(userId);
 
-            if (result.success) {
-                addNotification('success', `User ${newValue ? 'activated' : 'deactivated'} successfully`);
-            } else {
-                setFormData({ ...formData, [name]: !newValue });
-                addNotification('error', 'Failed to change user status', result.error);
+            if (!result.success) {
+                return;
             }
-            return;
         }
 
         setFormData({ ...formData, [name]: value });
@@ -163,26 +128,19 @@ export function EditUser() {
     };
 
     const handleBack = () => {
-        navigate('/app/users');
+        navigate(routes.users.main);
     };
 
     const handleSubmit = async () => {
         if (!userId) return;
 
-        const { password, is_active, ...dataToSend } = formData;
-        const dataWithPassword = password ? { ...formData, password: password.trim() } : { ...dataToSend, is_active };
-
-        const result = await updateUser(userId, dataWithPassword);
+        const result = await update(userId, formData);
 
         if (result.success) {
-            addNotification('success', 'User updated successfully');
-            navigate('/app/users');
+            navigate(routes.users.main);
         } else {
             if (result.fieldErrors) {
                 setFormErrors(result.fieldErrors);
-            }
-            if (result.error) {
-                addNotification('error', 'Failed to update user', result.error);
             }
         }
     };
@@ -191,34 +149,12 @@ export function EditUser() {
         navigate(-1);
     };
 
-    if (loading) {
-        return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh',
-                    flexDirection: 'column',
-                    gap: 2,
-                }}
-            >
-                <CircularProgress size={40} sx={{ color: '#667eea' }} />
-                <Typography sx={{ color: '#6b7280', fontSize: '14px', fontWeight: 500 }}>
-                    Loading user data...
-                </Typography>
-            </Box>
-        );
+    if (isLoading) {
+        return <LoadingState message="Loading user data..." />;
     }
 
     if (error) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Typography sx={{ color: '#ef4444', fontSize: '16px', fontWeight: 500 }}>
-                    Error loading user data. Please try again.
-                </Typography>
-            </Box>
-        );
+        return <ErrorState message="Error loading user data. Please try again." />;
     }
 
     const actions: AppBarAction[] = [

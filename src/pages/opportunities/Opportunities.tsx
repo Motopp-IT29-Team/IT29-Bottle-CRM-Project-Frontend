@@ -41,6 +41,7 @@ import { DeleteModal } from '../../components/DeleteModal';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { EnhancedTableHead } from '../../components/EnchancedTableHead';
+import { routes } from '../../constants/routes';
 
 interface HeadCell {
     disablePadding: boolean;
@@ -109,7 +110,7 @@ type Item = {
     id: string;
 };
 
-export default function Opportunities(props: any) {
+export function Opportunities(props: any) {
     const navigate = useNavigate();
     const [tab, setTab] = useState('open');
     const [loading, setLoading] = useState(true);
@@ -194,7 +195,7 @@ export default function Opportunities(props: any) {
 
     const onAddOpportunity = () => {
         if (!loading) {
-            navigate('/app/opportunities/add-opportunity', {
+            navigate(routes.opportunities.create, {
                 state: {
                     detail: false,
                     contacts: contacts || [],
@@ -223,7 +224,7 @@ export default function Opportunities(props: any) {
     };
 
     const opportunityDetail = (opportunityId: any) => {
-        navigate(`/app/opportunities/opportunity-details`, {
+        navigate(routes.opportunities.details, {
             state: {
                 opportunityId,
                 detail: true,

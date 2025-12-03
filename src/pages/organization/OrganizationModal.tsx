@@ -3,6 +3,7 @@ import { Box, Dialog, Divider, IconButton, List, ListItem, Stack, TextField, Typ
 import { FiPlus, FiX, FiCheck, FiBriefcase } from 'react-icons/fi';
 import { fetchData } from '../../components/FetchData';
 import { OrgUrl } from '../../services/ApiUrls';
+import { routes } from '../../constants/routes';
 
 interface Item {
     org: {
@@ -86,7 +87,7 @@ export default function OrganizationModal(props: any) {
 
         localStorage.setItem('org', id);
         onHandleClose();
-        window.location.reload();
+        window.location.href = routes.app.main;
     };
 
     const getOrgInitial = (name: string) => {
@@ -107,12 +108,7 @@ export default function OrganizationModal(props: any) {
         >
             <Box>
                 {/* Header */}
-                <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{ p: 3, pb: 2 }}
-                >
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 3, pb: 2 }}>
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                         <Box
                             sx={{
@@ -209,9 +205,7 @@ export default function OrganizationModal(props: any) {
                                                     transition: 'all 0.2s ease',
                                                     '&:hover': {
                                                         backgroundColor: isSelected ? '#f0f4ff' : '#f9fafb',
-                                                        border: isSelected
-                                                            ? '2px solid #667eea'
-                                                            : '2px solid #e5e7eb',
+                                                        border: isSelected ? '2px solid #667eea' : '2px solid #e5e7eb',
                                                     },
                                                 }}
                                             >

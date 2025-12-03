@@ -8,6 +8,7 @@ import { CustomAppBar } from '../../components/CustomAppBar';
 import { FaPlus, FaStar } from 'react-icons/fa';
 import FormateTime from '../../components/FormateTime';
 import { Label } from '../../components/Label';
+import { routes } from '../../constants/routes';
 
 export const formatDate = (dateString: any) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -155,8 +156,8 @@ export const OpportunityDetails = (props: any) => {
             })
             .catch((err) => {
                 // console.error('Error:', err)
-                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate('/app/opportunities')}>
-                    <Alert onClose={() => navigate('/app/opportunities')} severity="error" sx={{ width: '100%' }}>
+                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate(routes.opportunities.main)}>
+                    <Alert onClose={() => navigate(routes.opportunities.main)} severity="error" sx={{ width: '100%' }}>
                         Failed to load!
                     </Alert>
                 </Snackbar>;
@@ -173,7 +174,6 @@ export const OpportunityDetails = (props: any) => {
         return countryName?.[1];
     };
     const editHandle = () => {
-        // navigate('/contacts/edit-contacts', { state: { value: contactDetails, address: newAddress } })
         let country: string[] | undefined;
         for (country of countries) {
             if (Array.isArray(country) && country.includes(opportunityDetails?.country || '')) {
@@ -181,7 +181,7 @@ export const OpportunityDetails = (props: any) => {
                 break;
             }
         }
-        navigate('/app/opportunities/edit-opportunity', {
+        navigate(routes.opportunities.edit, {
             state: {
                 value: {
                     name: opportunityDetails?.name,
@@ -214,7 +214,7 @@ export const OpportunityDetails = (props: any) => {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/opportunities');
+        navigate(routes.opportunities.main);
     };
 
     const module = 'Opportunities';

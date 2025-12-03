@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Chip } from '@mui/material';
 
 export const Tags = (props: any) => {
-    // const [tags, seTags] = useState([props.tags])
     const [tagsColor, setTagsColor] = useState('#665d1e');
 
     useEffect(() => {

@@ -18,15 +18,26 @@ interface ApiErrorResponse {
  */
 export const parseApiErrors = (response: ApiErrorResponse): FormErrors => {
     const fieldErrors: FormErrors = {};
+    const errorsContainer = response?.errors;
 
-    const errorKeys = ['profile_errors', 'user_errors', 'address_errors', 'lead_errors'];
+    if (!errorsContainer || typeof errorsContainer !== 'object') {
+        return fieldErrors;
+    }
+
+    const errorKeys = [
+        'profile_errors',
+        'user_errors',
+        'address_errors',
+        'lead_errors',
+        'contact_errors',
+        'non_field_errors',
+    ];
 
     errorKeys.forEach((key) => {
-        const errors = response?.[key];
+        const errors = errorsContainer[key];
 
         if (!errors) return;
 
-        // Array format: [{field: ["error"]}, {field2: ["error2"]}]
         if (Array.isArray(errors)) {
             errors.forEach((errorObj: any) => {
                 if (typeof errorObj === 'object' && errorObj !== null) {
@@ -37,9 +48,7 @@ export const parseApiErrors = (response: ApiErrorResponse): FormErrors => {
                     });
                 }
             });
-        }
-        // Object format: {field: ["error"], field2: ["error2"]}
-        else if (typeof errors === 'object' && errors !== null) {
+        } else if (typeof errors === 'object' && errors !== null) {
             Object.keys(errors).forEach((fieldName) => {
                 if (Array.isArray(errors[fieldName])) {
                     fieldErrors[fieldName] = errors[fieldName];

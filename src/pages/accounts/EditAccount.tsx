@@ -26,6 +26,7 @@ import { FaFileUpload, FaPlus, FaTimes, FaUpload } from 'react-icons/fa';
 import { CustomPopupIcon, RequiredSelect, RequiredTextField } from '../../styles/CssStyled';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
@@ -126,9 +127,9 @@ export function EditAccount() {
 
     const backbtnHandle = () => {
         if (state?.edit) {
-            navigate('/app/accounts');
+            navigate(routes.accounts.main);
         } else {
-            navigate('/app/accounts/account-details', {
+            navigate(routes.accounts.details, {
                 state: { accountId: state?.id, detail: true },
             });
         }
@@ -240,7 +241,7 @@ export function EditAccount() {
                 // console.log('Form data:', res);
                 if (!res.error) {
                     resetForm();
-                    navigate('/app/accounts');
+                    navigate(routes.accounts.main);
                 }
                 if (res.error) {
                     setError(true);

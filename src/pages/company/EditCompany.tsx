@@ -8,12 +8,13 @@ import { CustomAppBar } from '../../components/CustomAppBar';
 import { fetchData } from '../../components/FetchData';
 import '../../styles/style.css';
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
+import { routes } from '../../constants/routes';
 
 type FormErrors = {
     name?: string[];
 };
 
-function EditCompany() {
+export function EditCompany() {
     const navigate = useNavigate();
     const location = useLocation();
     const [reset, setReset] = useState(false);
@@ -75,7 +76,7 @@ function EditCompany() {
     };
 
     const backbtnHandle = () => {
-        navigate('/app/companies/company-details', {
+        navigate(routes.companies.details, {
             state: { companyId: { id: location?.state?.id }, detail: true },
         });
     };
@@ -141,5 +142,3 @@ function EditCompany() {
         </Box>
     );
 }
-
-export default EditCompany;

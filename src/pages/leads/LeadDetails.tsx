@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
 import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt } from 'react-icons/fa';
-import { ModernAppBar, AppBarAction } from '../../components/ui/ModernAppBar';
+import { IActionModal, ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
-import { IActionModal } from '../../components/ui';
-import { useLeadDetails } from '../../hooks/leads/useLeadDetails';
-import { useLeadActions } from '../../hooks/leads/useLeadActions';
-import { useNotification } from '../../context/NotificationContext';
+import { useLeads, Lead } from '../../api';
+import { routes } from '../../constants/routes';
 
 export function LeadDetails() {
     const [searchParams] = useSearchParams();
     const leadId = searchParams.get('id');
     const navigate = useNavigate();
+
+    const { getById, deleteLead, addComment, deleteComment, uploadAttachment, deleteAttachment, isLoading } =
+        useLeads();
+
+    const [leadDetails, setLeadDetails] = useState<Lead | null>(null);
+    const [attachments, setAttachments] = useState<any[]>([]);
+    const [comments, setComments] = useState<any[]>([]);
     const [note, setNote] = useState('');
 
     // Modal states
@@ -23,24 +28,43 @@ export function LeadDetails() {
     const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const { leadDetails, attachments, comments, isLoading, refresh } = useLeadDetails(leadId);
-    const { deleteLead, addComment, uploadAttachment, deleteAttachment, deleteComment } = useLeadActions();
-    const { addNotification } = useNotification();
+    useEffect(() => {
+        if (leadId) {
+            fetchLeadDetails();
+        } else {
+            navigate(routes.leads.main);
+        }
+    }, [leadId]);
+
+    const fetchLeadDetails = async () => {
+        if (!leadId) return;
+
+        const result = await getById(leadId);
+        if (result.success && result.data) {
+            setLeadDetails(result.data.lead);
+            setAttachments(result.data.attachments);
+            setComments(result.data.comments);
+        } else {
+            navigate(routes.leads.main);
+        }
+    };
+
+    const refresh = async () => {
+        await fetchLeadDetails();
+    };
 
     if (!leadId) {
-        navigate('/app/leads');
         return null;
     }
 
     if (!isLoading && !leadDetails) {
-        navigate('/app/leads');
         return null;
     }
 
-    const handleBack = () => navigate('/app/leads');
+    const handleBack = () => navigate(routes.leads.main);
 
     const handleEdit = () => {
-        navigate(`/app/leads/edit-lead?id=${leadId}`);
+        navigate(`${routes.leads.edit}?id=${leadId}`);
     };
 
     const handleDeleteClick = () => {
@@ -49,26 +73,21 @@ export function LeadDetails() {
 
     const handleConfirmDeleteLead = async () => {
         setIsDeleting(true);
-        const success = await deleteLead(leadId);
+        const result = await deleteLead(leadId);
         setIsDeleting(false);
 
-        if (success) {
+        if (result.success) {
             setDeleteLeadModalOpen(false);
-            addNotification('success', 'Lead deleted successfully', '');
-            navigate('/app/leads');
+            navigate(routes.leads.main);
         } else {
             setDeleteLeadModalOpen(false);
-            addNotification('error', 'Failed to delete lead', '');
         }
     };
 
     const handleFileUpload = async (file: File) => {
         const result = await uploadAttachment(leadId, file);
         if (result.success) {
-            addNotification('success', 'Attachment uploaded successfully', '');
             await refresh();
-        } else {
-            addNotification('error', 'Failed to upload attachment', '');
         }
     };
 
@@ -81,18 +100,16 @@ export function LeadDetails() {
         if (!selectedAttachmentId) return;
 
         setIsDeleting(true);
-        const success = await deleteAttachment(selectedAttachmentId);
+        const result = await deleteAttachment(selectedAttachmentId);
         setIsDeleting(false);
 
-        if (success) {
+        if (result.success) {
             setDeleteAttachmentModalOpen(false);
             setSelectedAttachmentId(null);
-            addNotification('success', 'Attachment deleted successfully', '');
             await refresh();
         } else {
             setDeleteAttachmentModalOpen(false);
             setSelectedAttachmentId(null);
-            addNotification('error', 'Failed to delete attachment', '');
         }
     };
 
@@ -101,11 +118,8 @@ export function LeadDetails() {
 
         const result = await addComment(leadId, note);
         if (result.success) {
-            addNotification('success', 'Note added successfully', '');
             setNote('');
             await refresh();
-        } else {
-            addNotification('error', 'Failed to add note', '');
         }
     };
 
@@ -118,18 +132,16 @@ export function LeadDetails() {
         if (!selectedCommentId) return;
 
         setIsDeleting(true);
-        const success = await deleteComment(selectedCommentId);
+        const result = await deleteComment(selectedCommentId);
         setIsDeleting(false);
 
-        if (success) {
+        if (result.success) {
             setDeleteNoteModalOpen(false);
             setSelectedCommentId(null);
-            addNotification('success', 'Note deleted successfully', '');
             await refresh();
         } else {
             setDeleteNoteModalOpen(false);
             setSelectedCommentId(null);
-            addNotification('error', 'Failed to delete note', '');
         }
     };
 
@@ -140,19 +152,11 @@ export function LeadDetails() {
     ];
 
     if (isLoading) {
-        return (
-            <Box sx={{ mt: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-                <Typography>Loading...</Typography>
-            </Box>
-        );
+        return <LoadingState message="Loading lead data..." />;
     }
 
     if (!leadDetails) {
-        return (
-            <Box sx={{ mt: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-                <Typography>Lead not found</Typography>
-            </Box>
-        );
+        return <ErrorState message="Lead not found" />;
     }
 
     return (
