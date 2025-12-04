@@ -17,30 +17,22 @@ export const parseApiErrors = (response: BackendErrorResponse): FieldErrors => {
         return fieldErrors;
     }
 
-    Object.keys(response.errors).forEach((errorKey) => {
-        const errors = response.errors![errorKey];
+    const processErrors = (obj: any, prefix = '') => {
+        Object.keys(obj).forEach((key) => {
+            const value = obj[key];
 
-        if (!errors) return;
+            // Якщо масив строк - це field error
+            if (Array.isArray(value) && value.every((v) => typeof v === 'string')) {
+                fieldErrors[prefix + key] = value;
+            }
+            // Якщо об'єкт - рекурсивно обробити
+            else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                processErrors(value, prefix);
+            }
+        });
+    };
 
-        if (Array.isArray(errors)) {
-            errors.forEach((errorObj: any) => {
-                if (typeof errorObj === 'object' && errorObj !== null) {
-                    Object.keys(errorObj).forEach((fieldName) => {
-                        if (Array.isArray(errorObj[fieldName])) {
-                            fieldErrors[fieldName] = errorObj[fieldName];
-                        }
-                    });
-                }
-            });
-        } else if (typeof errors === 'object' && errors !== null) {
-            Object.keys(errors).forEach((fieldName) => {
-                if (Array.isArray(errors[fieldName])) {
-                    fieldErrors[fieldName] = errors[fieldName];
-                }
-            });
-        }
-    });
-
+    processErrors(response.errors);
     return fieldErrors;
 };
 
