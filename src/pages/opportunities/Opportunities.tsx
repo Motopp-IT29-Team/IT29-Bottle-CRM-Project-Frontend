@@ -560,17 +560,25 @@ export function Opportunities(props: any) {
                                                             {item?.account ? item?.account?.name : '---'}
                                                         </TableCell>
                                                         <TableCell className="tableCell">
-                                                            {item?.assigned_to ? (
-                                                                <Avatar
-                                                                    src={item?.assigned_to}
-                                                                    alt={item?.assigned_to}
-                                                                />
+                                                            {item?.assigned_to && item.assigned_to.length > 0 ? (
+                                                                <Stack direction="row" spacing={-1}>
+                                                                    {item.assigned_to.slice(0, 3).map((user: any) => (
+                                                                        <Avatar
+                                                                            key={user.id}
+                                                                            src={user?.user_details?.profile_pic}
+                                                                            alt={user?.user_details?.email || user?.first_name}
+                                                                            sx={{ width: 32, height: 32 }}
+                                                                        />
+                                                                    ))}
+                                                                    {item.assigned_to.length > 3 && (
+                                                                        <Avatar sx={{ width: 32, height: 32, fontSize: 12 }}>
+                                                                            +{item.assigned_to.length - 3}
+                                                                        </Avatar>
+                                                                    )}
+                                                                </Stack>
                                                             ) : (
                                                                 '----'
                                                             )}
-                                                            {/* <Stack style={{ display: 'flex', flexDirection: 'row', alignItems: "center" }}>
-                                  <Avatar src={item?.lead?.created_by?.profile_pic} alt={item?.lead?.created_by?.email} /><Stack sx={{ ml: 1 }}>{item?.lead?.account_name ? item?.lead?.account_name : '---'}</Stack>
-                                </Stack> */}
                                                         </TableCell>
                                                         <TableCell className="tableCell">
                                                             {item?.stage ? item?.stage : '---'}

@@ -442,7 +442,13 @@ export const OpportunityDetails = (props: any) => {
                                 </div>
                                 <div style={{ width: '32%' }}>
                                     <div className="title2">Assigned Users</div>
-                                    <div className="title3">{opportunityDetails?.assigned_to || '----'}</div>
+                                    <div className="title3">
+                                        {opportunityDetails?.assigned_to && opportunityDetails.assigned_to.length > 0
+                                            ? opportunityDetails.assigned_to.map((user: any) => 
+                                                user?.user_details?.email || user?.first_name || 'Unknown'
+                                              ).join(', ')
+                                            : '----'}
+                                    </div>
                                 </div>
                                 <div style={{ width: '32%' }}>
                                     <div className="title2">Closed Date</div>
