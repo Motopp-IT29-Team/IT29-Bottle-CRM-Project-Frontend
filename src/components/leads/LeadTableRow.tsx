@@ -1,5 +1,6 @@
 import React from 'react';
-import { TableRow, TableCell, Box, Stack, Avatar, AvatarGroup, Link } from '@mui/material';
+import { TableRow, TableCell, Box, Stack, Avatar, AvatarGroup, Link, Chip } from '@mui/material';
+import { CheckCircle as ConvertedIcon } from '@mui/icons-material';
 import { Label } from '../Label';
 import FormateTime from '../FormateTime';
 import { Lead } from '../../api';
@@ -10,14 +11,17 @@ interface Props {
 }
 
 export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
+    const isConverted = lead.status?.toLowerCase() === 'converted';
+    
     return (
         <TableRow
-            hover
+            hover={!isConverted}
             sx={{
-                cursor: 'pointer',
-                '&:hover': { backgroundColor: '#f8fafc' },
+                cursor: isConverted ? 'default' : 'pointer',
+                '&:hover': { backgroundColor: isConverted ? 'inherit' : '#f8fafc' },
+                opacity: isConverted ? 0.7 : 1,
             }}
-            onClick={() => onViewDetail(lead.id)}
+            onClick={() => !isConverted && onViewDetail(lead.id)}
         >
             {/* Lead Name */}
             <TableCell sx={{ border: 0, py: 2 }}>
@@ -50,21 +54,35 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
 
             {/* Status */}
             <TableCell sx={{ border: 0, py: 2 }}>
-                <Box
-                    sx={{
-                        display: 'inline-block',
-                        px: 2,
-                        py: 0.5,
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        textTransform: 'capitalize',
-                        backgroundColor: getStatusColor(lead.status),
-                        color: getStatusTextColor(lead.status),
-                    }}
-                >
-                    {lead.status || '--'}
-                </Box>
+                {isConverted ? (
+                    <Chip
+                        icon={<ConvertedIcon sx={{ fontSize: 16 }} />}
+                        label="Converted"
+                        size="small"
+                        sx={{
+                            backgroundColor: '#d1fae5',
+                            color: '#059669',
+                            fontWeight: 600,
+                            '& .MuiChip-icon': { color: '#059669' },
+                        }}
+                    />
+                ) : (
+                    <Box
+                        sx={{
+                            display: 'inline-block',
+                            px: 2,
+                            py: 0.5,
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            textTransform: 'capitalize',
+                            backgroundColor: getStatusColor(lead.status),
+                            color: getStatusTextColor(lead.status),
+                        }}
+                    >
+                        {lead.status || '--'}
+                    </Box>
+                )}
             </TableCell>
 
             {/* Tags & Team */}

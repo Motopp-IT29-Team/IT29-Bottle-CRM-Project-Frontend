@@ -84,6 +84,13 @@ export interface Lead {
     created_from_site?: boolean;
     assigned_to: any[];
     team?: any;
+    // Conversion fields
+    is_converted?: boolean;
+    converted_at?: string;
+    converted_by?: any;
+    converted_account?: any;
+    converted_contact?: any;
+    converted_opportunity?: any;
 }
 
 export interface GetLeadsParams {
@@ -91,6 +98,58 @@ export interface GetLeadsParams {
     limit?: number;
     status?: string;
     search?: string;
+}
+
+// Lead Conversion Types
+export interface AccountOption {
+    action: 'create' | 'link';
+    existing_id?: string;
+    name?: string;
+}
+
+export interface ContactOption {
+    action: 'create' | 'link';
+    existing_id?: string;
+}
+
+export interface OpportunityOption {
+    create: boolean;
+    name?: string;
+    stage?: string;
+    amount?: number;
+    close_date?: string;
+}
+
+export interface LeadConversionRequest {
+    account?: AccountOption;
+    contact?: ContactOption;
+    opportunity?: OpportunityOption;
+}
+
+export interface DuplicateMatch {
+    id: string;
+    name: string;
+    email?: string;
+    match_field: string;
+    match_score: number;
+}
+
+export interface LeadDuplicateCheckResponse {
+    account_matches: DuplicateMatch[];
+    contact_matches: DuplicateMatch[];
+}
+
+export interface LeadConversionResponse {
+    error: boolean;
+    message: string;
+    data: {
+        success: boolean;
+        message: string;
+        lead: Lead;
+        account: any;
+        contact: any;
+        opportunity: any;
+    };
 }
 
 export interface GetLeadsResponse {
@@ -256,6 +315,17 @@ export const leadsService = {
 
     deleteAttachment: async (attachmentId: string) => {
         const response = await apiClient.delete(ENDPOINTS.LEAD_ATTACHMENT_DELETE(attachmentId));
+        return response.data;
+    },
+
+    // Lead Conversion Methods
+    checkConversionDuplicates: async (id: string): Promise<LeadDuplicateCheckResponse> => {
+        const response = await apiClient.get(ENDPOINTS.LEAD_CHECK_DUPLICATES(id));
+        return response.data.data;
+    },
+
+    convert: async (id: string, options?: LeadConversionRequest): Promise<LeadConversionResponse> => {
+        const response = await apiClient.post(ENDPOINTS.LEAD_CONVERT(id), options || {});
         return response.data;
     },
 };

@@ -1,5 +1,14 @@
 import { useState, useCallback } from 'react';
-import { leadsService, Lead, LeadFormData, GetLeadsParams, GetLeadsResponse } from '../services/leads.service';
+import { 
+    leadsService, 
+    Lead, 
+    LeadFormData, 
+    GetLeadsParams, 
+    GetLeadsResponse,
+    LeadConversionRequest,
+    LeadConversionResponse,
+    LeadDuplicateCheckResponse 
+} from '../services/leads.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
 import { useNotification } from '../../context/NotificationContext';
@@ -307,6 +316,52 @@ export const useLeads = () => {
         }
     };
 
+    // Lead Conversion Methods
+    const checkConversionDuplicates = async (id: string): Promise<ApiResult<LeadDuplicateCheckResponse>> => {
+        setIsLoading(true);
+        try {
+            const data = await leadsService.checkConversionDuplicates(id);
+            return { success: true, data };
+        } catch (error: any) {
+            console.error('Error checking duplicates:', error);
+            addNotification('error', 'Error', error.message || 'Failed to check for duplicates');
+            return {
+                success: false,
+                error: error.message || 'Failed to check for duplicates',
+            };
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const convertLead = async (id: string, options?: LeadConversionRequest): Promise<ApiResult<LeadConversionResponse>> => {
+        setIsLoading(true);
+        try {
+            const data = await leadsService.convert(id, options);
+
+            if (!data.error) {
+                addNotification('success', 'Lead Converted', 'The lead has been converted to Account, Contact, and Opportunity');
+                return { success: true, data };
+            } else {
+                const errorMessage = data.message || 'Failed to convert lead';
+                addNotification('error', 'Conversion Failed', errorMessage);
+                return {
+                    success: false,
+                    error: errorMessage,
+                };
+            }
+        } catch (error: any) {
+            console.error('Critical error converting lead:', error);
+            addNotification('error', 'Server Error', error.message || 'Failed to convert lead');
+            return {
+                success: false,
+                error: error.message || 'Server error occurred',
+            };
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return {
         isLoading,
         leads,
@@ -321,5 +376,7 @@ export const useLeads = () => {
         deleteComment,
         uploadAttachment,
         deleteAttachment,
+        checkConversionDuplicates,
+        convertLead,
     };
 };
