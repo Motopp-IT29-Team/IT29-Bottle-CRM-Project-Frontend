@@ -140,9 +140,11 @@ export interface LeadDuplicateCheckResponse {
 }
 
 export interface LeadConversionResponse {
-    success: boolean;
+    error: boolean;
     message: string;
     data: {
+        success: boolean;
+        message: string;
         lead: Lead;
         account: any;
         contact: any;
