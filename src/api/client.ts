@@ -34,7 +34,7 @@ const createApiClient = (): AxiosInstance => {
 
             return config;
         },
-        (error) => {
+        (error: AxiosError) => {
             return Promise.reject(error);
         }
     );

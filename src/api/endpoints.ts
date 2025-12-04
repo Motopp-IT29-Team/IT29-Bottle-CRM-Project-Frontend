@@ -26,6 +26,8 @@ export const ENDPOINTS = {
     LEAD_COMMENT: (id: string) => `leads/comment/${id}/`,
     LEAD_ATTACHMENT: (id: string) => `leads/${id}/attachments/`,
     LEAD_ATTACHMENT_DELETE: (attachmentId: string) => `leads/attachments/${attachmentId}/`,
+    LEAD_CONVERT: (id: string) => `leads/${id}/convert/`,
+    LEAD_CHECK_DUPLICATES: (id: string) => `leads/${id}/check-duplicates/`,
 
     // Companies
     COMPANIES: 'leads/companies/',

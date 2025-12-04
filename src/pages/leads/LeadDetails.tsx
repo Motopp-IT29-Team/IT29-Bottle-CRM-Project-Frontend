@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
-import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt, FaExchangeAlt } from 'react-icons/fa';
 import { IActionModal, ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
+import { ConvertLeadModal } from '../../components/leads/conversion';
 import { useLeads, Lead } from '../../api';
 import { routes } from '../../constants/routes';
 
@@ -24,6 +25,7 @@ export function LeadDetails() {
     const [deleteLeadModalOpen, setDeleteLeadModalOpen] = useState(false);
     const [deleteAttachmentModalOpen, setDeleteAttachmentModalOpen] = useState(false);
     const [deleteNoteModalOpen, setDeleteNoteModalOpen] = useState(false);
+    const [convertModalOpen, setConvertModalOpen] = useState(false);
     const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
     const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -69,6 +71,15 @@ export function LeadDetails() {
 
     const handleDeleteClick = () => {
         setDeleteLeadModalOpen(true);
+    };
+
+    const handleConvertClick = () => {
+        setConvertModalOpen(true);
+    };
+
+    const handleConversionComplete = () => {
+        // Refresh lead details to show updated status
+        fetchLeadDetails();
     };
 
     const handleConfirmDeleteLead = async () => {
@@ -147,6 +158,9 @@ export function LeadDetails() {
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Leads', onClick: handleBack },
+        ...(leadDetails && !leadDetails.is_converted && leadDetails.status === 'qualified'
+            ? [{ type: 'custom' as const, label: 'Convert', icon: <FaExchangeAlt />, onClick: handleConvertClick, color: 'success' as const }]
+            : []),
         { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
         { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
     ];
@@ -311,6 +325,16 @@ export function LeadDetails() {
                 cancelText="Cancel"
                 isLoading={isDeleting}
             />
+
+            {/* Convert Lead Modal */}
+            {leadDetails && (
+                <ConvertLeadModal
+                    open={convertModalOpen}
+                    onClose={() => setConvertModalOpen(false)}
+                    lead={leadDetails}
+                    onConversionComplete={handleConversionComplete}
+                />
+            )}
         </Box>
     );
 }
