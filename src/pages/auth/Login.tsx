@@ -1,24 +1,28 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { FiMail, FiLock } from 'react-icons/fi';
+import axios from 'axios';
 import imgGoogle from '../../assets/images/auth/google.svg';
 import imgLogo from '../../assets/images/auth/img_logo.png';
 import { ITextField } from '../../components/ui';
-import { fetchData } from '../../components/FetchData';
 import { AuthUrl, LoginUrl } from '../../services/ApiUrls';
+import { routes } from '../../constants/routes';
 
-declare global {
-    interface Window {
-        google: any;
-        gapi: any;
-    }
-}
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/';
+
+const loginAxios = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 30000,
+    headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    },
+});
 
 export default function Login() {
     const navigate = useNavigate();
-    const [token, setToken] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -26,61 +30,75 @@ export default function Login() {
 
     useEffect(() => {
         if (localStorage.getItem('Token')) {
-            navigate('/app');
+            navigate(routes.app.main);
         }
-    }, [token, navigate]);
+    }, [navigate]);
 
     const login = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
-            const apiToken = { token: tokenResponse.access_token };
-            const head = {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            };
-            fetchData(`${AuthUrl}/`, 'POST', JSON.stringify(apiToken), head)
-                .then((res: any) => {
-                    localStorage.setItem('Token', `Bearer ${res.access_token}`);
-                    setToken(true);
-                })
-                .catch((error: any) => {
-                    console.error('Error:', error);
-                    setError('Google sign-in failed. Please try again.');
+        onSuccess: async (tokenResponse) => {
+            try {
+                const response = await loginAxios.post(`${AuthUrl}/`, {
+                    token: tokenResponse.access_token,
                 });
+
+                if (response.data?.access_token) {
+                    localStorage.setItem('Token', `Bearer ${response.data.access_token}`);
+                    navigate(routes.app.main);
+                } else {
+                    setError('Google sign-in failed. Please try again.');
+                }
+            } catch (error: any) {
+                console.error('Google auth error:', error);
+                setError(error.response?.data?.detail || 'Google sign-in failed. Please try again.');
+            }
         },
     });
 
-    const onEmailLoginSubmit = async (e: React.FormEvent) => {
+    const onEmailLoginSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
         setError(null);
 
-        const headers: Record<string, string> = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        };
-
-        const org = localStorage.getItem('org');
-        if (org) headers['org'] = org;
-
         try {
-            const res: any = await fetchData(
+            const org = localStorage.getItem('org');
+            const headers: Record<string, string> = {};
+
+            if (org) {
+                headers['org'] = org;
+            }
+
+            const response = await loginAxios.post(
                 `${LoginUrl}/`,
-                'POST',
-                JSON.stringify({ email: email.trim(), password }),
-                headers
+                {
+                    email: email.trim(),
+                    password: password,
+                },
+                { headers }
             );
 
-            if (res?.access) {
-                localStorage.setItem('Token', `Bearer ${res.access}`);
-                if (res?.refresh) localStorage.setItem('RefreshToken', res.refresh);
+            const data = response.data;
+
+            if (data?.access) {
+                localStorage.setItem('Token', `Bearer ${data.access}`);
+                if (data?.refresh) {
+                    localStorage.setItem('RefreshToken', data.refresh);
+                }
                 localStorage.setItem('userEmail', email.trim());
-                setToken(true);
-                navigate('/app');
+                navigate(routes.app.main);
             } else {
-                setError(res?.detail || 'Invalid email or password');
+                setError('Invalid email or password');
             }
-        } catch {
-            setError('Unable to login. Please try again.');
+        } catch (error: any) {
+            console.error('Login error:', error);
+
+            if (error.response) {
+                const errorData = error.response.data;
+                setError(errorData?.detail || errorData?.message || errorData?.error || 'Invalid email or password');
+            } else if (error.request) {
+                setError('Server is not responding. Please try again later.');
+            } else {
+                setError('An unexpected error occurred. Please try again.');
+            }
         } finally {
             setSubmitting(false);
         }

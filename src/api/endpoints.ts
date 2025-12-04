@@ -21,7 +21,7 @@ export const ENDPOINTS = {
     // Leads
     LEADS: 'leads/',
     LEAD_DETAIL: (id: string) => `leads/${id}/`,
-    LEAD_DUPLICATE_CHECK: 'leads/check_duplicate/',
+    LEAD_DUPLICATE_CHECK: 'leads/check-duplicate/',
     LEAD_UPLOAD: 'leads/upload/',
     LEAD_COMMENT: (id: string) => `leads/comment/${id}/`,
     LEAD_ATTACHMENT: (id: string) => `leads/${id}/attachments/`,
