@@ -1,10 +1,10 @@
 import React from 'react';
 import { TableRow, TableCell, Box, Typography, Avatar, Chip } from '@mui/material';
 import { FaEnvelope, FaPhone, FaBuilding } from 'react-icons/fa';
-import { Contact } from '../../api';
+import { IContact } from '../../types';
 
 interface ContactTableRowProps {
-    contact: Contact;
+    contact: IContact;
     onViewDetail: (id: string) => void;
 }
 

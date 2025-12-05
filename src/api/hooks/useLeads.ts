@@ -1,21 +1,21 @@
 import { useState, useCallback } from 'react';
-import { 
-    leadsService, 
-    Lead, 
-    LeadFormData, 
-    GetLeadsParams, 
+import {
+    leadsService,
+    LeadFormData,
+    GetLeadsParams,
     GetLeadsResponse,
     LeadConversionRequest,
     LeadConversionResponse,
-    LeadDuplicateCheckResponse 
+    LeadDuplicateCheckResponse,
 } from '../services/leads.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
 import { useNotification } from '../../context/NotificationContext';
+import { ILead, IAttachment, IComment } from '../../types';
 
 export const useLeads = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [leads, setLeads] = useState<Lead[]>([]);
+    const [leads, setLeads] = useState<ILead[]>([]);
     const { addNotification } = useNotification();
 
     const getAll = useCallback(
@@ -30,7 +30,7 @@ export const useLeads = () => {
                     setLeads([...openLeads, ...closeLeads]);
                     return { success: true, data };
                 } else {
-                    const fieldErrors = parseApiErrors(data);
+                    const fieldErrors = parseApiErrors(data as any);
                     return {
                         success: false,
                         error: formatErrorMessage(fieldErrors, 'Failed to load leads'),
@@ -58,7 +58,9 @@ export const useLeads = () => {
         [getAll]
     );
 
-    const getById = async (id: string): Promise<ApiResult<{ lead: Lead; attachments: any[]; comments: any[] }>> => {
+    const getById = async (
+        id: string
+    ): Promise<ApiResult<{ lead: ILead; attachments: IAttachment[]; comments: IComment[] }>> => {
         setIsLoading(true);
         try {
             const data = await leadsService.getById(id);
@@ -71,7 +73,7 @@ export const useLeads = () => {
                 };
                 return { success: true, data: result };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 return {
                     success: false,
                     error: formatErrorMessage(fieldErrors, 'Failed to load lead'),
@@ -99,7 +101,7 @@ export const useLeads = () => {
                 addNotification('success', 'Lead created', 'The lead has been created successfully');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to create lead');
                 addNotification('error', 'Failed to create lead', errorMessage);
                 return {
@@ -129,7 +131,7 @@ export const useLeads = () => {
                 addNotification('success', 'Lead updated', 'The lead has been updated successfully');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to update lead');
                 addNotification('error', 'Failed to update lead', errorMessage);
                 return {
@@ -159,7 +161,7 @@ export const useLeads = () => {
                 addNotification('success', 'Lead deleted', 'The lead has been deleted successfully');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to delete lead');
                 addNotification('error', 'Failed to delete lead', errorMessage);
                 return {
@@ -180,12 +182,12 @@ export const useLeads = () => {
         }
     };
 
-    const checkDuplicate = async (email: string, phone: string): Promise<ApiResult<{ duplicate: boolean }>> => {
+    const checkDuplicate = async (email: string, phone: string): Promise<ApiResult<LeadDuplicateCheckResponse>> => {
         try {
             const data = await leadsService.checkDuplicate(email, phone);
             return {
                 success: true,
-                data: { duplicate: data.duplicate || false },
+                data,
             };
         } catch (error: any) {
             console.error('Error checking duplicate:', error);
@@ -205,7 +207,7 @@ export const useLeads = () => {
                 addNotification('success', 'Comment added', 'Your comment has been added');
                 return { success: true, data };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to add comment');
                 addNotification('error', 'Failed to add comment', errorMessage);
                 return {
@@ -235,7 +237,7 @@ export const useLeads = () => {
                 addNotification('success', 'Comment deleted', 'The comment has been deleted');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to delete comment');
                 addNotification('error', 'Failed to delete comment', errorMessage);
                 return {
@@ -265,7 +267,7 @@ export const useLeads = () => {
                 addNotification('success', 'Attachment uploaded', 'The file has been uploaded');
                 return { success: true, data };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to upload attachment');
                 addNotification('error', 'Failed to upload attachment', errorMessage);
                 return {
@@ -295,7 +297,7 @@ export const useLeads = () => {
                 addNotification('success', 'Attachment deleted', 'The file has been deleted');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to delete attachment');
                 addNotification('error', 'Failed to delete attachment', errorMessage);
                 return {
@@ -316,7 +318,6 @@ export const useLeads = () => {
         }
     };
 
-    // Lead Conversion Methods
     const checkConversionDuplicates = async (id: string): Promise<ApiResult<LeadDuplicateCheckResponse>> => {
         setIsLoading(true);
         try {
@@ -334,13 +335,20 @@ export const useLeads = () => {
         }
     };
 
-    const convertLead = async (id: string, options?: LeadConversionRequest): Promise<ApiResult<LeadConversionResponse>> => {
+    const convertLead = async (
+        id: string,
+        options?: LeadConversionRequest
+    ): Promise<ApiResult<LeadConversionResponse>> => {
         setIsLoading(true);
         try {
             const data = await leadsService.convert(id, options);
 
             if (!data.error) {
-                addNotification('success', 'Lead Converted', 'The lead has been converted to Account, Contact, and Opportunity');
+                addNotification(
+                    'success',
+                    'Lead Converted',
+                    'The lead has been converted to Account, Contact, and Opportunity'
+                );
                 return { success: true, data };
             } else {
                 const errorMessage = data.message || 'Failed to convert lead';

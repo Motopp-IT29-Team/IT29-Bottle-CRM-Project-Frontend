@@ -1,11 +1,12 @@
 import React from 'react';
 import { Backdrop, CircularProgress, Box, Typography } from '@mui/material';
 
-interface LeadLoadingBackdropProps {
+interface Props {
     open: boolean;
+    message?: string;
 }
 
-export const LeadLoadingBackdrop: React.FC<LeadLoadingBackdropProps> = ({ open }) => {
+export const ILoadingBackdrop: React.FC<Props> = ({ open, message = 'Loading...' }) => {
     return (
         <Backdrop
             sx={{
@@ -24,7 +25,7 @@ export const LeadLoadingBackdrop: React.FC<LeadLoadingBackdropProps> = ({ open }
                 }}
             >
                 <CircularProgress size={50} sx={{ color: '#667eea' }} />
-                <Typography sx={{ fontSize: '16px', fontWeight: 500 }}>Creating lead...</Typography>
+                <Typography sx={{ fontSize: '16px', fontWeight: 500 }}>{message}</Typography>
             </Box>
         </Backdrop>
     );

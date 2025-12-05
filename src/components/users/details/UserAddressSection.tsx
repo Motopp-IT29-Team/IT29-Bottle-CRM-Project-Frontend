@@ -5,18 +5,10 @@ import { FiHome } from '@react-icons/all-files/fi/FiHome';
 import { FiNavigation } from '@react-icons/all-files/fi/FiNavigation';
 import { UserInfoCard } from './UserInfoCard';
 import { getCountryNameByCode } from '../../../utils/userHelpers';
-
-interface Address {
-    address_line: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-}
+import { IAddress } from '../../../types';
 
 interface Props {
-    address?: Address;
+    address: IAddress | null;
 }
 
 export const UserAddressSection: React.FC<Props> = ({ address }) => {

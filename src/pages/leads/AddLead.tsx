@@ -2,9 +2,7 @@ import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { useFormState } from '../../hooks/useFormState';
-import { IForm, FormErrors } from '../../components/ui/form';
-import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction } from '../../components/ui';
+import { ModernAppBar, AppBarAction, ILoadingBackdrop, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
 import { useLeads, LeadFormData, validateLeadForm, getLeadConfig } from '../../api';
 
@@ -132,8 +130,14 @@ export function AddLead() {
         }
 
         const duplicateResult = await checkDuplicate(formData.email, formData.phone);
-        if (duplicateResult.success && duplicateResult.data?.duplicate) {
-            return;
+        if (duplicateResult.success && duplicateResult.data) {
+            const hasDuplicates =
+                duplicateResult.data.data.account_matches.length > 0 ||
+                duplicateResult.data.data.contact_matches.length > 0;
+
+            if (hasDuplicates) {
+                return;
+            }
         }
 
         const result = await create(formData);
@@ -173,7 +177,7 @@ export function AddLead() {
         <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Leads" crntPage="Create Lead" actions={actions} />
 
-            <LeadLoadingBackdrop open={isLoading} />
+            <ILoadingBackdrop open={isLoading} message="Creating lead..." />
 
             <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
                 <IForm

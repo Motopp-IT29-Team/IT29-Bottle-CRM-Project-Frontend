@@ -1,27 +1,31 @@
 import { useState, useCallback } from 'react';
-import { contactsService, Contact, GetContactsParams } from '../services/contacts.service';
+import {
+    contactsService,
+    ContactFormData,
+    GetContactsParams,
+    ContactsListResponse,
+} from '../services/contacts.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
 import { useNotification } from '../../context/NotificationContext';
+import { IContact } from '../../types';
 
 export const useContacts = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [contacts, setContacts] = useState<IContact[]>([]);
     const { addNotification } = useNotification();
 
     const getAll = useCallback(
-        async (
-            params?: GetContactsParams
-        ): Promise<ApiResult<{ contact_obj_list: Contact[]; total_count: number }>> => {
+        async (params?: GetContactsParams): Promise<ApiResult<ContactsListResponse>> => {
             setIsLoading(true);
             try {
                 const data = await contactsService.getAll(params);
 
                 if (!data.error) {
-                    setContacts(data.contacts || []);
+                    setContacts(data.contact_obj_list || []);
                     return { success: true, data };
                 } else {
-                    const fieldErrors = parseApiErrors(data);
+                    const fieldErrors = parseApiErrors(data as any);
                     return {
                         success: false,
                         error: formatErrorMessage(fieldErrors, 'Failed to load contacts'),
@@ -49,7 +53,7 @@ export const useContacts = () => {
         [getAll]
     );
 
-    const getById = async (id: string): Promise<ApiResult<Contact>> => {
+    const getById = async (id: string): Promise<ApiResult<IContact>> => {
         setIsLoading(true);
         try {
             const data = await contactsService.getById(id);
@@ -57,7 +61,7 @@ export const useContacts = () => {
             if (!data.error) {
                 return { success: true, data: data.contact_obj };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 return {
                     success: false,
                     error: formatErrorMessage(fieldErrors, 'Failed to load contact'),
@@ -76,7 +80,7 @@ export const useContacts = () => {
         }
     };
 
-    const create = async (formData: any): Promise<ApiResult> => {
+    const create = async (formData: ContactFormData): Promise<ApiResult> => {
         setIsLoading(true);
         try {
             const data = await contactsService.create(formData);
@@ -85,7 +89,7 @@ export const useContacts = () => {
                 addNotification('success', 'Contact created', 'The contact has been created successfully');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to create contact');
                 addNotification('error', 'Failed to create contact', errorMessage);
                 return {
@@ -106,7 +110,7 @@ export const useContacts = () => {
         }
     };
 
-    const update = async (id: string, formData: any): Promise<ApiResult> => {
+    const update = async (id: string, formData: Partial<ContactFormData>): Promise<ApiResult> => {
         setIsLoading(true);
         try {
             const data = await contactsService.update(id, formData);
@@ -115,7 +119,7 @@ export const useContacts = () => {
                 addNotification('success', 'Contact updated', 'The contact has been updated successfully');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to update contact');
                 addNotification('error', 'Failed to update contact', errorMessage);
                 return {
@@ -145,7 +149,7 @@ export const useContacts = () => {
                 addNotification('success', 'Contact deleted', 'The contact has been deleted successfully');
                 return { success: true };
             } else {
-                const fieldErrors = parseApiErrors(data);
+                const fieldErrors = parseApiErrors(data as any);
                 const errorMessage = formatErrorMessage(fieldErrors, 'Failed to delete contact');
                 addNotification('error', 'Failed to delete contact', errorMessage);
                 return {

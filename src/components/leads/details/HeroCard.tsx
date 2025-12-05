@@ -2,45 +2,13 @@ import React from 'react';
 import { Paper, Typography, Stack, Chip, Avatar, Box, Divider, Tooltip } from '@mui/material';
 import { FaBriefcase, FaDollarSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
 import FormateTime from '../../FormateTime';
+import { ILead } from '../../../types';
 
 interface Props {
-    salutation: string;
-    firstName: string;
-    lastName: string;
-    title?: string;
-    companyName: string;
-    status: string;
-    source: string;
-    rating?: string;
-    opportunityAmount?: string;
-    probability: number;
-    closeDate?: string;
-    assignedTo: any[];
-    tags: any[];
-    createdBy: {
-        email: string;
-        profile_pic: string;
-    };
-    createdAt: string;
+    lead: ILead;
 }
 
-export const HeroCard: React.FC<Props> = ({
-    salutation,
-    firstName,
-    lastName,
-    title,
-    companyName,
-    status,
-    source,
-    rating,
-    opportunityAmount,
-    probability,
-    closeDate,
-    assignedTo,
-    tags,
-    createdBy,
-    createdAt,
-}) => {
+export const HeroCard: React.FC<Props> = ({ lead }) => {
     const getStatusColor = (status: string): string => {
         const colors: Record<string, string> = {
             assigned: '#3b82f6',
@@ -108,18 +76,18 @@ export const HeroCard: React.FC<Props> = ({
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
                     <Box>
                         <Typography variant="h4" fontWeight={700} color="#111827" mb={0.5}>
-                            {salutation} {firstName} {lastName}
+                            {lead.salutation} {lead.first_name} {lead.last_name}
                         </Typography>
                         <Stack direction="row" spacing={1} alignItems="center">
                             <FaBriefcase style={{ color: '#6b7280', fontSize: '14px' }} />
                             <Typography variant="body1" color="#6b7280">
-                                {title || 'No job title'}
+                                {lead.title || 'No job title'}
                             </Typography>
                             <Typography variant="body1" color="#d1d5db">
                                 •
                             </Typography>
                             <Typography variant="body1" color="#374151" fontWeight={600}>
-                                {companyName}
+                                {lead.account_name}
                             </Typography>
                         </Stack>
                     </Box>
@@ -130,21 +98,21 @@ export const HeroCard: React.FC<Props> = ({
                             px: 3,
                             py: 1.5,
                             borderRadius: '12px',
-                            backgroundColor: `${getStatusColor(status)}15`,
-                            border: `2px solid ${getStatusColor(status)}`,
+                            backgroundColor: `${getStatusColor(lead.status)}15`,
+                            border: `2px solid ${getStatusColor(lead.status)}`,
                         }}
                     >
                         <Typography
                             variant="body1"
                             fontWeight={700}
                             sx={{
-                                color: getStatusColor(status),
+                                color: getStatusColor(lead.status),
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.5px',
                                 fontSize: '14px',
                             }}
                         >
-                            {status}
+                            {lead.status}
                         </Typography>
                     </Box>
                 </Stack>
@@ -153,31 +121,31 @@ export const HeroCard: React.FC<Props> = ({
                 <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" gap={1}>
                     <Chip
                         icon={<FaTag style={{ fontSize: '12px' }} />}
-                        label={source}
+                        label={lead.source}
                         size="small"
                         sx={{
-                            backgroundColor: `${getSourceColor(source)}15`,
-                            color: getSourceColor(source),
-                            border: `1px solid ${getSourceColor(source)}40`,
+                            backgroundColor: `${getSourceColor(lead.source)}15`,
+                            color: getSourceColor(lead.source),
+                            border: `1px solid ${getSourceColor(lead.source)}40`,
                             fontWeight: 600,
                             textTransform: 'capitalize',
                             paddingX: 1,
                         }}
                     />
-                    {rating && (
+                    {lead.rating && (
                         <Chip
-                            label={rating}
+                            label={lead.rating}
                             size="small"
                             sx={{
-                                backgroundColor: `${getRatingColor(rating)}15`,
-                                color: getRatingColor(rating),
-                                border: `1px solid ${getRatingColor(rating)}40`,
+                                backgroundColor: `${getRatingColor(lead.rating)}15`,
+                                color: getRatingColor(lead.rating),
+                                border: `1px solid ${getRatingColor(lead.rating)}40`,
                                 fontWeight: 600,
                                 textTransform: 'capitalize',
                             }}
                         />
                     )}
-                    {tags?.map((tag: any, index: number) => (
+                    {lead.tags?.map((tag: any, index: number) => (
                         <Chip
                             key={index}
                             label={tag.name}
@@ -234,7 +202,7 @@ export const HeroCard: React.FC<Props> = ({
                             </Typography>
                         </Stack>
                         <Typography variant="h5" fontWeight={700} color="#111827">
-                            €{opportunityAmount || '0'}
+                            €{lead.opportunity_amount || '0'}
                         </Typography>
                     </Stack>
                 </Box>
@@ -270,7 +238,7 @@ export const HeroCard: React.FC<Props> = ({
                             </Typography>
                         </Stack>
                         <Typography variant="h5" fontWeight={700} color="#111827">
-                            {probability}%
+                            {lead.probability}%
                         </Typography>
                     </Stack>
                 </Box>
@@ -306,7 +274,7 @@ export const HeroCard: React.FC<Props> = ({
                             </Typography>
                         </Stack>
                         <Typography variant="h6" fontWeight={700} color="#111827">
-                            {closeDate || 'Not set'}
+                            {lead.close_date || 'Not set'}
                         </Typography>
                     </Stack>
                 </Box>
@@ -325,9 +293,9 @@ export const HeroCard: React.FC<Props> = ({
                         <Typography variant="caption" color="text.secondary" fontWeight={600}>
                             Assigned To
                         </Typography>
-                        {assignedTo?.length > 0 ? (
+                        {lead.assigned_to?.length > 0 ? (
                             <Stack direction="row" spacing={-1}>
-                                {assignedTo.slice(0, 4).map((user: any, index: number) => (
+                                {lead.assigned_to.slice(0, 4).map((user: any, index: number) => (
                                     <Tooltip key={index} title={getUserDisplayName(user)} arrow>
                                         <Avatar
                                             src={user.user_details?.profile_pic}
@@ -347,9 +315,9 @@ export const HeroCard: React.FC<Props> = ({
                                         </Avatar>
                                     </Tooltip>
                                 ))}
-                                {assignedTo.length > 4 && (
+                                {lead.assigned_to.length > 4 && (
                                     <Tooltip
-                                        title={assignedTo
+                                        title={lead.assigned_to
                                             .slice(4)
                                             .map((u: any) => getUserDisplayName(u))
                                             .join(', ')}
@@ -366,7 +334,7 @@ export const HeroCard: React.FC<Props> = ({
                                                 cursor: 'pointer',
                                             }}
                                         >
-                                            +{assignedTo.length - 4}
+                                            +{lead.assigned_to.length - 4}
                                         </Avatar>
                                     </Tooltip>
                                 )}
@@ -384,19 +352,19 @@ export const HeroCard: React.FC<Props> = ({
             <Box sx={{ px: 4, py: 2.5, backgroundColor: '#f9fafb' }}>
                 <Stack direction="row" spacing={3} alignItems="center">
                     <Stack direction="row" spacing={1.5} alignItems="center">
-                        <Avatar src={createdBy?.profile_pic} sx={{ width: 28, height: 28 }} />
+                        <Avatar src={lead.created_by?.profile_pic || ''} sx={{ width: 28, height: 28 }} />
                         <Box>
                             <Typography variant="caption" color="text.secondary" display="block">
                                 Created by
                             </Typography>
                             <Typography variant="body2" fontWeight={600} color="text.primary">
-                                {createdBy?.email}
+                                {lead.created_by?.email}
                             </Typography>
                         </Box>
                     </Stack>
                     <Stack direction="row" spacing={1} alignItems="center">
                         <FaClock style={{ color: '#9ca3af', fontSize: '14px' }} />
-                        <Box sx={{ fontSize: '14px', color: 'text.secondary' }}>{FormateTime(createdAt)}</Box>
+                        <Box sx={{ fontSize: '14px', color: 'text.secondary' }}>{FormateTime(lead.created_at)}</Box>
                     </Stack>
                 </Stack>
             </Box>

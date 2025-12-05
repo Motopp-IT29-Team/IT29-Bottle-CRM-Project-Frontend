@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
 import { ITable, ITableColumn, IPagination, ITableToolbar } from '../../components/ui';
-import { useContacts, Contact } from '../../api';
+import { useContacts } from '../../api';
 import { routes } from '../../constants/routes';
 import { ContactTableRow } from '../../components/contacts/ContactsTableRow';
+import { IContact } from '../../types';
 
 const columns: ITableColumn[] = [
     { id: 'name', label: 'Name', sortable: true },
@@ -18,7 +19,7 @@ export function Contacts() {
     const navigate = useNavigate();
     const { getAll, isLoading } = useContacts();
 
-    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [contacts, setContacts] = useState<IContact[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
@@ -29,10 +30,10 @@ export function Contacts() {
             offset,
             limit: recordsPerPage,
         });
-
+        console.log(result);
         if (result.success && result.data) {
             setContacts(result.data.contact_obj_list || []);
-            setTotalPages(Math.ceil((result.data.total_count || 0) / recordsPerPage));
+            setTotalPages(Math.ceil((result.data.contacts_count || 0) / recordsPerPage));
         }
     }, [currentPage, recordsPerPage, getAll]);
 
@@ -63,7 +64,7 @@ export function Contacts() {
         }
     };
 
-    const sortContacts = (contacts: Contact[], order: 'asc' | 'desc', orderBy: string) => {
+    const sortContacts = (contacts: IContact[], order: 'asc' | 'desc', orderBy: string) => {
         if (!Array.isArray(contacts) || contacts.length === 0) {
             return [];
         }

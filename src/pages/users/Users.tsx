@@ -6,14 +6,7 @@ import { ITableToolbar } from '../../components/ui';
 import { UserTableRow } from '../../components/users/UserTableRow';
 import { useUsers } from '../../api';
 import { routes } from '../../constants/routes';
-
-interface User {
-    id: string;
-    first_name: string;
-    last_name: string;
-    user_details: { email: string };
-    role: string;
-}
+import { IUser } from '../../types';
 
 const columns: ITableColumn[] = [
     { id: 'name', label: 'Full Name', sortable: true },
@@ -31,7 +24,7 @@ export function Users() {
     const { getAll, isLoading } = useUsers();
 
     const [tab, setTab] = useState<'active' | 'inactive'>('active');
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<IUser[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
@@ -79,7 +72,7 @@ export function Users() {
         if (!isLoading) navigate(routes.users.create);
     };
 
-    const sortUsers = (users: User[], order: 'asc' | 'desc', orderBy: string) => {
+    const sortUsers = (users: IUser[], order: 'asc' | 'desc', orderBy: string) => {
         return [...users].sort((a, b) => {
             let aValue: any;
             let bValue: any;

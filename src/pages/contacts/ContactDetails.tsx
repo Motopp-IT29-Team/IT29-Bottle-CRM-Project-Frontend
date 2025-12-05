@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
 import { FaUser, FaMapMarkerAlt, FaFileAlt, FaShareAlt } from 'react-icons/fa';
 import { ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
-import { Contact, useContacts } from '../../api';
+import { useContacts } from '../../api';
 import { routes } from '../../constants/routes';
 import { DetailField, DetailSection } from '../../components/leads/details';
 import { getCountryNameByCode } from '../../utils/userHelpers';
 import { DeleteModal } from '../../components/DeleteModal';
+import { IContact } from '../../types';
 
 export function ContactDetails() {
     const [searchParams] = useSearchParams();
@@ -15,7 +16,7 @@ export function ContactDetails() {
     const navigate = useNavigate();
     const { getById, deleteContact, isLoading } = useContacts();
 
-    const [contactDetails, setContactDetails] = useState<Contact>();
+    const [contactDetails, setContactDetails] = useState<IContact>();
     const [deleteModal, setDeleteModal] = useState(false);
 
     useEffect(() => {

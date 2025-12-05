@@ -5,8 +5,9 @@ import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt, FaExcha
 import { IActionModal, ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
 import { ConvertLeadModal } from '../../components/leads/conversion';
-import { useLeads, Lead } from '../../api';
+import { useLeads } from '../../api';
 import { routes } from '../../constants/routes';
+import { ILead } from '../../types';
 
 export function LeadDetails() {
     const [searchParams] = useSearchParams();
@@ -16,7 +17,7 @@ export function LeadDetails() {
     const { getById, deleteLead, addComment, deleteComment, uploadAttachment, deleteAttachment, isLoading } =
         useLeads();
 
-    const [leadDetails, setLeadDetails] = useState<Lead | null>(null);
+    const [leadDetails, setLeadDetails] = useState<ILead | null>(null);
     const [attachments, setAttachments] = useState<any[]>([]);
     const [comments, setComments] = useState<any[]>([]);
     const [note, setNote] = useState('');
@@ -78,7 +79,6 @@ export function LeadDetails() {
     };
 
     const handleConversionComplete = () => {
-        // Refresh lead details to show updated status
         fetchLeadDetails();
     };
 
@@ -159,7 +159,15 @@ export function LeadDetails() {
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Leads', onClick: handleBack },
         ...(leadDetails && !leadDetails.is_converted && leadDetails.status === 'qualified'
-            ? [{ type: 'custom' as const, label: 'Convert', icon: <FaExchangeAlt />, onClick: handleConvertClick, color: 'success' as const }]
+            ? [
+                  {
+                      type: 'custom' as const,
+                      label: 'Convert',
+                      icon: <FaExchangeAlt />,
+                      onClick: handleConvertClick,
+                      color: 'success' as const,
+                  },
+              ]
             : []),
         { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
         { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
@@ -180,23 +188,7 @@ export function LeadDetails() {
             <Box sx={{ mt: '120px', p: 3, display: 'flex', gap: 3 }}>
                 {/* Main Content - 68% */}
                 <Box sx={{ flex: '0 0 68%' }}>
-                    <HeroCard
-                        salutation={leadDetails.salutation}
-                        firstName={leadDetails.first_name}
-                        lastName={leadDetails.last_name}
-                        title={leadDetails.title}
-                        companyName={leadDetails.account_name}
-                        status={leadDetails.status}
-                        source={leadDetails.source}
-                        rating={leadDetails.rating}
-                        opportunityAmount={leadDetails.opportunity_amount}
-                        probability={leadDetails.probability}
-                        closeDate={leadDetails.close_date}
-                        assignedTo={leadDetails.assigned_to}
-                        tags={leadDetails.tags}
-                        createdBy={leadDetails.created_by}
-                        createdAt={leadDetails.created_at}
-                    />
+                    <HeroCard lead={leadDetails} />
 
                     <DetailSection title="Lead Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
                         <DetailField label="Company Name" value={leadDetails.account_name} />

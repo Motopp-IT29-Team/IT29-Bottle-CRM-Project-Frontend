@@ -14,7 +14,7 @@ import {
 interface Props {
     email: string;
     role: string;
-    dateOfJoining: string;
+    dateOfJoining: string | null;
 }
 
 export const UserInfoSection: React.FC<Props> = ({ email, role, dateOfJoining }) => {
@@ -27,12 +27,14 @@ export const UserInfoSection: React.FC<Props> = ({ email, role, dateOfJoining })
             <Box sx={USER_SECTION_GRID_STYLES}>
                 <UserInfoCard icon={<FiMail size={20} />} label="Email Address" value={email} color="#667eea" />
                 <UserInfoCard icon={<FiUser size={20} />} label="Role" value={role} color="#f59e0b" />
-                <UserInfoCard
-                    icon={<FiCalendar size={20} />}
-                    label="Date of Joining"
-                    value={formatDate(dateOfJoining)}
-                    color="#10b981"
-                />
+                {dateOfJoining && (
+                    <UserInfoCard
+                        icon={<FiCalendar size={20} />}
+                        label="Date of Joining"
+                        value={formatDate(dateOfJoining)}
+                        color="#10b981"
+                    />
+                )}
             </Box>
         </Box>
     );

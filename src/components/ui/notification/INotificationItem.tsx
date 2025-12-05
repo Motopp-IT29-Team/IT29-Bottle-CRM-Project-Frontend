@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { FiX, FiCheckCircle, FiAlertCircle, FiAlertTriangle, FiInfo } from 'react-icons/fi';
-import { Notification } from '../../../types/notification';
+import { INotification } from '../../../types';
 
 interface Props {
-    notification: Notification;
+    notification: INotification;
     onClose: (id: string) => void;
 }
 

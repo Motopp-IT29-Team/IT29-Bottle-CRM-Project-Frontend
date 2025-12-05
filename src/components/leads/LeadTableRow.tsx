@@ -3,16 +3,16 @@ import { TableRow, TableCell, Box, Stack, Avatar, AvatarGroup, Link, Chip } from
 import { CheckCircle as ConvertedIcon } from '@mui/icons-material';
 import { Label } from '../Label';
 import FormateTime from '../FormateTime';
-import { Lead } from '../../api';
+import { ILead } from '../../types';
 
 interface Props {
-    lead: Lead;
+    lead: ILead;
     onViewDetail: (leadId: string) => void;
 }
 
 export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
     const isConverted = lead.status?.toLowerCase() === 'converted';
-    
+
     return (
         <TableRow
             hover={!isConverted}
@@ -97,9 +97,9 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
                         )}
                     </Box>
 
-                    {lead.team && lead.team.length > 0 && (
+                    {lead.teams && lead.teams.length > 0 && (
                         <AvatarGroup max={3} sx={{ ml: 1 }}>
-                            {lead.team.map((team: any, idx: number) => (
+                            {lead.teams.map((team: any, idx: number) => (
                                 <Avatar key={idx} alt={team} src={team} sx={{ width: 28, height: 28 }}>
                                     {team}
                                 </Avatar>
@@ -113,7 +113,11 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
             <TableCell sx={{ border: 0, py: 2 }}>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <Box sx={{ fontSize: '13px', color: '#64748b' }}>{FormateTime(lead.created_at)}</Box>
-                    <Avatar alt={lead.first_name} src={lead.created_by?.profile_pic} sx={{ width: 24, height: 24 }} />
+                    <Avatar
+                        alt={lead.first_name}
+                        src={lead.created_by?.profile_pic || ''}
+                        sx={{ width: 24, height: 24 }}
+                    />
                 </Stack>
             </TableCell>
         </TableRow>

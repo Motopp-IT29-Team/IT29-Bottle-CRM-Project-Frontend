@@ -29,13 +29,13 @@ import {
     Warning as WarningIcon,
     CheckCircle as CheckIcon,
 } from '@mui/icons-material';
-import { Lead, LeadConversionRequest, DuplicateMatch } from '../../../api/services/leads.service';
-import { useLeads } from '../../../api/hooks/useLeads';
+import { ILead } from '../../../types';
+import { DuplicateMatch, LeadConversionRequest, useLeads } from '../../../api';
 
 interface ConvertLeadModalProps {
     open: boolean;
     onClose: () => void;
-    lead: Lead;
+    lead: ILead;
     onConversionComplete: () => void;
 }
 
@@ -47,12 +47,7 @@ const OPPORTUNITY_STAGES = [
     { value: 'NEGOTIATION', label: 'Negotiation' },
 ];
 
-export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({
-    open,
-    onClose,
-    lead,
-    onConversionComplete,
-}) => {
+export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({ open, onClose, lead, onConversionComplete }) => {
     const { checkConversionDuplicates, convertLead, isLoading } = useLeads();
 
     // Duplicate check state
@@ -82,15 +77,15 @@ export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({
             checkConversionDuplicates(lead.id)
                 .then((result) => {
                     if (result.success && result.data) {
-                        setDuplicates(result.data);
+                        setDuplicates(result.data.data);
                         // Auto-select if there are matches
-                        if (result.data.account_matches.length > 0) {
+                        if (result.data.data.account_matches.length > 0) {
                             setAccountAction('link');
-                            setSelectedAccountId(result.data.account_matches[0].id);
+                            setSelectedAccountId(result.data.data.account_matches[0].id);
                         }
-                        if (result.data.contact_matches.length > 0) {
+                        if (result.data.data.contact_matches.length > 0) {
                             setContactAction('link');
-                            setSelectedContactId(result.data.contact_matches[0].id);
+                            setSelectedContactId(result.data.data.contact_matches[0].id);
                         }
                     }
                 })
@@ -98,7 +93,6 @@ export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({
         }
     }, [open, lead.id]);
 
-    // Reset form when modal closes
     useEffect(() => {
         if (!open) {
             setAccountAction('create');
@@ -162,8 +156,11 @@ export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({
                     <Box display="flex" flexDirection="column" gap={3}>
                         {/* Lead Summary */}
                         <Alert severity="info">
-                            Converting <strong>{lead.first_name} {lead.last_name}</strong> ({lead.email}) 
-                            from <strong>{lead.account_name}</strong>
+                            Converting{' '}
+                            <strong>
+                                {lead.first_name} {lead.last_name}
+                            </strong>{' '}
+                            ({lead.email}) from <strong>{lead.account_name}</strong>
                         </Alert>
 
                         {/* Account Section */}
@@ -185,11 +182,7 @@ export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({
                                 value={accountAction}
                                 onChange={(e) => setAccountAction(e.target.value as 'create' | 'link')}
                             >
-                                <FormControlLabel
-                                    value="create"
-                                    control={<Radio />}
-                                    label="Create new account"
-                                />
+                                <FormControlLabel value="create" control={<Radio />} label="Create new account" />
                                 {accountAction === 'create' && (
                                     <Box ml={4} mb={2}>
                                         <TextField
