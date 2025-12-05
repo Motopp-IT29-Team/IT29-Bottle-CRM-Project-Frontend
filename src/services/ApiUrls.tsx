@@ -11,7 +11,7 @@ export const OrgUrl = 'org';
 // company
 
 export const CompanyUrl = 'leads/company';
-export const CompaniesUrl = 'leads/companies';
+export const CompaniesUrl = 'leads/companies/';
 // Lead
 export const LeadUrl = 'leads';
 // Contact
