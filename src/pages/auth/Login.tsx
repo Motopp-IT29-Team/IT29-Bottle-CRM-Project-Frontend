@@ -37,9 +37,18 @@ export default function Login() {
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const response = await loginAxios.post(`${AuthUrl}/`, {
-                    token: tokenResponse.access_token,
-                });
+                // Include org header if available (for returning users)
+                const org = localStorage.getItem('org');
+                const headers: Record<string, string> = {};
+                if (org) {
+                    headers['org'] = org;
+                }
+                
+                const response = await loginAxios.post(
+                    `${AuthUrl}/`,
+                    { token: tokenResponse.access_token },
+                    { headers }
+                );
 
                 if (response.data?.access_token) {
                     localStorage.setItem('Token', `Bearer ${response.data.access_token}`);
