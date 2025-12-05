@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Avatar, Box, Divider, Stack, Typography } from '@mui/material';
-import { FiLogOut, FiSettings } from 'react-icons/fi';
+import { FiActivity, FiLogOut, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { IActionModal } from '../ui/IActionModal';
+import { routes } from '../../constants/routes';
+import { apiClient } from '../../api/client';
+import { ENDPOINTS } from '../../api/endpoints';
 
 interface Props {
     userDetail: any;
@@ -10,6 +13,7 @@ interface Props {
     getInitials: () => string;
     getDisplayName: () => string;
     onOrganizationClick: () => void;
+    isAdmin?: boolean;
 }
 
 export const ISidebarUserSection: React.FC<Props> = ({
@@ -18,6 +22,7 @@ export const ISidebarUserSection: React.FC<Props> = ({
     getInitials,
     getDisplayName,
     onOrganizationClick,
+    isAdmin = false,
 }) => {
     const navigate = useNavigate();
     const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -27,8 +32,15 @@ export const ISidebarUserSection: React.FC<Props> = ({
         setLogoutModalOpen(true);
     };
 
-    const handleLogoutConfirm = () => {
+    const handleLogoutConfirm = async () => {
         setIsLoggingOut(true);
+        try {
+            // Call logout API to log the event
+            await apiClient.post(ENDPOINTS.LOGOUT + '/');
+        } catch (error) {
+            // Continue with logout even if API fails
+            console.error('Logout API error:', error);
+        }
         localStorage.clear();
         navigate('/login');
     };
@@ -135,6 +147,31 @@ export const ISidebarUserSection: React.FC<Props> = ({
                         <FiSettings size={18} />
                         <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Organization</Typography>
                     </Box>
+
+                    {/* Activity Log - Admin Only */}
+                    {isAdmin && (
+                        <Box
+                            onClick={() => navigate(routes.activityLogs.main)}
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                                px: 1.5,
+                                py: 1.25,
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    color: 'white',
+                                },
+                            }}
+                        >
+                            <FiActivity size={18} />
+                            <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Activity Log</Typography>
+                        </Box>
+                    )}
 
                     <Box
                         onClick={handleLogoutClick}

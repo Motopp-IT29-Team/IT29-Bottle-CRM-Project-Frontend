@@ -30,6 +30,7 @@ import { OpportunityDetails } from '../../pages/opportunities/OpportunityDetails
 import { AddCase } from '../../pages/cases/AddCase';
 import { EditCase } from '../../pages/cases/EditCase';
 import { CaseDetails } from '../../pages/cases/CaseDetails';
+import { ActivityLogs } from '../../pages/activityLogs/ActivityLogs';
 import { ISidebarHeader } from './ISidebarHeader';
 import { ISidebarNavigation } from './ISidebarNavigation';
 import { ISidebarUserSection } from './ISidebarUserSection';
@@ -137,6 +138,7 @@ export const ISidebar = () => {
                         getInitials={getInitials}
                         getDisplayName={getDisplayName}
                         onOrganizationClick={() => setOrganizationModal(true)}
+                        isAdmin={isAdmin}
                     />
                 ) : (
                     <ISidebarCollapsedUser
@@ -186,6 +188,7 @@ export const ISidebar = () => {
                                 <Route path={routes.users.create} element={<AddUsers />} />
                                 <Route path={routes.users.edit} element={<EditUser />} />
                                 <Route path={routes.users.details} element={<UserDetails />} />
+                                <Route path={routes.activityLogs.main} element={<ActivityLogs />} />
                             </>
                         )}
 

@@ -49,4 +49,7 @@ export const ENDPOINTS = {
     // Cases
     CASES: 'cases/',
     CASE_DETAIL: (id: string) => `cases/${id}/`,
+
+    // Activity Logs
+    ACTIVITY_LOGS: 'activity-logs/',
 } as const;
