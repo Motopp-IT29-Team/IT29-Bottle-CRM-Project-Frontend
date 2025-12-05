@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { FiClock, FiUserPlus, FiEdit, FiUserX, FiUserCheck } from 'react-icons/fi';
+import { IUser } from '../../../types';
 
 interface ActivityItem {
     icon: React.ReactNode;
@@ -12,24 +13,10 @@ interface ActivityItem {
 }
 
 interface Props {
-    createdByEmail?: string;
-    createdAt?: string;
-    updatedByEmail?: string;
-    updatedAt?: string;
-    deactivatedByEmail?: string;
-    deactivatedAt?: string;
-    isActive: boolean;
+    user: IUser;
 }
 
-export const UserActivitySection: React.FC<Props> = ({
-    createdByEmail,
-    createdAt,
-    updatedByEmail,
-    updatedAt,
-    deactivatedByEmail,
-    deactivatedAt,
-    isActive,
-}) => {
+export const UserActivitySection: React.FC<Props> = ({ user }) => {
     const activities: ActivityItem[] = [];
 
     const formatDate = (dateString: string) => {
@@ -43,45 +30,45 @@ export const UserActivitySection: React.FC<Props> = ({
         });
     };
 
-    if (createdByEmail && createdAt) {
+    if (user.created_by_email && user.created_at) {
         activities.push({
             icon: <FiUserPlus size={18} />,
             title: 'User Created',
-            subtitle: `by ${createdByEmail}`,
-            timestamp: formatDate(createdAt),
+            subtitle: `by ${user.created_by_email}`,
+            timestamp: formatDate(user.created_at),
             color: '#10b981',
             bgColor: '#f0fdf4',
         });
     }
 
-    if (updatedByEmail && updatedAt && updatedAt !== createdAt) {
+    if (user.updated_by_email && user.updated_at && user.updated_at !== user.created_at) {
         activities.push({
             icon: <FiEdit size={18} />,
             title: 'User Updated',
-            subtitle: `by ${updatedByEmail}`,
-            timestamp: formatDate(updatedAt),
+            subtitle: `by ${user.updated_by_email}`,
+            timestamp: formatDate(user.updated_at),
             color: '#3b82f6',
             bgColor: '#eff6ff',
         });
     }
 
-    if (!isActive && deactivatedByEmail && deactivatedAt) {
+    if (!user.user_details.is_active && user.deactivated_by_email && user.deactivated_at) {
         activities.push({
             icon: <FiUserX size={18} />,
             title: 'User Deactivated',
-            subtitle: `by ${deactivatedByEmail}`,
-            timestamp: formatDate(deactivatedAt),
+            subtitle: `by ${user.deactivated_by_email}`,
+            timestamp: formatDate(user.deactivated_at),
             color: '#ef4444',
             bgColor: '#fef2f2',
         });
     }
 
-    if (isActive && deactivatedByEmail && deactivatedAt) {
+    if (user.user_details.is_active && user.deactivated_by_email && user.deactivated_at) {
         activities.push({
             icon: <FiUserCheck size={18} />,
             title: 'User Activated',
-            subtitle: `by ${updatedByEmail || 'admin'}`,
-            timestamp: updatedAt ? formatDate(updatedAt) : '',
+            subtitle: `by ${user.updated_by_email || 'admin'}`,
+            timestamp: user.updated_at ? formatDate(user.updated_at) : '',
             color: '#10b981',
             bgColor: '#f0fdf4',
         });

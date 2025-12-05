@@ -2,8 +2,15 @@ import React, { useEffect, useState, ChangeEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { useFormState } from '../../hooks/useFormState';
-import { LeadLoadingBackdrop } from '../../components/leads/LeadLoadingBackdrop';
-import { ModernAppBar, AppBarAction, LoadingState, ErrorState, IForm, FormErrors } from '../../components/ui';
+import {
+    ModernAppBar,
+    AppBarAction,
+    LoadingState,
+    ErrorState,
+    IForm,
+    FormErrors,
+    ILoadingBackdrop,
+} from '../../components/ui';
 import { COUNTRIES } from '../../constants/countries';
 import { routes } from '../../constants/routes';
 import { useLeads, LeadFormData, validateLeadForm, getLeadConfig } from '../../api';
@@ -103,7 +110,7 @@ export function EditLead() {
                         label: u.user_details?.email || u.email || `User ${u.id}`,
                     })) || [],
                 contacts: [],
-                tags: lead.tags || [],
+                tags: lead.tags?.map((tag) => tag.name) || [],
             };
             setFormData(loadedData);
             setInitialFormData(loadedData);
@@ -208,7 +215,7 @@ export function EditLead() {
         <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Leads" crntPage="Edit Lead" actions={actions} />
 
-            <LeadLoadingBackdrop open={isSubmitting} />
+            <ILoadingBackdrop open={isSubmitting} message="Updating lead..." />
 
             <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
                 <IForm

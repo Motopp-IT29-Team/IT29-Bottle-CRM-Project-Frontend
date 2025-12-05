@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
 import { ITableToolbar, ITable, ITableColumn, IPagination } from '../../components/ui';
 import { LeadTableRow } from '../../components/leads/LeadTableRow';
-import { useLeads, Lead } from '../../api';
+import { useLeads } from '../../api';
 import { routes } from '../../constants/routes';
+import { ILead } from '../../types';
 
 const columns: ITableColumn[] = [
     { id: 'title', label: 'Lead Name', sortable: true },
@@ -24,7 +25,7 @@ export function Leads() {
     const { getAll, isLoading } = useLeads();
 
     const [tab, setTab] = useState<'open' | 'closed'>('open');
-    const [leads, setLeads] = useState<Lead[]>([]);
+    const [leads, setLeads] = useState<ILead[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
@@ -90,7 +91,7 @@ export function Leads() {
         }
     };
 
-    const sortLeads = (leads: Lead[], order: 'asc' | 'desc', orderBy: string) => {
+    const sortLeads = (leads: ILead[], order: 'asc' | 'desc', orderBy: string) => {
         return [...leads].sort((a, b) => {
             let aValue: any;
             let bValue: any;

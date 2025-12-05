@@ -1,0 +1,40 @@
+import { IAddress } from './address.types';
+import { IAttachment } from './attachment.types';
+import { IProfile } from './profile.types';
+import { IUserDetails } from './user.types';
+import { ITeam } from './team.types';
+import { IOrganization } from './organization.types';
+
+export interface IContact {
+    id: string;
+    salutation: string;
+    first_name: string;
+    last_name: string;
+    date_of_birth: string;
+    organization: string;
+    title: string;
+    primary_email: string;
+    secondary_email: string;
+    mobile_number: string;
+    secondary_number: string;
+    department: string;
+    country: string;
+    language: string;
+    do_not_call: boolean;
+    address: IAddress;
+    description: string;
+    linked_in_url: string;
+    facebook_url: string;
+    twitter_username: string;
+    contact_attachment: IAttachment[];
+    assigned_to: IProfile[];
+    created_by: IUserDetails;
+    created_at: string;
+    is_active: boolean;
+    teams: ITeam[];
+    created_on_arrow: string;
+    get_team_users: IProfile[];
+    get_team_and_assigned_users: IProfile[];
+    get_assigned_users_not_in_teams: IProfile[];
+    org: IOrganization;
+}

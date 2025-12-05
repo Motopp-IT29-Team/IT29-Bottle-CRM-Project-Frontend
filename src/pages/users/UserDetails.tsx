@@ -7,8 +7,9 @@ import { UserInfoSection } from '../../components/users/details/UserInfoSection'
 import { UserAddressSection } from '../../components/users/details/UserAddressSection';
 import { UserActivitySection } from '../../components/users/details/UserActivitySection';
 import { DeleteModal } from '../../components/DeleteModal';
-import { useUsers, User } from '../../api';
+import { useUsers } from '../../api';
 import { routes } from '../../constants/routes';
+import { IUser } from '../../types';
 
 export function UserDetails() {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ export function UserDetails() {
 
     const [deleteModal, setDeleteModal] = useState(false);
     const [isResending, setIsResending] = useState(false);
-    const [userDetails, setUserDetails] = useState<User | null>(null);
+    const [userDetails, setUserDetails] = useState<IUser | null>(null);
 
     useEffect(() => {
         if (!userId) {
@@ -89,12 +90,7 @@ export function UserDetails() {
 
             <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
                 <UserProfileHeader
-                    firstName={userDetails.first_name}
-                    lastName={userDetails.last_name}
-                    email={userDetails.user_details.email}
-                    role={userDetails.role}
-                    profilePic={userDetails.user_details.profile_pic}
-                    isActive={userDetails.user_details.is_active}
+                    user={userDetails}
                     onResendInvitation={!userDetails.user_details.is_active ? handleResendInvitation : undefined}
                     isResending={isResending}
                 />
@@ -107,15 +103,7 @@ export function UserDetails() {
 
                 <UserAddressSection address={userDetails.address} />
 
-                <UserActivitySection
-                    createdByEmail={userDetails.created_by_email}
-                    createdAt={userDetails.created_at}
-                    updatedByEmail={userDetails.updated_by_email}
-                    updatedAt={userDetails.updated_at}
-                    deactivatedByEmail={userDetails.deactivated_by_email}
-                    deactivatedAt={userDetails.deactivated_at}
-                    isActive={userDetails.user_details.is_active}
-                />
+                <UserActivitySection user={userDetails} />
             </Box>
 
             <DeleteModal

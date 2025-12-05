@@ -1,8 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { IForm, FormErrors } from '../../components/ui/form';
-import { ModernAppBar, AppBarAction } from '../../components/ui';
+import { ModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
 import { useContacts, ContactFormData, validateContactForm } from '../../api';
 import { useFormState } from '../../hooks/useFormState';
 import { getContactConfig } from '../../api/configs/contact.config';

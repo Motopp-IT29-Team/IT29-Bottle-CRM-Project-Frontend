@@ -19,46 +19,33 @@ import {
     CHIP_ICON_STYLES,
     RESEND_INVITATION_BUTTON_STYLES,
 } from '../../../styles/UsersStyles';
+import { IUser } from '../../../types';
 
 interface Props {
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-    profilePic?: string;
-    isActive: boolean;
+    user: IUser;
     onResendInvitation?: () => void;
     isResending?: boolean;
 }
 
-export const UserProfileHeader: React.FC<Props> = ({
-    firstName,
-    lastName,
-    email,
-    role,
-    profilePic,
-    isActive,
-    onResendInvitation,
-    isResending = false,
-}) => {
-    const fullName = `${firstName || ''} ${lastName || ''}`.trim();
+export const UserProfileHeader: React.FC<Props> = ({ user, onResendInvitation, isResending = false }) => {
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
     const displayName = fullName || '';
-    const initials = fullName ? getInitials(fullName) : getInitials(email);
+    const initials = fullName ? getInitials(fullName) : getInitials(user.user_details.email);
 
     return (
         <Card sx={USER_PROFILE_HEADER_CARD_STYLES}>
             <Box sx={USER_PROFILE_HEADER_GRADIENT_STYLES} />
             <Box sx={USER_PROFILE_HEADER_CONTENT_STYLES}>
                 <Box sx={USER_PROFILE_HEADER_FLEX_STYLES}>
-                    <Avatar sx={USER_PROFILE_AVATAR_STYLES} src={profilePic || undefined}>
+                    <Avatar sx={USER_PROFILE_AVATAR_STYLES} src={user.user_details.profile_pic || undefined}>
                         {initials}
                     </Avatar>
 
                     <Box sx={USER_PROFILE_INFO_CONTAINER_STYLES}>
                         <Typography sx={USER_PROFILE_EMAIL_STYLES}>{displayName}</Typography>
                         <Box sx={USER_PROFILE_CHIPS_CONTAINER_STYLES}>
-                            <Chip label={role} size="small" sx={USER_PROFILE_ROLE_CHIP_STYLES} />
-                            {isActive ? (
+                            <Chip label={user.role} size="small" sx={USER_PROFILE_ROLE_CHIP_STYLES} />
+                            {user.user_details.is_active ? (
                                 <Chip
                                     icon={<FiCheckCircle style={CHIP_ICON_STYLES} />}
                                     label="Active"
@@ -76,7 +63,7 @@ export const UserProfileHeader: React.FC<Props> = ({
                         </Box>
                     </Box>
 
-                    {!isActive && onResendInvitation && (
+                    {!user.user_details.is_active && onResendInvitation && (
                         <Box
                             sx={{
                                 display: 'flex',
@@ -87,7 +74,7 @@ export const UserProfileHeader: React.FC<Props> = ({
                             }}
                         >
                             <Typography sx={{ fontSize: '14px', color: '#6b7280', fontWeight: 500 }}>
-                                {email}
+                                {user.user_details.email}
                             </Typography>
                             <Button
                                 variant="outlined"

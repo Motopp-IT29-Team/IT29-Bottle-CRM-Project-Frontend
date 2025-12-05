@@ -1,6 +1,19 @@
 import { apiClient } from '../client';
 import { ENDPOINTS } from '../endpoints';
 import { UploadedFile } from '../../components/ui/form';
+import {
+    IAccount,
+    IAttachment,
+    IChoiceOption,
+    IComment,
+    ICompany,
+    IContact,
+    ILead,
+    IOpportunity,
+    IProfile,
+    ITag,
+    ITeam,
+} from '../../types';
 
 export interface LeadFormData {
     first_name: string;
@@ -36,63 +49,6 @@ export interface LeadFormData {
     tags: string[];
 }
 
-export interface Lead {
-    id: string;
-    title: string;
-    first_name: string;
-    last_name: string;
-    account_name: string;
-    phone: string;
-    email: string;
-    status: string;
-    source: string;
-    created_at: string;
-    country: string;
-    tags: any[];
-    created_by: {
-        email: string;
-        profile_pic: string;
-    };
-    website?: string;
-    description?: string;
-    status_display?: string;
-    source_display?: string;
-    industry?: string;
-    industry_display?: string;
-    probability: number;
-    opportunity_amount?: string;
-    salutation: string;
-    salutation_display?: string;
-    department?: string;
-    department_display?: string;
-    preferred_language?: string;
-    preferred_language_display?: string;
-    rating?: string;
-    rating_display?: string;
-    budget_range?: string;
-    budget_range_display?: string;
-    decision_timeframe?: string;
-    decision_timeframe_display?: string;
-    do_not_call?: boolean;
-    address_line?: string;
-    street?: string;
-    city?: string;
-    state?: string;
-    postcode?: string;
-    close_date?: string;
-    organization?: string;
-    created_from_site?: boolean;
-    assigned_to: any[];
-    team?: any;
-    // Conversion fields
-    is_converted?: boolean;
-    converted_at?: string;
-    converted_by?: any;
-    converted_account?: any;
-    converted_contact?: any;
-    converted_opportunity?: any;
-}
-
 export interface GetLeadsParams {
     offset?: number;
     limit?: number;
@@ -100,7 +56,81 @@ export interface GetLeadsParams {
     search?: string;
 }
 
-// Lead Conversion Types
+export interface ContactMinimal {
+    id: string;
+    first_name: string;
+}
+
+export interface UserMinimal {
+    id: string;
+    user__email: string;
+    user__is_active: boolean;
+}
+
+export interface GetLeadsResponse {
+    open_leads: {
+        open_leads: ILead[];
+        leads_count: number;
+        offset: number | null;
+    };
+    close_leads: {
+        close_leads: ILead[];
+        leads_count: number;
+        offset: number;
+    };
+    contacts: ContactMinimal[];
+    status: IChoiceOption[];
+    source: IChoiceOption[];
+    companies: ICompany[];
+    tags: ITag[];
+    users: UserMinimal[];
+    countries: IChoiceOption[];
+    industries: IChoiceOption[];
+    error?: boolean;
+}
+
+export interface AssignedData {
+    id: string;
+    name: string;
+}
+
+export interface UserMention {
+    user__email: string;
+}
+
+export interface LeadDetailResponse {
+    error: boolean;
+    lead_obj: ILead;
+    users: IProfile[];
+    users_excluding_team: IProfile[];
+    teams: ITeam[];
+    countries: IChoiceOption[];
+    status: IChoiceOption[];
+    source: IChoiceOption[];
+    lead_attachment: IAttachment[];
+    comments: IComment[];
+    users_mention: UserMention[];
+    assigned_data: AssignedData[];
+    attachments: IAttachment[];
+}
+
+export interface LeadCreateResponse {
+    error: boolean;
+    message?: string;
+    errors?: Record<string, string[]>;
+}
+
+export interface LeadUpdateResponse {
+    error: boolean;
+    message?: string;
+    errors?: Record<string, string[]>;
+}
+
+export interface LeadDeleteResponse {
+    error: boolean;
+    message?: string;
+}
+
 export interface AccountOption {
     action: 'create' | 'link';
     existing_id?: string;
@@ -135,8 +165,11 @@ export interface DuplicateMatch {
 }
 
 export interface LeadDuplicateCheckResponse {
-    account_matches: DuplicateMatch[];
-    contact_matches: DuplicateMatch[];
+    error: boolean;
+    data: {
+        account_matches: DuplicateMatch[];
+        contact_matches: DuplicateMatch[];
+    };
 }
 
 export interface LeadConversionResponse {
@@ -145,36 +178,35 @@ export interface LeadConversionResponse {
     data: {
         success: boolean;
         message: string;
-        lead: Lead;
-        account: any;
-        contact: any;
-        opportunity: any;
+        lead: ILead;
+        account: IAccount | null;
+        contact: IContact | null;
+        opportunity: IOpportunity | null;
     };
 }
 
-export interface GetLeadsResponse {
-    open_leads: {
-        open_leads: Lead[];
-        leads_count: number;
-        offset: number | null;
-    };
-    close_leads: {
-        close_leads: Lead[];
-        leads_count: number;
-        offset: number;
-    };
-    contacts: any[];
-    status: any[];
-    source: any[];
-    companies: any[];
-    tags: any[];
-    users: any[];
-    countries: any[];
-    industries: any[];
+export interface CommentCreateResponse {
+    error: boolean;
+    message?: string;
+}
+
+export interface CommentDeleteResponse {
+    error: boolean;
+    message?: string;
+}
+
+export interface AttachmentUploadResponse {
+    error: boolean;
+    message?: string;
+}
+
+export interface AttachmentDeleteResponse {
+    error: boolean;
+    message?: string;
 }
 
 export const leadsService = {
-    getAll: async (params?: GetLeadsParams) => {
+    getAll: async (params?: GetLeadsParams): Promise<GetLeadsResponse> => {
         const queryParams = new URLSearchParams();
 
         if (params?.offset !== undefined) {
@@ -192,16 +224,16 @@ export const leadsService = {
 
         const url = queryParams.toString() ? `${ENDPOINTS.LEADS}?${queryParams.toString()}` : ENDPOINTS.LEADS;
 
-        const response = await apiClient.get(url);
+        const response = await apiClient.get<GetLeadsResponse>(url);
         return response.data;
     },
 
-    getById: async (id: string) => {
-        const response = await apiClient.get(ENDPOINTS.LEAD_DETAIL(id));
+    getById: async (id: string): Promise<LeadDetailResponse> => {
+        const response = await apiClient.get<LeadDetailResponse>(ENDPOINTS.LEAD_DETAIL(id));
         return response.data;
     },
 
-    create: async (data: LeadFormData) => {
+    create: async (data: LeadFormData): Promise<LeadCreateResponse> => {
         const formData = new FormData();
 
         formData.append('title', data.title);
@@ -247,11 +279,11 @@ export const leadsService = {
         data.contacts.forEach((value) => formData.append('contacts', value));
         data.tags.forEach((tag) => formData.append('tags', tag));
 
-        const response = await apiClient.post(ENDPOINTS.LEADS, formData);
+        const response = await apiClient.post<LeadCreateResponse>(ENDPOINTS.LEADS, formData);
         return response.data;
     },
 
-    update: async (id: string, data: Partial<LeadFormData>) => {
+    update: async (id: string, data: Partial<LeadFormData>): Promise<LeadUpdateResponse> => {
         const formData = new FormData();
 
         Object.keys(data).forEach((key) => {
@@ -279,53 +311,54 @@ export const leadsService = {
             }
         });
 
-        const response = await apiClient.put(ENDPOINTS.LEAD_DETAIL(id), formData);
+        const response = await apiClient.put<LeadUpdateResponse>(ENDPOINTS.LEAD_DETAIL(id), formData);
         return response.data;
     },
 
-    delete: async (id: string) => {
-        const response = await apiClient.delete(ENDPOINTS.LEAD_DETAIL(id));
+    delete: async (id: string): Promise<LeadDeleteResponse> => {
+        const response = await apiClient.delete<LeadDeleteResponse>(ENDPOINTS.LEAD_DETAIL(id));
         return response.data;
     },
 
-    checkDuplicate: async (email: string, phone: string) => {
-        const response = await apiClient.get(
+    checkDuplicate: async (email: string, phone: string): Promise<LeadDuplicateCheckResponse> => {
+        const response = await apiClient.get<LeadDuplicateCheckResponse>(
             `${ENDPOINTS.LEAD_DUPLICATE_CHECK}?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`
         );
         return response.data;
     },
 
-    addComment: async (id: string, comment: string) => {
-        const response = await apiClient.post(ENDPOINTS.LEAD_DETAIL(id), { comment });
+    addComment: async (id: string, comment: string): Promise<CommentCreateResponse> => {
+        const response = await apiClient.post<CommentCreateResponse>(ENDPOINTS.LEAD_DETAIL(id), { comment });
         return response.data;
     },
 
-    deleteComment: async (commentId: string) => {
-        const response = await apiClient.delete(ENDPOINTS.LEAD_COMMENT(commentId));
+    deleteComment: async (commentId: string): Promise<CommentDeleteResponse> => {
+        const response = await apiClient.delete<CommentDeleteResponse>(ENDPOINTS.LEAD_COMMENT(commentId));
         return response.data;
     },
 
-    uploadAttachment: async (id: string, file: File) => {
+    uploadAttachment: async (id: string, file: File): Promise<AttachmentUploadResponse> => {
         const formData = new FormData();
         formData.append('lead_attachment', file);
 
-        const response = await apiClient.post(ENDPOINTS.LEAD_ATTACHMENT(id), formData);
+        const response = await apiClient.post<AttachmentUploadResponse>(ENDPOINTS.LEAD_ATTACHMENT(id), formData);
         return response.data;
     },
 
-    deleteAttachment: async (attachmentId: string) => {
-        const response = await apiClient.delete(ENDPOINTS.LEAD_ATTACHMENT_DELETE(attachmentId));
+    deleteAttachment: async (attachmentId: string): Promise<AttachmentDeleteResponse> => {
+        const response = await apiClient.delete<AttachmentDeleteResponse>(
+            ENDPOINTS.LEAD_ATTACHMENT_DELETE(attachmentId)
+        );
         return response.data;
     },
 
-    // Lead Conversion Methods
     checkConversionDuplicates: async (id: string): Promise<LeadDuplicateCheckResponse> => {
-        const response = await apiClient.get(ENDPOINTS.LEAD_CHECK_DUPLICATES(id));
-        return response.data.data;
+        const response = await apiClient.get<LeadDuplicateCheckResponse>(ENDPOINTS.LEAD_CHECK_DUPLICATES(id));
+        return response.data;
     },
 
     convert: async (id: string, options?: LeadConversionRequest): Promise<LeadConversionResponse> => {
-        const response = await apiClient.post(ENDPOINTS.LEAD_CONVERT(id), options || {});
+        const response = await apiClient.post<LeadConversionResponse>(ENDPOINTS.LEAD_CONVERT(id), options || {});
         return response.data;
     },
 };

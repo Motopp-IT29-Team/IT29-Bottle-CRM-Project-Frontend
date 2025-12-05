@@ -1,16 +1,17 @@
 import { useState, useCallback } from 'react';
-import { usersService, User, UserFormData, GetUsersParams } from '../services/users.service';
+import { usersService, UserFormData, GetUsersParams, UsersListResponse } from '../services/users.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
 import { useNotification } from '../../context/NotificationContext';
+import { IUser } from '../../types';
 
 export const useUsers = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<IUser[]>([]);
     const { addNotification } = useNotification();
 
     const getAll = useCallback(
-        async (params?: GetUsersParams): Promise<ApiResult<{ users: User[]; total_count: number }>> => {
+        async (params?: GetUsersParams): Promise<ApiResult<UsersListResponse>> => {
             setIsLoading(true);
             try {
                 const data = await usersService.getAll(params);
@@ -19,7 +20,7 @@ export const useUsers = () => {
                     setUsers(data.users || []);
                     return { success: true, data };
                 } else {
-                    const fieldErrors = parseApiErrors(data);
+                    const fieldErrors = parseApiErrors(data as any);
                     return {
                         success: false,
                         error: formatErrorMessage(fieldErrors, 'Failed to load users'),
@@ -47,7 +48,7 @@ export const useUsers = () => {
         [getAll]
     );
 
-    const getById = async (id: string): Promise<ApiResult<User>> => {
+    const getById = async (id: string): Promise<ApiResult<IUser>> => {
         setIsLoading(true);
         try {
             const data = await usersService.getById(id);

@@ -1,10 +1,9 @@
 import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { IForm, FormErrors } from '../../components/ui/form';
 import { useUsers, UserFormData, validateUserForm, getUserConfig } from '../../api';
 import { useFormState } from '../../hooks/useFormState';
-import { LoadingBackdrop, ModernAppBar, AppBarAction } from '../../components/ui';
+import { ILoadingBackdrop, ModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
 
 const INITIAL_FORM_DATA: UserFormData = {
@@ -106,7 +105,7 @@ export function AddUsers() {
         <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
             <ModernAppBar module="Users" crntPage="Create User" actions={actions} />
 
-            <LoadingBackdrop open={isLoading} />
+            <ILoadingBackdrop open={isLoading} message="Creating user..." />
 
             <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
                 <IForm

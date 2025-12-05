@@ -8,7 +8,7 @@ export { IToggle } from './IToggle';
 export { INotificationContainer, INotificationItem } from './notification';
 export { IForm, IFormSection, IFormField, type FormErrors } from './form';
 export { ModernAppBar, type AppBarAction } from './ModernAppBar';
-export { LoadingBackdrop } from './LoadingBackdrop';
+export { ILoadingBackdrop } from './ILoadingBackdrop';
 export { LoadingState } from './LoadingState';
 export { ErrorState } from './ErrorState';
 export { ISidebar, ISidebarHeader, ISidebarNavigation, ISidebarCollapsedUser, ISidebarUserSection } from '../sidebar';
