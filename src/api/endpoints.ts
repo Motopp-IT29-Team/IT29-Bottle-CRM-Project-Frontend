@@ -57,4 +57,5 @@ export const ENDPOINTS = {
 
     // Activity Logs
     ACTIVITY_LOGS: 'activity-logs/',
+    LOG_ORG_SELECTION: 'auth/log-org-selection/',
 } as const;

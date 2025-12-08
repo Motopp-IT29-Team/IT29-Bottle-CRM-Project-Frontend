@@ -82,22 +82,21 @@ export default function OrganizationModal(props: any) {
         }
 
         localStorage.setItem('org', id);
-        
-        // Log the org selection as LOGIN
+
         try {
-            await fetchData(
-                'auth/log-org-selection/',
-                'POST',
-                null as any,
+            await apiClient.post(
+                ENDPOINTS.LOG_ORG_SELECTION,
+                {},
                 {
-                    ...headers,
-                    org: id,
+                    headers: {
+                        org: id,
+                    },
                 }
             );
         } catch (error) {
             console.error('Error logging org selection:', error);
         }
-        
+
         onHandleClose();
         window.location.href = routes.app.main;
     };
