@@ -1,611 +1,343 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, Link, Avatar, Box, Snackbar, Alert, Stack, Button, Chip } from '@mui/material';
-
-import { fetchData } from '../../components/FetchData';
-import { AccountsUrl } from '../../services/ApiUrls';
-import { Tags } from '../../components/Tags';
-import { CustomAppBar } from '../../components/CustomAppBar';
-import { FaPlus, FaStar } from 'react-icons/fa';
-import FormateTime from '../../components/FormateTime';
-import { Label } from '../../components/Label';
-import { AntSwitch } from '../../styles/CssStyled';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Box, CircularProgress, Avatar, Chip, Button, Stack } from '@mui/material';
+import { FaPlus } from 'react-icons/fa';
+import { IModernAppBar, AppBarAction } from '../../components/ui';
+import { useAccounts } from '../../api';
 import { routes } from '../../constants/routes';
+import { IAccount, IAttachment, IContact } from '../../types';
+import FormateTime from '../../utils/formateTime';
+import { ILabel } from '../../components/ui/ILabel';
 
-export const formatDate = (dateString: any) => {
-    const options: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-};
-type response = {
-    created_by: {
-        email: string;
-        id: string;
-        profile_pic: string;
-    };
-    user_details: {
-        email: string;
-        id: string;
-        profile_pic: string;
-    };
-    org: { name: string };
-    lead: { account_name: string };
-    account_attachment: [];
-    assigned_to: [];
-    billing_address_line: string;
-    billing_city: string;
-    billing_country: string;
-    billing_state: string;
-    billing_postcode: string;
-    billing_street: string;
-    contact_name: string;
-    name: string;
-
-    created_at: string;
-    created_on: string;
-    created_on_arrow: string;
-    date_of_birth: string;
-    title: string;
-    first_name: string;
-    last_name: string;
-    account_name: string;
-    phone: string;
-    email: string;
-    lead_attachment: string;
-    opportunity_amount: string;
-    website: string;
-    description: string;
-    contacts: string;
-    status: string;
-    source: string;
-    address_line: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-    tags: [];
-    company: string;
-    probability: string;
-    industry: string;
-    skype_ID: string;
-    file: string;
-
-    close_date: string;
-    organization: string;
-    created_from_site: boolean;
-    id: string;
-    teams: [];
-    leads: string;
-};
-export const AccountDetails = (props: any) => {
-    const { state } = useLocation();
+export function AccountDetails() {
     const navigate = useNavigate();
+    const { state } = useLocation();
+    const { id } = useParams<{ id: string }>();
+    const { getById, isLoading } = useAccounts();
 
-    const [accountDetails, setAccountDetails] = useState<response | null>(null);
-    const [usersDetails, setUsersDetails] = useState<
-        Array<{
-            user_details: {
-                email: string;
-                id: string;
-                profile_pic: string;
-            };
-        }>
-    >([]);
-    const [selectedCountry, setSelectedCountry] = useState([]);
-    const [attachments, setAttachments] = useState([]);
-    const [tags, setTags] = useState([]);
-    const [countries, setCountries] = useState<string[][]>([]);
-    const [source, setSource] = useState([]);
-    const [status, setStatus] = useState([]);
-    const [industries, setIndustries] = useState([]);
-    const [contacts, setContacts] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [teams, setTeams] = useState([]);
-    const [leads, setLeads] = useState([]);
-    const [comments, setComments] = useState([]);
-    const [commentList, setCommentList] = useState('Recent Last');
-    const [note, setNote] = useState('');
+    const [account, setAccount] = useState<IAccount | null>(null);
+    const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    const [contacts, setContacts] = useState<IContact[]>([]);
+
+    const accountId = id || state?.accountId;
 
     useEffect(() => {
-        getAccountDetails(state.accountId);
-    }, [state.accountId]);
+        if (!accountId) {
+            navigate(routes.accounts.main);
+            return;
+        }
 
-    const getAccountDetails = (id: any) => {
-        const Header = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
-        };
-        fetchData(`${AccountsUrl}/${id}/`, 'GET', null as any, Header)
-            .then((res) => {
-                console.log(res, 'edd');
-                if (!res.error) {
-                    setAccountDetails(res?.account_obj);
-                    setContacts(res?.contacts);
-                    setIndustries(res?.industries);
-                    setUsers(res?.users);
-                    setStatus(res?.status);
-                    setCountries(res?.countries);
-                    setLeads(res?.leads);
-                    setTags(res?.tags);
-                    setTeams(res?.teams);
-                    // setAttachments(res?.attachments)
-                    // setTags(res?.tags)
-                    // setCountries(res?.countries)
-                    // setIndustries(res?.industries)
-                    // setStatus(res?.status)
-                    // setSource(res?.source)
-                    // setUsers(res?.users)
-                    // setContacts(res?.contacts)
-                    // setTeams(res?.teams)
-                    // setComments(res?.comments)
-                }
-            })
-            .catch((err) => {
-                // console.error('Error:', err)
-                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate(routes.accounts.main)}>
-                    <Alert onClose={() => navigate(routes.accounts.main)} severity="error" sx={{ width: '100%' }}>
-                        Failed to load!
-                    </Alert>
-                </Snackbar>;
-            });
-    };
-    const accountCountry = (country: string) => {
-        let countryName: string[] | undefined;
-        for (countryName of countries) {
-            if (Array.isArray(countryName) && countryName.includes(country)) {
-                const ele = countryName;
-                break;
-            }
+        fetchAccountDetails();
+    }, [accountId]);
+
+    const fetchAccountDetails = async () => {
+        if (!accountId) return;
+
+        const result = await getById(accountId);
+
+        if (result.success && result.data) {
+            // setAccount(result.data.account_obj);
+            setAttachments(result.data.attachments || []);
+            // setContacts(result.data.contacts || []);
+        } else {
+            navigate(routes.accounts.main);
         }
-        return countryName?.[1];
     };
-    const editHandle = () => {
-        let country: string[] | undefined;
-        for (country of countries) {
-            if (Array.isArray(country) && country.includes(accountDetails?.country || '')) {
-                const firstElement = country[0];
-                break;
-            }
-        }
-        navigate(routes.accounts.edit, {
+
+    const handleBack = () => navigate(routes.accounts.main);
+
+    const handleEdit = () => {
+        navigate(routes.accounts.edit.replace(':id', accountId), {
             state: {
-                value: {
-                    name: accountDetails?.name,
-                    phone: accountDetails?.phone,
-                    email: accountDetails?.email,
-                    billing_address_line: accountDetails?.billing_address_line,
-                    billing_street: accountDetails?.billing_street,
-                    billing_city: accountDetails?.billing_city,
-                    billing_state: accountDetails?.billing_state,
-                    billing_postcode: accountDetails?.billing_postcode,
-                    billing_country: accountDetails?.billing_country,
-                    contact_name: accountDetails?.contact_name,
-                    teams: accountDetails?.teams || [],
-                    assigned_to: accountDetails?.assigned_to || [],
-                    tags: accountDetails?.tags || [],
-                    account_attachment: accountDetails?.account_attachment || null,
-                    website: accountDetails?.website,
-                    status: accountDetails?.status,
-                    lead: accountDetails?.lead?.account_name,
-                    // contacts: accountDetails?.contacts
-                },
-                id: state?.accountId,
-                contacts: state?.contacts || [],
-                status: state?.status || [],
-                tags: state?.tags || [],
-                users: state?.users || [],
-                countries: state?.countries || [],
-                teams: state?.teams || [],
-                leads: state?.leads || [],
+                fromDetails: true,
             },
         });
     };
 
-    const backbtnHandle = () => {
-        navigate(routes.accounts.main);
-    };
+    const actions: AppBarAction[] = [
+        { type: 'back', label: 'Back To Accounts', onClick: handleBack },
+        { type: 'edit', onClick: handleEdit },
+    ];
 
-    const module = 'Accounts';
-    const crntPage = 'Account Details';
-    const backBtn = 'Back To Accounts';
-
-    return (
-        <Box sx={{ mt: '60px' }}>
-            <div>
-                <CustomAppBar
-                    backbtnHandle={backbtnHandle}
-                    module={module}
-                    backBtn={backBtn}
-                    crntPage={crntPage}
-                    editHandle={editHandle}
-                />
+    if (isLoading || !account) {
+        return (
+            <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
+                <IModernAppBar module="Accounts" crntPage="Account Details" actions={actions} />
                 <Box
                     sx={{
-                        mt: '110px',
-                        p: '20px',
+                        mt: '120px',
                         display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '400px',
                     }}
                 >
-                    <Box sx={{ width: '65%' }}>
+                    <CircularProgress />
+                </Box>
+            </Box>
+        );
+    }
+
+    return (
+        <Box>
+            <IModernAppBar module="Accounts" crntPage="Account Details" actions={actions} />
+
+            <Box
+                sx={{
+                    p: 3,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '24px',
+                }}
+            >
+                {/* Main Content - Left Side */}
+                <Box sx={{ flex: 1 }}>
+                    <Box
+                        sx={{
+                            borderRadius: '10px',
+                            border: '1px solid #e0e0e0',
+                            backgroundColor: 'white',
+                            mb: 3,
+                        }}
+                    >
+                        {/* Header Section */}
                         <Box
                             sx={{
-                                borderRadius: '10px',
-                                border: '1px solid #80808038',
-                                backgroundColor: 'white',
+                                p: '20px',
+                                borderBottom: '1px solid #e0e0e0',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
                             }}
                         >
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    borderBottom: '1px solid lightgray',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353f0',
-                                    }}
-                                >
-                                    Account Information
-                                </div>
-                                <div
-                                    style={{
-                                        color: 'gray',
-                                        fontSize: '16px',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            justifyContent: 'flex-end',
-                                            alignItems: 'center',
-                                            marginRight: '15px',
-                                        }}
-                                    >
-                                        created &nbsp;
-                                        {FormateTime(accountDetails?.created_at)} &nbsp; by &nbsp;
-                                        <Avatar
-                                            // src={accountDetails?.created_by?.profile_pic}
-                                            alt={accountDetails?.created_by?.email}
-                                        />
-                                        &nbsp;&nbsp;
-                                        {accountDetails?.created_by?.email}
-                                        {/* {accountDetails?.first_name}&nbsp;
-                                        {accountDetails?.last_name} */}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    marginTop: '10px',
-                                }}
-                            >
-                                <div className="title2">
-                                    {accountDetails?.name}
-                                    <Stack
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            mt: 1,
-                                        }}
-                                    >
-                                        {/* {
-                                            lead.assigned_to && lead.assigned_to.map((assignItem) => (
-                                                assignItem.user_details.profile_pic
-                                                    ? */}
-                                        {usersDetails?.length
-                                            ? usersDetails.map((val: any, i: any) => (
-                                                  <Avatar
-                                                      key={i}
-                                                      alt={val?.user_details?.email}
-                                                      src={val?.user_details?.profile_pic}
-                                                      sx={{ mr: 1 }}
-                                                  />
-                                              ))
-                                            : ''}
-                                    </Stack>
-                                </div>
-                                <Stack
-                                    sx={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    {accountDetails?.tags?.length
-                                        ? accountDetails?.tags.map((tagData: any) => <Label tags={tagData} />)
-                                        : ''}
-                                </Stack>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Website</div>
-                                    <div className="title3">{accountDetails?.website || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Contact Name</div>
-                                    <div className="title3">{accountDetails?.contact_name}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Organization Name</div>
-                                    <div className="title3">{accountDetails?.org?.name || '----'}</div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Industry</div>
-                                    <div className="title3">
-                                        {/* {lead.pipeline ? lead.pipeline : '------'} */}
-                                        {accountDetails?.industry || '----'}
-                                    </div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Leads</div>
-                                    <div className="title3">{accountDetails?.lead?.account_name || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Teams</div>
-                                    <div className="title3">
-                                        {accountDetails?.teams?.length
-                                            ? accountDetails?.teams.map((team: any) => (
-                                                  <Chip
-                                                      label={team}
-                                                      sx={{
-                                                          height: '20px',
-                                                          borderRadius: '4px',
-                                                      }}
-                                                  />
-                                              ))
-                                            : '----'}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Email Address</div>
-                                    <div className="title3">{accountDetails?.email || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Mobile Number</div>
-                                    <div className="title3">{accountDetails?.phone || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Skype Id</div>
-                                    <div className="title3">
-                                        {accountDetails?.skype_ID ? <Link>{accountDetails?.skype_ID}</Link> : '----'}
-                                    </div>
-                                </div>
-                            </div>
-                            {/* </div> */}
-                            {/* Address details */}
-                            <div style={{ marginTop: '2%' }}>
-                                <div
-                                    style={{
-                                        padding: '20px',
-                                        borderBottom: '1px solid lightgray',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            fontWeight: 600,
-                                            fontSize: '18px',
-                                            color: '#1a3353f0',
-                                        }}
-                                    >
-                                        Address Details
-                                    </div>
-                                </div>
-                                <div
-                                    style={{
-                                        padding: '20px',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        marginTop: '10px',
-                                    }}
-                                >
-                                    <div style={{ width: '32%' }}>
-                                        <div className="title2">Address Lane</div>
-                                        <div className="title3">{accountDetails?.billing_address_line || '----'}</div>
-                                    </div>
-                                    <div style={{ width: '32%' }}>
-                                        <div className="title2">Street</div>
-                                        <div className="title3">{accountDetails?.billing_street || '----'}</div>
-                                    </div>
-                                    <div style={{ width: '32%' }}>
-                                        <div className="title2">City</div>
-                                        <div className="title3">{accountDetails?.billing_city || '----'}</div>
-                                    </div>
-                                </div>
-                                <div
-                                    style={{
-                                        padding: '20px',
-                                        marginTop: '15px',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <div style={{ width: '32%' }}>
-                                        <div className="title2">Pincode</div>
-                                        <div className="title3">{accountDetails?.billing_postcode || '----'}</div>
-                                    </div>
-                                    <div style={{ width: '32%' }}>
-                                        <div className="title2">State</div>
-                                        <div className="title3">{accountDetails?.billing_state || '----'}</div>
-                                    </div>
-                                    <div style={{ width: '32%' }}>
-                                        <div className="title2">Country</div>
-                                        <div className="title3">
-                                            {/* {accountDetails?.billing_country || '----'} */}
-                                            {accountCountry(accountDetails?.billing_country || '----')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Description */}
-                            <div style={{ marginTop: '2%' }}>
-                                <div
-                                    style={{
-                                        padding: '20px',
-                                        borderBottom: '1px solid lightgray',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            fontWeight: 600,
-                                            fontSize: '18px',
-                                            color: '#1a3353f0',
-                                        }}
-                                    >
-                                        Description
-                                    </div>
-                                </div>
-                                <Box sx={{ p: '15px' }}>
-                                    {accountDetails?.description ? (
-                                        <div
-                                            dangerouslySetInnerHTML={{
-                                                __html: accountDetails?.description,
-                                            }}
-                                        />
+                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>Account Information</Box>
+                            <Box sx={{ color: 'gray', fontSize: '14px', display: 'flex', alignItems: 'center' }}>
+                                <span>created {FormateTime(account.created_at)} by</span>
+                                <Avatar
+                                    src={account.created_by?.profile_pic || ''}
+                                    alt={account.created_by?.email}
+                                    sx={{ width: 24, height: 24, mx: 1 }}
+                                />
+                                <span>{account.created_by?.email}</span>
+                            </Box>
+                        </Box>
+
+                        {/* Title and Tags */}
+                        <Box sx={{ p: '20px' }}>
+                            <Box sx={{ fontSize: '24px', fontWeight: 600, color: '#1a3353', mb: 2 }}>
+                                {account.name}
+                            </Box>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                                {account.assigned_to?.map((user: any) => (
+                                    <Avatar
+                                        key={user.id}
+                                        alt={user.email}
+                                        src={user.profile_pic}
+                                        sx={{ width: 32, height: 32 }}
+                                    />
+                                ))}
+                            </Stack>
+                            <Stack direction="row" spacing={1}>
+                                {account.tags?.map((tag: any) => (
+                                    <ILabel key={tag.id || tag} tags={tag} />
+                                ))}
+                            </Stack>
+                        </Box>
+
+                        {/* Details Grid */}
+                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <DetailField label="Website" value={account.website} />
+                            <DetailField label="Contact Name" value={account.contact_name} />
+                            <DetailField label="Organization" value={account.org?.name} />
+                        </Box>
+
+                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <DetailField label="Industry" value={account.industry} />
+                            <DetailField label="Lead" value={account.lead?.first_name} />
+                            <Box sx={{ flex: 1 }}>
+                                <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>Teams</Box>
+                                <Box>
+                                    {account.teams && account.teams.length > 0 ? (
+                                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                                            {account.teams.map((team: any) => (
+                                                <Chip
+                                                    key={team.id || team}
+                                                    label={team.name || team}
+                                                    size="small"
+                                                    sx={{ height: '24px', borderRadius: '4px' }}
+                                                />
+                                            ))}
+                                        </Stack>
                                     ) : (
-                                        '---'
+                                        <Box sx={{ color: '#999' }}>----</Box>
                                     )}
                                 </Box>
-                            </div>
+                            </Box>
+                        </Box>
+
+                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <DetailField label="Email Address" value={account.email} />
+                            <DetailField label="Phone Number" value={account.phone} />
+                            <DetailField label="Status" value={account.status} />
+                        </Box>
+
+                        {/* Address Section */}
+                        <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
+                            <Box
+                                sx={{
+                                    p: '20px',
+                                    borderBottom: '1px solid #e0e0e0',
+                                    fontWeight: 600,
+                                    fontSize: '18px',
+                                    color: '#1a3353',
+                                }}
+                            >
+                                Address Details
+                            </Box>
+                            <Box sx={{ p: '20px', display: 'flex', gap: '20px' }}>
+                                <DetailField label="Address Line" value={account.billing_address_line} />
+                                <DetailField label="Street" value={account.billing_street} />
+                                <DetailField label="City" value={account.billing_city} />
+                            </Box>
+                            <Box sx={{ p: '20px', display: 'flex', gap: '20px', pt: 0 }}>
+                                <DetailField label="Postal Code" value={account.billing_postcode} />
+                                <DetailField label="State" value={account.billing_state} />
+                                <DetailField label="Country" value={account.billing_country} />
+                            </Box>
+                        </Box>
+
+                        {/* Description Section */}
+                        {account.description && (
+                            <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
+                                <Box
+                                    sx={{
+                                        p: '20px',
+                                        borderBottom: '1px solid #e0e0e0',
+                                        fontWeight: 600,
+                                        fontSize: '18px',
+                                        color: '#1a3353',
+                                    }}
+                                >
+                                    Description
+                                </Box>
+                                <Box sx={{ p: '20px' }} dangerouslySetInnerHTML={{ __html: account.description }} />
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+
+                {/* Sidebar - Right Side */}
+                <Box sx={{ width: '400px' }}>
+                    {/* Attachments Section */}
+                    <Box
+                        sx={{
+                            borderRadius: '10px',
+                            border: '1px solid #e0e0e0',
+                            backgroundColor: 'white',
+                            mb: 3,
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                p: '20px',
+                                borderBottom: '1px solid #e0e0e0',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>Attachments</Box>
+                            <Button
+                                variant="text"
+                                size="small"
+                                startIcon={<FaPlus style={{ fill: '#3E79F7', width: '12px' }} />}
+                                sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+                            >
+                                Add Attachments
+                            </Button>
+                        </Box>
+
+                        <Box sx={{ p: '20px' }}>
+                            {attachments && attachments.length > 0 ? (
+                                <Stack spacing={2}>
+                                    {attachments.map((attachment) => (
+                                        <Box
+                                            key={attachment.id}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                p: 1,
+                                                border: '1px solid #e0e0e0',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                '&:hover': { backgroundColor: '#f5f5f5' },
+                                            }}
+                                        >
+                                            {/*<Box sx={{ flex: 1, fontSize: '14px' }}>*/}
+                                            {/*    {attachment.attachment?.split('/').pop() || 'Attachment'}*/}
+                                            {/*</Box>*/}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Box sx={{ color: '#999', textAlign: 'center', py: 2 }}>No attachments</Box>
+                            )}
                         </Box>
                     </Box>
-                    <Box sx={{ width: '34%' }}>
+
+                    {/* Contacts Section */}
+                    {contacts && contacts.length > 0 && (
                         <Box
                             sx={{
                                 borderRadius: '10px',
-                                border: '1px solid #80808038',
+                                border: '1px solid #e0e0e0',
                                 backgroundColor: 'white',
                             }}
                         >
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    borderBottom: '1px solid lightgray',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
+                            <Box
+                                sx={{
+                                    p: '20px',
+                                    borderBottom: '1px solid #e0e0e0',
+                                    fontWeight: 600,
+                                    fontSize: '18px',
+                                    color: '#1a3353',
                                 }}
                             >
-                                <div
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353f0',
-                                    }}
-                                >
-                                    Attachments
-                                </div>
-                                {/* <div style={{ color: "#3E79F7", fontSize: "16px", fontWeight: "bold" }}> */}
-                                {/* Add Social #1E90FF */}
-                                <Button
-                                    type="submit"
-                                    variant="text"
-                                    size="small"
-                                    startIcon={
-                                        <FaPlus
-                                            style={{
-                                                fill: '#3E79F7',
-                                                width: '12px',
-                                            }}
-                                        />
-                                    }
-                                    style={{
-                                        textTransform: 'capitalize',
-                                        fontWeight: 600,
-                                        fontSize: '16px',
-                                    }}
-                                >
-                                    Add Attachments
-                                </Button>
-                                {/* </div> */}
-                            </div>
-
-                            <div
-                                style={{
-                                    padding: '10px 10px 10px 15px',
-                                    marginTop: '5%',
-                                }}
-                            >
-                                {/* {lead && lead.lead_attachment} */}
-                                {accountDetails?.account_attachment?.length
-                                    ? accountDetails?.account_attachment.map((pic: any, i: any) => (
-                                          <Box
-                                              key={i}
-                                              sx={{
-                                                  width: '100px',
-                                                  height: '100px',
-                                                  border: '0.5px solid gray',
-                                                  borderRadius: '5px',
-                                              }}
-                                          >
-                                              <img src={pic} alt={pic} />
-                                          </Box>
-                                      ))
-                                    : ''}
-                            </div>
+                                Contacts
+                            </Box>
+                            <Box sx={{ p: '20px' }}>
+                                <Stack spacing={1}>
+                                    {contacts.map((contact: any) => (
+                                        <Box key={contact.id} sx={{ fontSize: '14px', color: '#333' }}>
+                                            {contact.first_name} {contact.last_name}
+                                            {contact.email && (
+                                                <Box sx={{ fontSize: '12px', color: '#666' }}>{contact.email}</Box>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            </Box>
                         </Box>
-                    </Box>
+                    )}
                 </Box>
-            </div>
+            </Box>
         </Box>
     );
-};
+}
+
+// Helper Component
+interface DetailFieldProps {
+    label: string;
+    value?: string | number | null;
+}
+
+function DetailField({ label, value }: DetailFieldProps) {
+    return (
+        <Box sx={{ flex: 1 }}>
+            <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>{label}</Box>
+            <Box sx={{ fontSize: '14px', color: '#333', fontWeight: 500 }}>
+                {value || <span style={{ color: '#999' }}>----</span>}
+            </Box>
+        </Box>
+    );
+}

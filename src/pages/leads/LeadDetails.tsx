@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
 import { FaEdit, FaTrash, FaBuilding, FaUser, FaMapMarkerAlt, FaFileAlt, FaExchangeAlt } from 'react-icons/fa';
-import { IActionModal, ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
+import { IActionModal, IModernAppBar, AppBarAction, ILoadingState, ErrorState } from '../../components/ui';
 import { HeroCard, DetailSection, DetailField, AttachmentsCard, NotesCard } from '../../components/leads/details';
 import { ConvertLeadModal } from '../../components/leads/conversion';
 import { useLeads } from '../../api';
 import { routes } from '../../constants/routes';
 import { ILead } from '../../types';
+import { formatBudgetRange, formatDecisionTimeframe, formatIndustry } from '../../utils/formatters';
 
 export function LeadDetails() {
     const [searchParams] = useSearchParams();
@@ -52,15 +53,7 @@ export function LeadDetails() {
         }
     };
 
-    const refresh = async () => {
-        await fetchLeadDetails();
-    };
-
     if (!leadId) {
-        return null;
-    }
-
-    if (!isLoading && !leadDetails) {
         return null;
     }
 
@@ -97,8 +90,9 @@ export function LeadDetails() {
 
     const handleFileUpload = async (file: File) => {
         const result = await uploadAttachment(leadId, file);
-        if (result.success) {
-            await refresh();
+        if (result.success && result.data) {
+            const newAttachment = result.data.attachment || result.data;
+            setAttachments((prev) => [...prev, newAttachment]);
         }
     };
 
@@ -116,8 +110,9 @@ export function LeadDetails() {
 
         if (result.success) {
             setDeleteAttachmentModalOpen(false);
+            // Optimistically remove attachment from state
+            setAttachments((prev) => prev.filter((att) => att.id !== selectedAttachmentId));
             setSelectedAttachmentId(null);
-            await refresh();
         } else {
             setDeleteAttachmentModalOpen(false);
             setSelectedAttachmentId(null);
@@ -128,9 +123,11 @@ export function LeadDetails() {
         if (!note.trim()) return;
 
         const result = await addComment(leadId, note);
-        if (result.success) {
+        if (result.success && result.data) {
             setNote('');
-            await refresh();
+            if (result.data.comments) {
+                setComments(result.data.comments);
+            }
         }
     };
 
@@ -148,8 +145,8 @@ export function LeadDetails() {
 
         if (result.success) {
             setDeleteNoteModalOpen(false);
+            setComments((prev) => prev.filter((comment) => comment.id !== selectedCommentId));
             setSelectedCommentId(null);
-            await refresh();
         } else {
             setDeleteNoteModalOpen(false);
             setSelectedCommentId(null);
@@ -174,7 +171,7 @@ export function LeadDetails() {
     ];
 
     if (isLoading) {
-        return <LoadingState message="Loading lead data..." />;
+        return <ILoadingState message="Loading lead data..." />;
     }
 
     if (!leadDetails) {
@@ -182,20 +179,23 @@ export function LeadDetails() {
     }
 
     return (
-        <Box sx={{ mt: '60px' }}>
-            <ModernAppBar module="Leads" crntPage="Lead Details" actions={actions} />
+        <Box>
+            <IModernAppBar module="Leads" crntPage="Lead Details" actions={actions} />
 
-            <Box sx={{ mt: '120px', p: 3, display: 'flex', gap: 3 }}>
+            <Box sx={{ p: 3, display: 'flex', gap: 3 }}>
                 {/* Main Content - 68% */}
                 <Box sx={{ flex: '0 0 68%' }}>
                     <HeroCard lead={leadDetails} />
 
                     <DetailSection title="Lead Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
                         <DetailField label="Company Name" value={leadDetails.account_name} />
-                        <DetailField label="Industry" value={leadDetails.industry_display} />
-                        <DetailField label="Department" value={leadDetails.department_display} />
-                        <DetailField label="Budget Range" value={leadDetails.budget_range_display} />
-                        <DetailField label="Decision Timeframe" value={leadDetails.decision_timeframe_display} />
+                        <DetailField label="Industry" value={formatIndustry(leadDetails.industry)} />
+                        <DetailField label="Department" value={leadDetails.department} />
+                        <DetailField label="Budget Range" value={formatBudgetRange(leadDetails.budget_range)} />
+                        <DetailField
+                            label="Decision Timeframe"
+                            value={formatDecisionTimeframe(leadDetails.decision_timeframe)}
+                        />
                         <DetailField
                             label="Website"
                             value={

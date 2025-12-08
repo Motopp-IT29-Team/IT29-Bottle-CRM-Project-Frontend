@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Box, Typography, TextField, Button, CircularProgress, Alert } from '@mui/material';
-import { fetchData } from '../../components/FetchData';
+import { apiClient } from '../../api';
 import { routes } from '../../constants/routes';
 
 export const ActivateUser = () => {
@@ -18,18 +18,15 @@ export const ActivateUser = () => {
         const checkLink = async () => {
             try {
                 const url = `auth/activate-user/${uid}/${token}/${activationKey}/`;
-                const res = await fetchData(url, 'GET', null as any, {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                });
+                const response = await apiClient.get(url);
 
-                if (!res.error) {
+                if (!response.data.error) {
                     setLinkValid(true);
-                    setEmail(res.email);
+                    setEmail(response.data.email);
                 } else {
-                    setError(res.error || 'Invalid or expired activation link');
+                    setError(response.data.error || 'Invalid or expired activation link');
                 }
-            } catch (err) {
+            } catch (err: any) {
                 setError('Failed to validate activation link');
             } finally {
                 setLoading(false);
@@ -57,22 +54,22 @@ export const ActivateUser = () => {
 
         try {
             const url = `auth/activate-user/${uid}/${token}/${activationKey}/`;
-            const res = await fetchData(url, 'POST', JSON.stringify({ password, password_confirm: passwordConfirm }), {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
+            const response = await apiClient.post(url, {
+                password,
+                password_confirm: passwordConfirm,
             });
 
-            if (!res.error) {
-                localStorage.setItem('Token', res.access);
-                localStorage.setItem('refresh', res.refresh);
-                localStorage.setItem('user_id', res.user.id);
-                localStorage.setItem('email', res.user.email);
+            if (!response.data.error) {
+                localStorage.setItem('Token', response.data.access);
+                localStorage.setItem('refresh', response.data.refresh);
+                localStorage.setItem('user_id', response.data.user.id);
+                localStorage.setItem('email', response.data.user.email);
 
                 window.location.href = routes.app.main;
             } else {
-                setError(res.error || 'Failed to activate account');
+                setError(response.data.error || 'Failed to activate account');
             }
-        } catch (err) {
+        } catch (err: any) {
             setError('Failed to activate account. Please try again.');
         } finally {
             setSubmitting(false);

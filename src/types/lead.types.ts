@@ -14,9 +14,7 @@ export interface ILead {
     phone: string;
     email: string;
     status: string;
-    status_display: string | null;
     source: string;
-    source_display: string | null;
     address_line: string;
     contacts: IContact[];
     street: string;
@@ -28,7 +26,7 @@ export interface ILead {
     description: string;
     lead_attachment: IAttachment[];
     lead_comments: IComment[];
-    assigned_to: IProfile[];
+    assigned_to: IProfile | null;
     account_name: string;
     opportunity_amount: string;
     created_by: IUserDetails;
@@ -39,23 +37,16 @@ export interface ILead {
     created_from_site: boolean;
     teams: ITeam[];
     industry: string;
-    industry_display: string | null;
     company: string;
     organization: string;
     probability: number;
     close_date: string | null;
     salutation: string;
-    salutation_display: string | null;
     department: string;
-    department_display: string | null;
     preferred_language: string;
-    preferred_language_display: string | null;
     rating: string;
-    rating_display: string | null;
     budget_range: string;
-    budget_range_display: string | null;
     decision_timeframe: string;
-    decision_timeframe_display: string | null;
     do_not_call: boolean;
     is_converted: boolean;
 }

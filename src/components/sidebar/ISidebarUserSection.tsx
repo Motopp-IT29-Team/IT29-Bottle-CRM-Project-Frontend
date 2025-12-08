@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { Avatar, Box, Divider, Stack, Typography } from '@mui/material';
 import { FiActivity, FiLogOut, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import { IActionModal } from '../ui/IActionModal';
+import { IActionModal } from '../ui';
 import { routes } from '../../constants/routes';
-import { apiClient } from '../../api/client';
-import { ENDPOINTS } from '../../api/endpoints';
+import { apiClient, ENDPOINTS } from '../../api';
 
 interface Props {
     userDetail: any;

@@ -44,7 +44,7 @@ export interface LeadFormData {
     country: string;
     description: string;
     attachments?: UploadedFile[] | null;
-    assigned_to: Array<{ value: string; label: string }> | string[];
+    assigned_to: string | null;
     contacts: string[];
     tags: string[];
 }
@@ -166,6 +166,7 @@ export interface DuplicateMatch {
 
 export interface LeadDuplicateCheckResponse {
     error: boolean;
+    duplicate?: boolean;
     data: {
         account_matches: DuplicateMatch[];
         contact_matches: DuplicateMatch[];
@@ -272,10 +273,9 @@ export const leadsService = {
             });
         }
 
-        const assignedToIds = Array.isArray(data.assigned_to)
-            ? data.assigned_to.map((item) => (typeof item === 'string' ? item : item.value))
-            : [];
-        assignedToIds.forEach((id) => formData.append('assigned_to', id));
+        if (data.assigned_to) {
+            formData.append('assigned_to', data.assigned_to);
+        }
         data.contacts.forEach((value) => formData.append('contacts', value));
         data.tags.forEach((tag) => formData.append('tags', tag));
 
@@ -298,9 +298,8 @@ export const leadsService = {
                     });
                 }
             } else if (key === 'assigned_to') {
-                if (Array.isArray(value)) {
-                    const assignedToIds = value.map((item) => (typeof item === 'string' ? item : item.value));
-                    assignedToIds.forEach((id: string) => formData.append('assigned_to', id));
+                if (value) {
+                    formData.append('assigned_to', value);
                 }
             } else if (key === 'contacts' || key === 'tags') {
                 if (Array.isArray(value)) {

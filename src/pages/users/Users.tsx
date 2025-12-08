@@ -1,6 +1,6 @@
 import React, { useState, useEffect, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Container } from '@mui/material';
+import { Box } from '@mui/material';
 import { ITable, ITableColumn, IPagination } from '../../components/ui';
 import { ITableToolbar } from '../../components/ui';
 import { UserTableRow } from '../../components/users/UserTableRow';
@@ -99,7 +99,7 @@ export function Users() {
     };
 
     return (
-        <Box sx={{ mt: '60px' }}>
+        <Box>
             <ITableToolbar
                 tabs={tabs}
                 currentTab={tab}
@@ -118,19 +118,17 @@ export function Users() {
                 />
             </ITableToolbar>
 
-            <Container sx={{ maxWidth: '100% !important', px: 3, py: 3 }}>
-                <ITable
-                    data={users}
-                    columns={columns}
-                    loading={isLoading}
-                    emptyMessage={`No ${tab} users found`}
-                    renderRow={(user) => <UserTableRow key={user.id} user={user} onViewDetail={navigateToUserDetail} />}
-                    getRowKey={(user) => user.id}
-                    sortable={true}
-                    defaultOrderBy="name"
-                    customSort={sortUsers}
-                />
-            </Container>
+            <ITable
+                data={users}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={`No ${tab} users found`}
+                renderRow={(user) => <UserTableRow key={user.id} user={user} onViewDetail={navigateToUserDetail} />}
+                getRowKey={(user) => user.id}
+                sortable={true}
+                defaultOrderBy="name"
+                customSort={sortUsers}
+            />
         </Box>
     );
 }

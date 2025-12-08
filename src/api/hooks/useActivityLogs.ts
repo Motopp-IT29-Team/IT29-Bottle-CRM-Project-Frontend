@@ -1,13 +1,13 @@
 import { useState, useCallback } from 'react';
-import { 
-    activityLogsService, 
-    ActivityLog, 
-    GetActivityLogsParams, 
-    GetActivityLogsResponse 
+import {
+    activityLogsService,
+    ActivityLog,
+    GetActivityLogsParams,
+    GetActivityLogsResponse,
 } from '../services/activityLogs.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
-import { useNotification } from '../../context/NotificationContext';
+import { useNotification } from '../../components/ui/notification/NotificationContext';
 
 export const useActivityLogs = () => {
     const [isLoading, setIsLoading] = useState(false);

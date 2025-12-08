@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Container } from '@mui/material';
+import { Box } from '@mui/material';
 import { ITableToolbar, ITable, ITableColumn, IPagination } from '../../components/ui';
 import { LeadTableRow } from '../../components/leads/LeadTableRow';
 import { useLeads } from '../../api';
@@ -118,7 +118,7 @@ export function Leads() {
     };
 
     return (
-        <Box sx={{ mt: '60px' }}>
+        <Box>
             <ITableToolbar
                 tabs={tabs}
                 currentTab={tab}
@@ -137,20 +137,18 @@ export function Leads() {
                 />
             </ITableToolbar>
 
-            <Container sx={{ maxWidth: '100% !important', px: 3, py: 3 }}>
-                <ITable
-                    data={leads}
-                    columns={columns}
-                    loading={isLoading}
-                    emptyMessage={`No ${tab === 'closed' ? 'converted' : tab} leads found`}
-                    renderRow={(lead) => <LeadTableRow key={lead.id} lead={lead} onViewDetail={navigateToLeadDetail} />}
-                    getRowKey={(lead) => lead.id}
-                    sortable={true}
-                    defaultOrderBy="created_at"
-                    defaultOrder="desc"
-                    customSort={sortLeads}
-                />
-            </Container>
+            <ITable
+                data={leads}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage={`No ${tab === 'closed' ? 'converted' : tab} leads found`}
+                renderRow={(lead) => <LeadTableRow key={lead.id} lead={lead} onViewDetail={navigateToLeadDetail} />}
+                getRowKey={(lead) => lead.id}
+                sortable={true}
+                defaultOrderBy="created_at"
+                defaultOrder="desc"
+                customSort={sortLeads}
+            />
         </Box>
     );
 }

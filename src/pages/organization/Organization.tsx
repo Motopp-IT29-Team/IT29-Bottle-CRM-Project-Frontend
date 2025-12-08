@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import OrganizationModal from './OrganizationModal';
-import '../../styles/style.css';
 
 export default function Organization() {
     const navigate = useNavigate();

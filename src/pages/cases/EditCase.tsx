@@ -1,865 +1,223 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-    TextField,
-    FormControl,
-    TextareaAutosize,
-    AccordionDetails,
-    Accordion,
-    AccordionSummary,
-    Typography,
-    Box,
-    MenuItem,
-    InputAdornment,
-    Chip,
-    Autocomplete,
-    FormHelperText,
-    IconButton,
-    Select,
-    Divider,
-    Button,
-} from '@mui/material';
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css';
-import { CasesUrl } from '../../services/ApiUrls';
-import { fetchData } from '../../components/FetchData';
-import { CustomAppBar } from '../../components/CustomAppBar';
-import { FaCheckCircle, FaPlus, FaTimes, FaTimesCircle, FaUpload } from 'react-icons/fa';
-import { CustomPopupIcon, RequiredTextField } from '../../styles/CssStyled';
-import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
-import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
-import '../../styles/style.css';
+import { Box, CircularProgress } from '@mui/material';
+import { useForm } from '../../api/hooks/useForm';
+import { ILoadingBackdrop, IModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
+import { CaseFormData, getCaseConfig, useCases, validateCaseForm } from '../../api';
 
-type FormErrors = {
-    name?: string[];
-    status?: string[];
-    priority?: string[];
-    case_type?: string[];
-    closed_on?: string[];
-    teams?: string[];
-    assigned_to?: string[];
-    account?: string[];
-    case_attachment?: string[];
-    contacts?: string[];
-    description?: string[];
-    file?: string[];
+const INITIAL_FORM_DATA: CaseFormData = {
+    name: '',
+    account: '',
+    status: '',
+    priority: '',
+    case_type: '',
+    closed_on: '',
+    description: '',
+    contacts: [],
+    assigned_to: [],
+    teams: [],
 };
-
-interface FormData {
-    name: string;
-    status: string;
-    priority: string;
-    case_type: string;
-    closed_on: string;
-    teams: string[];
-    assigned_to: string[];
-    account: string;
-    case_attachment: string;
-    contacts: string[];
-    description: string;
-    file: string | null;
-}
 
 export function EditCase() {
     const navigate = useNavigate();
-    const { state } = useLocation();
-    const { quill, quillRef } = useQuill();
-    const initialContentRef = useRef<string | null>(null);
-    const pageContainerRef = useRef<HTMLDivElement | null>(null);
+    const location = useLocation();
+    const { getById, update, isLoading, getAll } = useCases();
 
-    const [hasInitialFocus, setHasInitialFocus] = useState(false);
+    const caseId = location.state?.caseId;
+    const fromDetails = location.state?.fromDetails;
 
-    const autocompleteRef = useRef<any>(null);
-    const [error, setError] = useState(false);
-    const [reset, setReset] = useState(false);
-    const [selectedContacts, setSelectedContacts] = useState<any[]>([]);
-    const [selectedAssignTo, setSelectedAssignTo] = useState<any[]>([]);
-    const [selectedTags, setSelectedTags] = useState<any[]>([]);
-    const [selectedTeams, setSelectedTeams] = useState<any[]>([]);
-    const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
-    const [leadSelectOpen, setLeadSelectOpen] = useState(false);
-    const [statusSelectOpen, setStatusSelectOpen] = useState(false);
-    const [countrySelectOpen, setCountrySelectOpen] = useState(false);
-    const [accountSelectOpen, setAccountSelectOpen] = useState(false);
-    const [contactSelectOpen, setContactSelectOpen] = useState(false);
-    const [prioritySelectOpen, setPrioritySelectOpen] = useState(false);
-    const [caseTypeSelectOpen, setCaseTypeSelectOpen] = useState(false);
-    const [errors, setErrors] = useState<FormErrors>({});
-    const [formData, setFormData] = useState<FormData>({
-        name: '',
-        status: 'New',
-        priority: 'Normal',
-        case_type: '',
-        closed_on: '',
-        teams: [],
-        assigned_to: [],
-        account: '',
-        case_attachment: '',
-        contacts: [],
-        description: '',
-        file: null,
-    });
+    const [formData, setFormData] = useState<CaseFormData>(INITIAL_FORM_DATA);
+    const [initialData, setInitialData] = useState<CaseFormData>(INITIAL_FORM_DATA);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    const [backendErrors, setBackendErrors] = useState<FormErrors>({});
+    const [loadingData, setLoadingData] = useState(true);
+
+    // Dropdown data
+    const [accounts, setAccounts] = useState<any[]>([]);
+    const [contacts, setContacts] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
+    const [teams, setTeams] = useState<any[]>([]);
+    const [statusOptions, setStatusOptions] = useState<Array<[string, string]>>([]);
+    const [priorityOptions, setPriorityOptions] = useState<Array<[string, string]>>([]);
+    const [caseTypeOptions, setCaseTypeOptions] = useState<Array<[string, string]>>([]);
+
+    // Load case data and dropdown options
     useEffect(() => {
-        // Scroll to the top of the page when the component mounts
-        window.scrollTo(0, 0);
-        // Set focus to the page container after the Quill editor loads its content
-        if (quill && !hasInitialFocus) {
-            quill.on('editor-change', () => {
-                if (pageContainerRef.current) {
-                    pageContainerRef.current.focus();
-                    setHasInitialFocus(true); // Set the flag to true after the initial focus
-                }
-            });
-        }
-        // Cleanup: Remove event listener when the component unmounts
-        return () => {
-            if (quill) {
-                quill.off('editor-change');
-            }
-        };
-    }, [quill, hasInitialFocus]);
-
-    useEffect(() => {
-        setFormData(state?.value);
-        if (state?.value?.contacts) {
-            setSelectedContacts(state.value.contacts);
-        }
-    }, [state?.id]);
-
-    useEffect(() => {
-        if (reset) {
-            setFormData(state?.value);
-            if (quill && initialContentRef.current !== null) {
-                quill.clipboard.dangerouslyPasteHTML(initialContentRef.current);
-            }
-        }
-        return () => {
-            setReset(false);
-        };
-    }, [reset, quill, state?.value]);
-
-    useEffect(() => {
-        if (quill && initialContentRef.current === null) {
-            // Save the initial state (HTML content) of the Quill editor only if not already saved
-            initialContentRef.current = formData.description;
-            quill.clipboard.dangerouslyPasteHTML(formData.description);
-        }
-    }, [quill, formData.description]);
-
-    const backbtnHandle = () => {
-        if (state?.edit) {
+        if (!caseId) {
             navigate(routes.cases.main);
-        } else {
+            return;
+        }
+
+        const loadData = async () => {
+            setLoadingData(true);
+
+            // Load dropdown data
+            const dropdownResult = await getAll({ limit: 1 });
+            if (dropdownResult.success && dropdownResult.data) {
+                setAccounts(dropdownResult.data.accounts_list || []);
+                setContacts(dropdownResult.data.contacts_list || []);
+                setStatusOptions(dropdownResult.data.status || []);
+                setPriorityOptions(dropdownResult.data.priority || []);
+                setCaseTypeOptions(dropdownResult.data.type_of_case || []);
+            }
+
+            // Load case data
+            const result = await getById(caseId);
+
+            if (result.success && result.data) {
+                // const caseData = result.data.cases_obj;
+                // const data: CaseFormData = {
+                //     name: caseData.name || '',
+                //     account: caseData.account?.id || '',
+                //     status: caseData.status || '',
+                //     priority: caseData.priority || '',
+                //     case_type: caseData.case_type || '',
+                //     closed_on: caseData.closed_on || '',
+                //     description: caseData.description || '',
+                //     contacts: caseData.contacts?.map((c: any) => c.id) || [],
+                //     assigned_to: caseData.assigned_to?.map((u: any) => u.id) || [],
+                //     teams: caseData.teams?.map((t: any) => t.id) || [],
+                // };
+                // setFormData(data);
+                // setInitialData(data);
+            } else {
+                navigate(routes.cases.main);
+            }
+
+            setLoadingData(false);
+        };
+
+        loadData();
+    }, [caseId]);
+
+    const { canSubmit } = useForm({
+        formConfig: getCaseConfig({
+            accounts,
+            contacts,
+            users,
+            teams,
+            status: statusOptions,
+            priority: priorityOptions,
+            case_type: caseTypeOptions,
+        }),
+        formData,
+        isSubmitting: isLoading,
+    });
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleBack = () => {
+        if (fromDetails) {
             navigate(routes.cases.details, {
-                state: { caseId: state?.id, detail: true },
+                state: { caseId, detail: true },
             });
-        }
-    };
-    const handleChange2 = (title: any, val: any) => {
-        if (title === 'contacts') {
-            setFormData({
-                ...formData,
-                contacts: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedContacts(val);
-        } else if (title === 'assigned_to') {
-            setFormData({
-                ...formData,
-                assigned_to: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedAssignTo(val);
-        } else if (title === 'tags') {
-            setFormData({
-                ...formData,
-                assigned_to: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedTags(val);
-        } else if (title === 'teams') {
-            setFormData({
-                ...formData,
-                teams: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedTags(val);
         } else {
-            setFormData({ ...formData, [title]: val });
+            navigate(routes.cases.main);
         }
     };
-    const handleChange = (e: any) => {
-        const { name, value, files, type, checked, id } = e.target;
-        if (type === 'file') {
-            setFormData({ ...formData, [name]: e.target.files?.[0] || null });
-        } else if (type === 'checkbox') {
-            setFormData({ ...formData, [name]: checked });
+
+    const handleCancel = () => {
+        setFormData(initialData);
+        setValidationErrors({});
+        setBackendErrors({});
+        navigate(-1);
+    };
+
+    const handleSubmit = async () => {
+        setBackendErrors({});
+
+        const errors = validateCaseForm(formData);
+        if (Object.keys(errors).length > 0) {
+            // setValidationErrors(errors);
+            return;
+        }
+
+        const result = await update(caseId, formData);
+
+        if (result.success) {
+            if (fromDetails) {
+                navigate(routes.cases.details, {
+                    state: { caseId, detail: true },
+                });
+            } else {
+                navigate(routes.cases.main);
+            }
         } else {
-            setFormData({ ...formData, [name]: value });
+            if (result.fieldErrors) {
+                setBackendErrors(result.fieldErrors);
+            }
         }
     };
 
-    const handleFileChange = (event: any) => {
-        const file = event.target.files?.[0] || null;
-        if (file) {
-            setFormData((prevData) => ({
-                ...prevData,
-                case_attachment: file.name,
-                file: prevData.file,
-            }));
+    const allErrors: FormErrors = Object.keys(validationErrors).reduce(
+        (acc, key) => {
+            const error = validationErrors[key];
+            acc[key] = error ? [error] : undefined;
+            return acc;
+        },
+        { ...backendErrors } as FormErrors
+    );
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                setFormData((prevData) => ({
-                    ...prevData,
-                    file: reader.result as string,
-                }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+    const actions: AppBarAction[] = [
+        { type: 'back', label: 'Back To Cases', onClick: handleBack },
+        { type: 'cancel', onClick: handleCancel, disabled: isLoading },
+        {
+            type: 'save',
+            label: 'Update',
+            onClick: handleSubmit,
+            loading: isLoading,
+            disabled: !canSubmit,
+        },
+    ];
 
-    const emptyDescription = () => {
-        setFormData({ ...formData, description: '' });
-        if (quill) {
-            quill.clipboard.dangerouslyPasteHTML('');
-        }
-    };
-
-    const handleSubmit = (e: any) => {
-        e.preventDefault();
-        submitForm();
-    };
-    const submitForm = () => {
-        const Header = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
-        };
-        // console.log('Form data:', formData.lead_attachment,'sfs', formData.file);
-        const data = {
-            name: formData.name,
-            status: formData.status,
-            priority: formData.priority,
-            case_type: formData.case_type,
-            closed_on: formData.closed_on,
-            teams: formData.teams,
-            assigned_to: formData.assigned_to,
-            account: formData.account,
-            case_attachment: formData.file,
-            contacts: formData.contacts,
-            description: formData.description,
-        };
-        fetchData(`${CasesUrl}/${state?.id}/`, 'PUT', JSON.stringify(data), Header)
-            .then((res: any) => {
-                // console.log('Form data:', res);
-                if (!res.error) {
-                    // setReset(!reset)
-                    navigate(routes.cases.main);
-                }
-                if (res.error) {
-                    setError(true);
-                    setErrors(res?.errors);
-                }
-            })
-            .catch(() => {});
-    };
-
-    const onCancel = () => {
-        // resetForm()
-        setReset(true);
-        if (state?.value?.contacts) {
-            setSelectedContacts(state?.value?.contacts);
-        }
-    };
-
-    const module = 'Cases';
-    const crntPage = 'Add Case';
-    const backBtn = state?.edit ? 'Back to Cases' : 'Back to CaseDetails';
-
-    // console.log(state, 'caseedit')
-    return (
-        <Box sx={{ mt: '60px' }}>
-            <CustomAppBar
-                backbtnHandle={backbtnHandle}
-                module={module}
-                backBtn={backBtn}
-                crntPage={crntPage}
-                onCancel={onCancel}
-                onSubmit={handleSubmit}
-            />
-            <Box sx={{ mt: '120px' }}>
-                <form onSubmit={handleSubmit}>
-                    <div style={{ padding: '10px' }}>
-                        <div className="leadContainer">
-                            <Accordion defaultExpanded style={{ width: '98%' }}>
-                                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                    <Typography className="accordion-header">Cases Information</Typography>
-                                </AccordionSummary>
-                                <Divider className="divider" />
-                                <AccordionDetails>
-                                    <Box
-                                        sx={{
-                                            width: '98%',
-                                            color: '#1A3353',
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <div className="fieldContainer">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Name</div>
-                                                <RequiredTextField
-                                                    ref={pageContainerRef}
-                                                    tabIndex={-1}
-                                                    name="name"
-                                                    value={formData.name}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.name?.[0] ? errors?.name[0] : ''}
-                                                    error={!!errors?.name?.[0]}
-                                                />
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Contact</div>
-                                                <FormControl error={!!errors?.contacts?.[0]} sx={{ width: '70%' }}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        value={selectedContacts}
-                                                        limitTags={2}
-                                                        // options={state.contacts || []}
-                                                        // getOptionLabel={(option: any) => state.contacts ? option?.first_name : option}
-                                                        options={
-                                                            state?.contacts?.length
-                                                                ? state?.contacts.filter(
-                                                                      (option: any) =>
-                                                                          !selectedContacts.some(
-                                                                              (selectedOption) =>
-                                                                                  selectedOption.id === option.id
-                                                                          )
-                                                                  )
-                                                                : []
-                                                        }
-                                                        getOptionLabel={(option: any) =>
-                                                            state?.contacts?.length ? option?.first_name : option
-                                                        }
-                                                        onChange={(e: any, value: any) =>
-                                                            handleChange2('contacts', value)
-                                                        }
-                                                        size="small"
-                                                        filterSelectedOptions
-                                                        renderTags={(value: any, getTagProps: any) =>
-                                                            value.map((option: any, index: any) => (
-                                                                <Chip
-                                                                    deleteIcon={
-                                                                        <FaTimes
-                                                                            style={{
-                                                                                width: '9px',
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px',
-                                                                    }}
-                                                                    variant="outlined"
-                                                                    label={
-                                                                        state?.contacts?.length
-                                                                            ? option?.first_name
-                                                                            : option
-                                                                    }
-                                                                    {...getTagProps({
-                                                                        index,
-                                                                    })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        filterOptions={(options) =>
-                                                            options.filter(
-                                                                (option) => !selectedContacts.includes(option?.id)
-                                                            )
-                                                        }
-                                                        popupIcon={
-                                                            <CustomPopupIcon>
-                                                                <FaPlus className="input-plus-icon" />
-                                                            </CustomPopupIcon>
-                                                        }
-                                                        renderInput={(params: any) => (
-                                                            <TextField
-                                                                {...params}
-                                                                placeholder="Add Contacts"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': {
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'white',
-                                                                            },
-                                                                        },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.contacts?.[0] || ''}</FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Status</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="status"
-                                                        value={formData.status}
-                                                        open={statusSelectOpen}
-                                                        onClick={() => setStatusSelectOpen(!statusSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setStatusSelectOpen(!statusSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {statusSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className="select"
-                                                        onChange={handleChange}
-                                                        error={!!errors?.status?.[0]}
-                                                    >
-                                                        {state?.status?.length
-                                                            ? state?.status.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[0]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
-                                                    </Select>
-                                                    <FormHelperText>
-                                                        {errors?.status?.[0] ? errors?.status[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Teams</div>
-                                                <FormControl error={!!errors?.teams?.[0]} sx={{ width: '70%' }}>
-                                                    <Autocomplete
-                                                        value={selectedTeams}
-                                                        multiple
-                                                        limitTags={5}
-                                                        options={state?.teams?.length || []}
-                                                        getOptionLabel={(option: any) => option}
-                                                        onChange={(e: any, value: any) => handleChange2('teams', value)}
-                                                        size="small"
-                                                        filterSelectedOptions
-                                                        renderTags={(value, getTagProps) =>
-                                                            value.map((option, index) => (
-                                                                <Chip
-                                                                    deleteIcon={
-                                                                        <FaTimes
-                                                                            style={{
-                                                                                width: '9px',
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px',
-                                                                    }}
-                                                                    variant="outlined"
-                                                                    label={option}
-                                                                    {...getTagProps({
-                                                                        index,
-                                                                    })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        popupIcon={
-                                                            <CustomPopupIcon>
-                                                                <FaPlus className="input-plus-icon" />
-                                                            </CustomPopupIcon>
-                                                        }
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                placeholder="Add Teams"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': {
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'white',
-                                                                            },
-                                                                        },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.teams?.[0] || ''}</FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Priority</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="priority"
-                                                        value={formData.priority}
-                                                        open={prioritySelectOpen}
-                                                        onClick={() => setPrioritySelectOpen(!prioritySelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() =>
-                                                                    setPrioritySelectOpen(!prioritySelectOpen)
-                                                                }
-                                                                className="select-icon-background"
-                                                            >
-                                                                {prioritySelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className="select"
-                                                        onChange={handleChange}
-                                                        error={!!errors?.priority?.[0]}
-                                                    >
-                                                        {state?.priority?.length
-                                                            ? state?.priority.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[0]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
-                                                    </Select>
-                                                    <FormHelperText>
-                                                        {errors?.priority?.[0] ? errors?.priority[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Users</div>
-                                                <FormControl error={!!errors?.assigned_to?.[0]} sx={{ width: '70%' }}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        value={selectedAssignTo}
-                                                        limitTags={2}
-                                                        options={state?.users?.length || []}
-                                                        getOptionLabel={(option: any) =>
-                                                            state?.users?.length ? option?.user__email : option
-                                                        }
-                                                        onChange={(e: any, value: any) =>
-                                                            handleChange2('assigned_to', value)
-                                                        }
-                                                        size="small"
-                                                        filterSelectedOptions
-                                                        renderTags={(value, getTagProps) =>
-                                                            value.map((option, index) => (
-                                                                <Chip
-                                                                    deleteIcon={
-                                                                        <FaTimes
-                                                                            style={{
-                                                                                width: '9px',
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px',
-                                                                    }}
-                                                                    variant="outlined"
-                                                                    label={
-                                                                        state?.users?.length
-                                                                            ? option?.user__email
-                                                                            : option
-                                                                    }
-                                                                    {...getTagProps({
-                                                                        index,
-                                                                    })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        popupIcon={
-                                                            <CustomPopupIcon>
-                                                                <FaPlus className="input-plus-icon" />
-                                                            </CustomPopupIcon>
-                                                        }
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                placeholder="Add Users"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': {
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'white',
-                                                                            },
-                                                                        },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.assigned_to?.[0] || ''}</FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Type of Case</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="case_type"
-                                                        value={formData.case_type}
-                                                        open={caseTypeSelectOpen}
-                                                        onClick={() => setCaseTypeSelectOpen(!caseTypeSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() =>
-                                                                    setCaseTypeSelectOpen(!caseTypeSelectOpen)
-                                                                }
-                                                                className="select-icon-background"
-                                                            >
-                                                                {caseTypeSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className="select"
-                                                        onChange={handleChange}
-                                                        error={!!errors?.case_type?.[0]}
-                                                    >
-                                                        {state?.typeOfCases?.length
-                                                            ? state?.typeOfCases.map((option: any) => (
-                                                                  <MenuItem key={option[0]} value={option[0]}>
-                                                                      {option[1]}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
-                                                    </Select>
-                                                    <FormHelperText>
-                                                        {errors?.case_type?.[0] ? errors?.case_type[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Account</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="account"
-                                                        value={formData.account}
-                                                        open={accountSelectOpen}
-                                                        onClick={() => setAccountSelectOpen(!accountSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setAccountSelectOpen(!accountSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {accountSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className="select"
-                                                        onChange={handleChange}
-                                                        error={!!errors?.account?.[0]}
-                                                    >
-                                                        {state?.account?.length
-                                                            ? state?.account.map((option: any) => (
-                                                                  <MenuItem key={option.id} value={option.id}>
-                                                                      {option.name}
-                                                                  </MenuItem>
-                                                              ))
-                                                            : ''}
-                                                    </Select>
-                                                    <FormHelperText>
-                                                        {errors?.account?.[0] ? errors?.account[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Closed Date</div>
-                                                <TextField
-                                                    type={'date'}
-                                                    name="closed_on"
-                                                    value={formData.closed_on}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.closed_on?.[0] ? errors?.closed_on[0] : ''}
-                                                    error={!!errors?.closed_on?.[0]}
-                                                    sx={{
-                                                        '& input[type="date"]::-webkit-calendar-picker-indicator': {
-                                                            backgroundColor: 'whitesmoke',
-                                                            padding: '13px',
-                                                            marginRight: '-15px',
-                                                        },
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Case Attachment</div>
-                                                <TextField
-                                                    name="case_attachment"
-                                                    value={formData.case_attachment}
-                                                    InputProps={{
-                                                        endAdornment: (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    disableFocusRipple
-                                                                    disableTouchRipple
-                                                                    sx={{
-                                                                        width: '40px',
-                                                                        height: '40px',
-                                                                        backgroundColor: 'whitesmoke',
-                                                                        borderRadius: '0px',
-                                                                        mr: '-13px',
-                                                                        cursor: 'pointer',
-                                                                    }}
-                                                                >
-                                                                    <label htmlFor="icon-button-file">
-                                                                        <input
-                                                                            hidden
-                                                                            accept="image/*"
-                                                                            id="icon-button-file"
-                                                                            type="file"
-                                                                            name="case_attachment"
-                                                                            onChange={(e: any) => {
-                                                                                //  handleChange(e);
-                                                                                handleFileChange(e);
-                                                                            }}
-                                                                        />
-                                                                        <FaUpload
-                                                                            color="primary"
-                                                                            style={{
-                                                                                fontSize: '15px',
-                                                                                cursor: 'pointer',
-                                                                            }}
-                                                                        />
-                                                                    </label>
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                    sx={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={
-                                                        errors?.case_attachment?.[0] ? errors?.case_attachment[0] : ''
-                                                    }
-                                                    error={!!errors?.case_attachment?.[0]}
-                                                />
-                                            </div>
-                                        </div>
-                                    </Box>
-                                </AccordionDetails>
-                            </Accordion>
-                        </div>
-                    </div>
-                    {/* Description details  */}
-                    <div className="leadContainer">
-                        <Accordion defaultExpanded style={{ width: '98%' }}>
-                            <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                <Typography className="accordion-header">Description</Typography>
-                            </AccordionSummary>
-                            <Divider className="divider" />
-                            <AccordionDetails>
-                                <Box sx={{ width: '100%', mb: 1 }} component="form" noValidate autoComplete="off">
-                                    <div className="DescriptionDetail">
-                                        <div className="descriptionTitle">Description</div>
-                                        <div
-                                            style={{
-                                                width: '100%',
-                                                marginBottom: '3%',
-                                            }}
-                                        >
-                                            <div ref={quillRef} />
-                                        </div>
-                                    </div>
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            mt: 1.5,
-                                        }}
-                                    >
-                                        <Button
-                                            className="header-button"
-                                            onClick={emptyDescription}
-                                            size="small"
-                                            variant="contained"
-                                            startIcon={
-                                                <FaTimesCircle
-                                                    style={{
-                                                        fill: 'white',
-                                                        width: '16px',
-                                                        marginLeft: '2px',
-                                                    }}
-                                                />
-                                            }
-                                            sx={{
-                                                backgroundColor: '#2b5075',
-                                                ':hover': {
-                                                    backgroundColor: '#1e3750',
-                                                },
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            className="header-button"
-                                            onClick={() =>
-                                                setFormData({
-                                                    ...formData,
-                                                    description: quillRef.current.firstChild.innerHTML,
-                                                })
-                                            }
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={
-                                                <FaCheckCircle
-                                                    style={{
-                                                        fill: 'white',
-                                                        width: '16px',
-                                                        marginLeft: '2px',
-                                                    }}
-                                                />
-                                            }
-                                            sx={{ ml: 1 }}
-                                        >
-                                            Save
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionDetails>
-                        </Accordion>
-                    </div>
-                </form>
+    if (loadingData) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px',
+                }}
+            >
+                <CircularProgress />
             </Box>
+        );
+    }
+
+    return (
+        <Box>
+            <IModernAppBar module="Cases" crntPage="Edit Case" actions={actions} />
+
+            <ILoadingBackdrop open={isLoading} message="Updating case..." />
+
+            <IForm
+                config={getCaseConfig({
+                    accounts,
+                    contacts,
+                    users,
+                    teams,
+                    status: statusOptions,
+                    priority: priorityOptions,
+                    case_type: caseTypeOptions,
+                })}
+                formData={formData}
+                errors={allErrors}
+                onChange={handleChange}
+                disabled={isLoading}
+            />
         </Box>
     );
 }

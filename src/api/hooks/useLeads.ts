@@ -10,7 +10,7 @@ import {
 } from '../services/leads.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
-import { useNotification } from '../../context/NotificationContext';
+import { useNotification } from '../../components/ui/notification/NotificationContext';
 import { ILead, IAttachment, IComment } from '../../types';
 
 export const useLeads = () => {
@@ -38,7 +38,6 @@ export const useLeads = () => {
                     };
                 }
             } catch (error: any) {
-                console.error('Critical error loading leads:', error);
                 addNotification('error', 'Server Error', error.message || 'Failed to load leads');
                 return {
                     success: false,
@@ -81,7 +80,6 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error loading lead:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to load lead');
             return {
                 success: false,
@@ -111,7 +109,6 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error creating lead:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to create lead');
             return {
                 success: false,
@@ -141,7 +138,6 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error updating lead:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to update lead');
             return {
                 success: false,
@@ -171,7 +167,6 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error deleting lead:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to delete lead');
             return {
                 success: false,
@@ -190,7 +185,6 @@ export const useLeads = () => {
                 data,
             };
         } catch (error: any) {
-            console.error('Error checking duplicate:', error);
             return {
                 success: false,
                 error: error.message || 'Failed to check duplicate',
@@ -199,7 +193,6 @@ export const useLeads = () => {
     };
 
     const addComment = async (id: string, comment: string): Promise<ApiResult> => {
-        setIsLoading(true);
         try {
             const data = await leadsService.addComment(id, comment);
 
@@ -217,19 +210,15 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error adding comment:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to add comment');
             return {
                 success: false,
                 error: error.message || 'Server error occurred',
             };
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const deleteComment = async (commentId: string): Promise<ApiResult> => {
-        setIsLoading(true);
         try {
             const data = await leadsService.deleteComment(commentId);
 
@@ -247,19 +236,15 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error deleting comment:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to delete comment');
             return {
                 success: false,
                 error: error.message || 'Server error occurred',
             };
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const uploadAttachment = async (id: string, file: File): Promise<ApiResult> => {
-        setIsLoading(true);
         try {
             const data = await leadsService.uploadAttachment(id, file);
 
@@ -277,19 +262,15 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error uploading attachment:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to upload attachment');
             return {
                 success: false,
                 error: error.message || 'Server error occurred',
             };
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const deleteAttachment = async (attachmentId: string): Promise<ApiResult> => {
-        setIsLoading(true);
         try {
             const data = await leadsService.deleteAttachment(attachmentId);
 
@@ -307,14 +288,11 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error deleting attachment:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to delete attachment');
             return {
                 success: false,
                 error: error.message || 'Server error occurred',
             };
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -324,7 +302,6 @@ export const useLeads = () => {
             const data = await leadsService.checkConversionDuplicates(id);
             return { success: true, data };
         } catch (error: any) {
-            console.error('Error checking duplicates:', error);
             addNotification('error', 'Error', error.message || 'Failed to check for duplicates');
             return {
                 success: false,
@@ -359,7 +336,6 @@ export const useLeads = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error converting lead:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to convert lead');
             return {
                 success: false,

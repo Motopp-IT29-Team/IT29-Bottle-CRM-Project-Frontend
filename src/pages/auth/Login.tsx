@@ -3,23 +3,11 @@ import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { FiMail, FiLock } from 'react-icons/fi';
-import axios from 'axios';
 import imgGoogle from '../../assets/images/auth/google.svg';
 import imgLogo from '../../assets/images/auth/img_logo.png';
 import { ITextField } from '../../components/ui';
-import { AuthUrl, LoginUrl } from '../../services/ApiUrls';
+import { apiClient, ENDPOINTS } from '../../api';
 import { routes } from '../../constants/routes';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/';
-
-const loginAxios = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 30000,
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-    },
-});
 
 export default function Login() {
     const navigate = useNavigate();
@@ -37,18 +25,9 @@ export default function Login() {
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                // Include org header if available (for returning users)
-                const org = localStorage.getItem('org');
-                const headers: Record<string, string> = {};
-                if (org) {
-                    headers['org'] = org;
-                }
-                
-                const response = await loginAxios.post(
-                    `${AuthUrl}/`,
-                    { token: tokenResponse.access_token },
-                    { headers }
-                );
+                const response = await apiClient.post(ENDPOINTS.LOGIN_GOOGLE, {
+                    token: tokenResponse.access_token,
+                });
 
                 if (response.data?.access_token) {
                     localStorage.setItem('Token', `Bearer ${response.data.access_token}`);
@@ -69,21 +48,10 @@ export default function Login() {
         setError(null);
 
         try {
-            const org = localStorage.getItem('org');
-            const headers: Record<string, string> = {};
-
-            if (org) {
-                headers['org'] = org;
-            }
-
-            const response = await loginAxios.post(
-                `${LoginUrl}/`,
-                {
-                    email: email.trim(),
-                    password: password,
-                },
-                { headers }
-            );
+            const response = await apiClient.post(ENDPOINTS.LOGIN, {
+                email: email.trim(),
+                password: password,
+            });
 
             const data = response.data;
 

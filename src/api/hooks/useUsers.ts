@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { usersService, UserFormData, GetUsersParams, UsersListResponse } from '../services/users.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
-import { useNotification } from '../../context/NotificationContext';
+import { useNotification } from '../../components/ui/notification/NotificationContext';
 import { IUser } from '../../types';
 
 export const useUsers = () => {
@@ -28,7 +28,6 @@ export const useUsers = () => {
                     };
                 }
             } catch (error: any) {
-                console.error('Critical error loading users:', error);
                 addNotification('error', 'Server Error', error.message || 'Failed to load users');
                 return {
                     success: false,
@@ -65,7 +64,6 @@ export const useUsers = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error loading user:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to load user');
             return {
                 success: false,
@@ -95,7 +93,6 @@ export const useUsers = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error creating user:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to create user');
             return {
                 success: false,
@@ -125,7 +122,6 @@ export const useUsers = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error updating user:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to update user');
             return {
                 success: false,
@@ -155,7 +151,6 @@ export const useUsers = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error deleting user:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to delete user');
             return {
                 success: false,
@@ -185,7 +180,6 @@ export const useUsers = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error resending invitation:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to resend invitation');
             return {
                 success: false,
@@ -215,7 +209,6 @@ export const useUsers = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error changing user status:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to change user status');
             return {
                 success: false,

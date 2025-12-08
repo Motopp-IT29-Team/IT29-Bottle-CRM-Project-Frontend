@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { ModernAppBar, AppBarAction, LoadingState, ErrorState, IForm, FormErrors } from '../../components/ui';
+import { IModernAppBar, AppBarAction, ILoadingState, ErrorState, IForm, FormErrors } from '../../components/ui';
 import { useUsers, UserFormData, apiClient, ENDPOINTS, getUserConfig } from '../../api';
-import { useFormState } from '../../hooks/useFormState';
-import { hasFormChanges } from '../../utils/form/formHelpers';
+import { useForm } from '../../api/hooks/useForm';
+import { hasFormChanges } from '../../utils/formHelpers';
 import { routes } from '../../constants/routes';
 
 export function EditUser() {
@@ -35,7 +35,7 @@ export function EditUser() {
     const isCurrentUser = formData.email === currentUserEmail;
     const formConfig = getUserConfig(isCurrentUser);
 
-    const { canSubmit } = useFormState({
+    const { canSubmit } = useForm({
         formConfig,
         formData,
         initialData: initialFormData,
@@ -150,7 +150,7 @@ export function EditUser() {
     };
 
     if (isLoading) {
-        return <LoadingState message="Loading user data..." />;
+        return <ILoadingState message="Loading user data..." />;
     }
 
     if (error) {
@@ -164,18 +164,16 @@ export function EditUser() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-            <ModernAppBar module="Users" crntPage="Edit User" actions={actions} />
+        <Box>
+            <IModernAppBar module="Users" crntPage="Edit User" actions={actions} />
 
-            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
-                <IForm
-                    config={formConfig}
-                    formData={formData}
-                    errors={formErrors}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                />
-            </Box>
+            <IForm
+                config={formConfig}
+                formData={formData}
+                errors={formErrors}
+                onChange={handleChange}
+                disabled={isSubmitting}
+            />
         </Box>
     );
 }

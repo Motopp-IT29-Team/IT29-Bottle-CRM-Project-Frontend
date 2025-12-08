@@ -7,7 +7,7 @@ import {
 } from '../services/contacts.service';
 import { ApiResult } from '../types';
 import { parseApiErrors, formatErrorMessage } from '../errors';
-import { useNotification } from '../../context/NotificationContext';
+import { useNotification } from '../../components/ui/notification/NotificationContext';
 import { IContact } from '../../types';
 
 export const useContacts = () => {
@@ -33,7 +33,6 @@ export const useContacts = () => {
                     };
                 }
             } catch (error: any) {
-                console.error('Critical error loading contacts:', error);
                 addNotification('error', 'Server Error', error.message || 'Failed to load contacts');
                 return {
                     success: false,
@@ -69,7 +68,6 @@ export const useContacts = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error loading contact:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to load contact');
             return {
                 success: false,
@@ -99,7 +97,6 @@ export const useContacts = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error creating contact:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to create contact');
             return {
                 success: false,
@@ -129,7 +126,6 @@ export const useContacts = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error updating contact:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to update contact');
             return {
                 success: false,
@@ -159,7 +155,6 @@ export const useContacts = () => {
                 };
             }
         } catch (error: any) {
-            console.error('Critical error deleting contact:', error);
             addNotification('error', 'Server Error', error.message || 'Failed to delete contact');
             return {
                 success: false,

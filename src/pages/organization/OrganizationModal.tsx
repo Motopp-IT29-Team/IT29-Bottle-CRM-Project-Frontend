@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Dialog, Divider, IconButton, List, ListItem, Stack, TextField, Typography, Avatar } from '@mui/material';
 import { FiPlus, FiX, FiCheck, FiBriefcase } from 'react-icons/fi';
-import { fetchData } from '../../components/FetchData';
-import { OrgUrl } from '../../services/ApiUrls';
+import { apiClient, ENDPOINTS } from '../../api';
 import { routes } from '../../constants/routes';
 
 interface Item {
@@ -37,40 +36,37 @@ export default function OrganizationModal(props: any) {
         }
     };
 
-    const headers = {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Token'),
+    const getOrganization = async () => {
+        try {
+            const response = await apiClient.get(ENDPOINTS.ORGANIZATIONS);
+
+            if (response.data?.profile_org_list) {
+                setOrganization(response.data.profile_org_list);
+                setNewOrganization('');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
-    const getOrganization = () => {
-        fetchData(`${OrgUrl}/`, 'GET', null as any, headers)
-            .then((res: any) => {
-                if (res?.profile_org_list) {
-                    setOrganization(res?.profile_org_list);
-                    setNewOrganization('');
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    };
-
-    const addOrganization = () => {
+    const addOrganization = async () => {
         if (!newOrganization.trim()) return;
 
-        const organizationName = { name: newOrganization };
-        fetchData(`${OrgUrl}/`, 'POST', JSON.stringify(organizationName), headers)
-            .then((res) => {
-                if (res?.error) {
-                    setError(res?.errors?.name[0]);
-                } else if (res.status === 201) {
-                    getOrganization();
-                    setError('');
-                    setNewOrganization('');
-                }
-            })
-            .catch((err) => console.error(err));
+        try {
+            const response = await apiClient.post(ENDPOINTS.ORGANIZATIONS, {
+                name: newOrganization,
+            });
+
+            if (response.data?.error) {
+                setError(response.data?.errors?.name[0]);
+            } else if (response.status === 201) {
+                getOrganization();
+                setError('');
+                setNewOrganization('');
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const onHandleClose = () => {
@@ -86,22 +82,21 @@ export default function OrganizationModal(props: any) {
         }
 
         localStorage.setItem('org', id);
-        
-        // Log the org selection as LOGIN
+
         try {
-            await fetchData(
-                'auth/log-org-selection/',
-                'POST',
-                null as any,
+            await apiClient.post(
+                ENDPOINTS.LOG_ORG_SELECTION,
+                {},
                 {
-                    ...headers,
-                    org: id,
+                    headers: {
+                        org: id,
+                    },
                 }
             );
         } catch (error) {
             console.error('Error logging org selection:', error);
         }
-        
+
         onHandleClose();
         window.location.href = routes.app.main;
     };

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { useFormState } from '../../hooks/useFormState';
-import { ModernAppBar, AppBarAction, ILoadingBackdrop, IForm, FormErrors } from '../../components/ui';
+import { IModernAppBar, AppBarAction, ILoadingBackdrop, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
-import { useLeads, LeadFormData, validateLeadForm, getLeadConfig } from '../../api';
+import { useLeads, LeadFormData, validateLeadForm, getLeadConfig, useForm } from '../../api';
 
 const INITIAL_LEAD_FORM_DATA: LeadFormData = {
     first_name: '',
@@ -35,7 +34,7 @@ const INITIAL_LEAD_FORM_DATA: LeadFormData = {
     country: 'NL',
     description: '',
     attachments: null,
-    assigned_to: [],
+    assigned_to: null,
     contacts: [],
     tags: [],
 };
@@ -51,7 +50,7 @@ export function AddLead() {
 
     const formConfig = getLeadConfig({ users });
 
-    const { canSubmit } = useFormState({
+    const { canSubmit } = useForm({
         formConfig,
         formData,
         isSubmitting: isLoading,
@@ -130,14 +129,9 @@ export function AddLead() {
         }
 
         const duplicateResult = await checkDuplicate(formData.email, formData.phone);
-        if (duplicateResult.success && duplicateResult.data) {
-            const hasDuplicates =
-                duplicateResult.data.data.account_matches.length > 0 ||
-                duplicateResult.data.data.contact_matches.length > 0;
 
-            if (hasDuplicates) {
-                return;
-            }
+        if (duplicateResult.success && duplicateResult.data?.duplicate) {
+            return;
         }
 
         const result = await create(formData);
@@ -174,21 +168,19 @@ export function AddLead() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-            <ModernAppBar module="Leads" crntPage="Create Lead" actions={actions} />
+        <Box>
+            <IModernAppBar module="Leads" crntPage="Create Lead" actions={actions} />
 
             <ILoadingBackdrop open={isLoading} message="Creating lead..." />
 
-            <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
-                <IForm
-                    config={formConfig}
-                    formData={formData}
-                    errors={allErrors}
-                    onAutocompleteChange={handleAutocompleteChange}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                />
-            </Box>
+            <IForm
+                config={formConfig}
+                formData={formData}
+                errors={allErrors}
+                onAutocompleteChange={handleAutocompleteChange}
+                onChange={handleChange}
+                disabled={isLoading}
+            />
         </Box>
     );
 }

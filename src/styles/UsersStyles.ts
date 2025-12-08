@@ -1,25 +1,5 @@
 import { SxProps, Theme } from '@mui/material';
 
-export const USER_DETAILS_LOADING_CONTAINER_STYLES: SxProps<Theme> = {
-    mt: '60px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '80vh',
-    flexDirection: 'column',
-    gap: 2,
-};
-
-export const USER_DETAILS_LOADING_TEXT_STYLES: SxProps<Theme> = {
-    color: '#6b7280',
-    fontSize: '14px',
-    fontWeight: 500,
-};
-
-export const USER_DETAILS_LOADING_SPINNER_STYLES: SxProps<Theme> = {
-    color: '#667eea',
-};
-
 export const USER_PROFILE_HEADER_CARD_STYLES: SxProps<Theme> = {
     borderRadius: '16px',
     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',

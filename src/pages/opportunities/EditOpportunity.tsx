@@ -1,985 +1,249 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-    TextField,
-    FormControl,
-    TextareaAutosize,
-    AccordionDetails,
-    Accordion,
-    AccordionSummary,
-    Typography,
-    Box,
-    MenuItem,
-    InputAdornment,
-    Chip,
-    Autocomplete,
-    FormHelperText,
-    IconButton,
-    Select,
-    Divider,
-    Button,
-} from '@mui/material';
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css';
-import { OpportunityUrl } from '../../services/ApiUrls';
-import { fetchData } from '../../components/FetchData';
-import { CustomAppBar } from '../../components/CustomAppBar';
-import { FaCheckCircle, FaFileUpload, FaPlus, FaTimes, FaTimesCircle, FaUpload } from 'react-icons/fa';
-import { CustomPopupIcon, RequiredSelect, RequiredTextField } from '../../styles/CssStyled';
-import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
-import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
-import '../../styles/style.css';
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Box, CircularProgress } from '@mui/material';
+import { IModernAppBar, AppBarAction, ILoadingBackdrop, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
-
-type FormErrors = {
-    name?: string[];
-    account?: string[];
-    amount?: string[];
-    currency?: string[];
-    stage?: string[];
-    teams?: string[];
-    lead_source?: string[];
-    probability?: string[];
-    description?: string[];
-    assigned_to?: string[];
-    contacts?: string[];
-    due_date?: string[];
-    tags?: string[];
-    opportunity_attachment?: string[];
-    file?: string[];
-    contact_name?: string[];
-};
-interface FormData {
-    name: string;
-    account: string;
-    amount: string;
-    currency: string;
-    stage: string;
-    teams: string[];
-    lead_source: string;
-    probability: number;
-    description: string;
-    assigned_to: string[];
-    contacts: string[];
-    due_date: string;
-    tags: string[];
-    opportunity_attachment: string | null;
-    file: string | null;
-    contact_name: string;
-}
+import {
+    useOpportunities,
+    OpportunityFormData,
+    validateOpportunityForm,
+    getOpportunityConfig,
+    useForm,
+} from '../../api';
 
 export function EditOpportunity() {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const { state } = useLocation();
-    const { quill, quillRef } = useQuill();
-    const initialContentRef = useRef<string | null>(null);
-    const pageContainerRef = useRef<HTMLDivElement | null>(null);
+    const { getAll: getAllOpportunities, getById, update, isLoading } = useOpportunities();
 
-    const [hasInitialFocus, setHasInitialFocus] = useState(false);
+    const [formData, setFormData] = useState<OpportunityFormData | null>(null);
+    const [initialData, setInitialData] = useState<OpportunityFormData | null>(null);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    const [backendErrors, setBackendErrors] = useState<FormErrors>({});
+    const [isLoadingData, setIsLoadingData] = useState(true);
 
-    const autocompleteRef = useRef<any>(null);
-    const [error, setError] = useState(false);
-    const [reset, setReset] = useState(false);
-    const [selectedContacts, setSelectedContacts] = useState<any[]>([]);
-    const [selectedAssignTo, setSelectedAssignTo] = useState<any[]>([]);
-    const [selectedTags, setSelectedTags] = useState<any[]>([]);
-    const [selectedTeams, setSelectedTeams] = useState<any[]>([]);
-    const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
-    const [leadSelectOpen, setLeadSelectOpen] = useState(false);
-    const [statusSelectOpen, setStatusSelectOpen] = useState(false);
-    const [countrySelectOpen, setCountrySelectOpen] = useState(false);
-    const [contactSelectOpen, setContactSelectOpen] = useState(false);
-    const [currencySelectOpen, setCurrencySelectOpen] = useState(false);
-    const [accountSelectOpen, setAccountSelectOpen] = useState(false);
-    const [stageSelectOpen, setStageSelectOpen] = useState(false);
-    const [errors, setErrors] = useState<FormErrors>({});
-    const [formData, setFormData] = useState<FormData>({
-        name: '',
-        account: '',
-        amount: '',
-        currency: '',
-        stage: '',
-        teams: [],
-        lead_source: '',
-        probability: 1,
-        description: '',
-        assigned_to: [],
-        contacts: [],
-        due_date: '',
-        tags: [],
-        opportunity_attachment: null,
-        file: null,
-        contact_name: '',
+    const [accounts, setAccounts] = useState<any[]>([]);
+    const [contacts, setContacts] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
+    const [teams, setTeams] = useState<any[]>([]);
+    const [tags, setTags] = useState<any[]>([]);
+    const [currency, setCurrency] = useState<any[]>([]);
+    const [stage, setStage] = useState<any[]>([]);
+    const [leadSource, setLeadSource] = useState<any[]>([]);
+
+    const formConfig = formData
+        ? getOpportunityConfig({
+              accounts,
+              contacts,
+              users,
+              teams,
+              tags,
+              currency,
+              stage,
+              leadSource,
+          })
+        : null;
+
+    const { canSubmit } = useForm({
+        formConfig: formConfig || { sections: [] },
+        formData: formData || {},
+        isSubmitting: isLoading,
     });
 
     useEffect(() => {
-        // Scroll to the top of the page when the component mounts
-        window.scrollTo(0, 0);
-        // Set focus to the page container after the Quill editor loads its content
-        if (quill && !hasInitialFocus) {
-            quill.on('editor-change', () => {
-                if (pageContainerRef.current) {
-                    pageContainerRef.current.focus();
-                    setHasInitialFocus(true); // Set the flag to true after the initial focus
-                }
-            });
-        }
-        // Cleanup: Remove event listener when the component unmounts
-        return () => {
-            if (quill) {
-                quill.off('editor-change');
+        const fetchData = async () => {
+            if (!id) {
+                navigate(routes.opportunities.main);
+                return;
             }
-        };
-    }, [quill, hasInitialFocus]);
 
-    useEffect(() => {
-        setFormData(state?.value);
-    }, [state?.id]);
+            setIsLoadingData(true);
 
-    useEffect(() => {
-        if (reset) {
-            setFormData(state?.value);
-            if (quill && initialContentRef.current !== null) {
-                quill.clipboard.dangerouslyPasteHTML(initialContentRef.current);
+            // Fetch dropdown options
+            const optionsResult = await getAllOpportunities({ limit: 1 });
+            if (optionsResult.success && optionsResult.data) {
+                setAccounts(optionsResult.data.accounts_list || []);
+                setContacts(optionsResult.data.contacts_list || []);
+                // setUsers(optionsResult.data.users || []);
+                // setTeams(optionsResult.data.teams || []);
+                setTags(optionsResult.data.tags || []);
+                setCurrency(optionsResult.data.currency || []);
+                setStage(optionsResult.data.stage || []);
+                setLeadSource(optionsResult.data.lead_source || []);
             }
-        }
-        return () => {
-            setReset(false);
+
+            // Fetch opportunity data
+            const result = await getById(id);
+            if (result.success && result.data) {
+                const opportunity = result.data.opportunity;
+
+                const data: OpportunityFormData = {
+                    name: opportunity.name || '',
+                    account: opportunity.account?.id || '',
+                    amount: opportunity.amount || '',
+                    currency: opportunity.currency || 'USD',
+                    stage: opportunity.stage || '',
+                    probability: opportunity.probability || 50,
+                    lead_source: opportunity.lead_source || '',
+                    closed_on: opportunity.closed_on || '',
+                    description: opportunity.description || '',
+                    contacts: opportunity.contacts?.map((c: any) => c.id) || [],
+                    assigned_to: opportunity.assigned_to?.map((u: any) => u.id) || [],
+                    teams: opportunity.teams?.map((t: any) => t.id) || [],
+                    tags: opportunity.tags?.map((tag: any) => tag.name || tag) || [],
+                    attachments: null,
+                };
+
+                setFormData(data);
+                setInitialData(data);
+            } else {
+                navigate(routes.opportunities.main);
+            }
+
+            setIsLoadingData(false);
         };
-    }, [reset, quill, state?.value]);
 
-    useEffect(() => {
-        if (quill && initialContentRef.current === null) {
-            // Save the initial state (HTML content) of the Quill editor only if not already saved
-            initialContentRef.current = formData.description;
-            quill.clipboard.dangerouslyPasteHTML(formData.description);
-        }
-    }, [quill, formData.description]);
+        fetchData();
+    }, [id]);
 
-    const backbtnHandle = () => {
-        if (state?.edit) {
-            navigate(routes.opportunities.main);
-        } else {
-            navigate(routes.opportunities.details, {
-                state: { opportunityId: state?.id, detail: true },
-            });
-        }
-    };
-    const handleChange2 = (title: any, val: any) => {
-        if (title === 'contacts') {
-            setFormData({
-                ...formData,
-                contacts: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedContacts(val);
-        } else if (title === 'assigned_to') {
-            setFormData({
-                ...formData,
-                assigned_to: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedAssignTo(val);
-        } else if (title === 'tags') {
-            setFormData({
-                ...formData,
-                assigned_to: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedTags(val);
-        } else if (title === 'teams') {
-            setFormData({
-                ...formData,
-                teams: val.length > 0 ? val.map((item: any) => item.id) : [],
-            });
-            setSelectedTags(val);
-        } else {
-            setFormData({ ...formData, [title]: val });
-        }
-    };
-    const handleChange = (e: any) => {
-        const { name, value, files, type, checked, id } = e.target;
-        if (type === 'file') {
-            setFormData({ ...formData, [name]: e.target.files?.[0] || null });
-        } else if (type === 'checkbox') {
-            setFormData({ ...formData, [name]: checked });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
-    };
-    const handleFileChange = (event: any) => {
-        const file = event.target.files?.[0] || null;
-        if (file) {
-            setFormData((prevData) => ({
-                ...prevData,
-                opportunity_attachment: file.name,
-                file: prevData.file,
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
+    ) => {
+        if (!formData) return;
+
+        const { name, value } = e.target;
+        const type = 'type' in e.target ? e.target.type : undefined;
+
+        if (type === 'number') {
+            setFormData((prev) => ({
+                ...prev!,
+                [name]: value === '' ? '' : Number(value),
             }));
+        } else {
+            setFormData((prev) => ({
+                ...prev!,
+                [name]: value,
+            }));
+        }
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                setFormData((prevData) => ({
-                    ...prevData,
-                    file: reader.result as string,
-                }));
-            };
-            reader.readAsDataURL(file);
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
         }
     };
-    const emptyDescription = () => {
-        setFormData({ ...formData, description: '' });
-        if (quill) {
-            quill.clipboard.dangerouslyPasteHTML('');
+
+    const handleAutocompleteChange = (name: string, value: any[]) => {
+        if (!formData) return;
+
+        setFormData((prev) => ({
+            ...prev!,
+            [name]: value,
+        }));
+    };
+
+    const handleBack = () => {
+        if (state?.fromDetails) {
+            navigate(routes.opportunities.details, { state: { opportunityId: id } });
+        } else {
+            navigate(routes.opportunities.main);
         }
     };
-    const handleSubmit = (e: any) => {
-        e.preventDefault();
-        submitForm();
-    };
-    const submitForm = () => {
-        const Header = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
-        };
-        // console.log('Form data:', formData.lead_attachment,'sfs', formData.file);
-        const data = {
-            name: formData.name,
-            account: formData.account,
-            amount: formData.amount,
-            currency: formData.currency,
-            contact_name: formData.contact_name,
-            stage: formData.stage,
-            teams: formData.teams,
-            lead_source: formData.lead_source,
-            probability: formData.probability,
-            description: formData.description,
-            assigned_to: formData.assigned_to,
-            contacts: formData.contacts,
-            due_date: formData.due_date,
-            tags: formData.tags,
-            // opportunity_attachment: formData.opportunity_attachment,
-            opportunity_attachment: formData.file,
-        };
 
-        fetchData(`${OpportunityUrl}/${state?.id}/`, 'PUT', JSON.stringify(data), Header)
-            .then((res: any) => {
-                // console.log('Form data:', res);
-                if (!res.error) {
-                    resetForm();
-                    navigate(routes.opportunities.main);
-                }
-                if (res.error) {
-                    setError(true);
-                    setErrors(res?.errors);
-                }
-            })
-            .catch(() => {});
-    };
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            account: '',
-            amount: '',
-            currency: '',
-            stage: '',
-            teams: [],
-            contact_name: '',
-            lead_source: '',
-            probability: 1,
-            description: '',
-            assigned_to: [],
-            contacts: [],
-            due_date: '',
-            tags: [],
-            opportunity_attachment: null,
-            file: null,
-        });
-        setErrors({});
-        setSelectedContacts([]);
-        setSelectedAssignTo([]);
-        setSelectedTags([]);
-        setSelectedTeams([]);
-    };
-    const onCancel = () => {
-        // resetForm()
-        setReset(true);
+    const handleCancel = () => {
+        if (initialData) {
+            setFormData({ ...initialData });
+            setValidationErrors({});
+            setBackendErrors({});
+        }
     };
 
-    const module = 'Opportunities';
-    const crntPage = 'Add Opportunities';
-    const backBtn = state?.edit ? 'Back To Opportunities' : 'Back To OpportunityDetails';
+    const handleSubmit = async () => {
+        if (!formData || !id) return;
 
-    console.log(state, 'opportunityedit');
-    return (
-        <Box sx={{ mt: '60px' }}>
-            <CustomAppBar
-                backbtnHandle={backbtnHandle}
-                module={module}
-                backBtn={backBtn}
-                crntPage={crntPage}
-                onCancel={onCancel}
-                onSubmit={handleSubmit}
-            />
-            <Box sx={{ mt: '120px' }}>
-                <form onSubmit={handleSubmit}>
-                    <div style={{ padding: '10px' }}>
-                        <div className="leadContainer">
-                            <Accordion defaultExpanded style={{ width: '98%' }}>
-                                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                    <Typography className="accordion-header">Opportunity Information</Typography>
-                                </AccordionSummary>
-                                <Divider className="divider" />
-                                <AccordionDetails>
-                                    <Box
-                                        sx={{
-                                            width: '98%',
-                                            color: '#1A3353',
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <div className="fieldContainer">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Name</div>
-                                                <TextField
-                                                    ref={pageContainerRef}
-                                                    tabIndex={-1}
-                                                    name="account_name"
-                                                    value={formData.name}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.name?.[0] ? errors?.name[0] : ''}
-                                                    error={!!errors?.name?.[0]}
-                                                />
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Amount</div>
-                                                <TextField
-                                                    type={'number'}
-                                                    name="amount"
-                                                    value={formData.amount}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.amount?.[0] ? errors?.amount[0] : ''}
-                                                    error={!!errors?.amount?.[0]}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Account</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="account"
-                                                        value={formData.account}
-                                                        open={accountSelectOpen}
-                                                        onClick={() => setAccountSelectOpen(!accountSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setAccountSelectOpen(!accountSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {accountSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
-                                                        onChange={handleChange}
-                                                        error={!!errors?.account?.[0]}
-                                                    >
-                                                        {state?.account?.length &&
-                                                            state?.account.map((option: any) => (
-                                                                <MenuItem key={option?.id} value={option?.id}>
-                                                                    {option?.name}
-                                                                </MenuItem>
-                                                            ))}
-                                                    </Select>
-                                                    <FormHelperText className="helperText">
-                                                        {errors?.currency?.[0] ? errors?.currency[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Currency</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="currency"
-                                                        value={formData.currency}
-                                                        open={currencySelectOpen}
-                                                        onClick={() => setCurrencySelectOpen(!currencySelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() =>
-                                                                    setCurrencySelectOpen(!currencySelectOpen)
-                                                                }
-                                                                className="select-icon-background"
-                                                            >
-                                                                {currencySelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
-                                                        onChange={handleChange}
-                                                        error={!!errors?.currency?.[0]}
-                                                    >
-                                                        {state?.currency?.length &&
-                                                            state?.currency.map((option: any) => (
-                                                                <MenuItem key={option[0]} value={option[0]}>
-                                                                    {option[1]}
-                                                                </MenuItem>
-                                                            ))}
-                                                    </Select>
-                                                    <FormHelperText className="helperText">
-                                                        {errors?.currency?.[0] ? errors?.currency[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Stage</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <RequiredSelect
-                                                        name="stage"
-                                                        value={formData.stage}
-                                                        open={stageSelectOpen}
-                                                        onClick={() => setStageSelectOpen(!stageSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setStageSelectOpen(!stageSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {stageSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
-                                                        onChange={handleChange}
-                                                        error={!!errors?.stage?.[0]}
-                                                    >
-                                                        {state?.stage?.length &&
-                                                            state?.stage.map((option: any) => (
-                                                                <MenuItem key={option[0]} value={option[0]}>
-                                                                    {option[1]}
-                                                                </MenuItem>
-                                                            ))}
-                                                    </RequiredSelect>
-                                                    <FormHelperText className="helperText">
-                                                        {errors?.stage?.[0] ? errors?.stage[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Contact Name</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <RequiredSelect
-                                                        name="contact_name"
-                                                        value={formData.contact_name}
-                                                        open={contactSelectOpen}
-                                                        onClick={() => setContactSelectOpen(!contactSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setContactSelectOpen(!contactSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {contactSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className="select"
-                                                        onChange={handleChange}
-                                                        error={!!errors?.contact_name?.[0]}
-                                                    >
-                                                        {state?.contacts?.length &&
-                                                            state?.contacts.map((option: any) => (
-                                                                <MenuItem key={option?.id} value={option?.first_name}>
-                                                                    {option?.first_name}
-                                                                </MenuItem>
-                                                            ))}
-                                                    </RequiredSelect>
-                                                    <FormHelperText className="helperText">
-                                                        {errors?.contact_name?.[0] ? errors?.contact_name[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                                {/* <FormControl error={!!errors?.contacts?.[0]} sx={{ width: '70%' }}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        value={selectedContacts}
-                                                        limitTags={2}
-                                                        options={state.contacts || []}
-                                                        getOptionLabel={(option: any) => state.contacts ? option?.first_name : option}
-                                                        onChange={(e: any, value: any) => handleChange2('contacts', value)}
-                                                        size='small'
-                                                        filterSelectedOptions
-                                                        renderTags={(value: any, getTagProps: any) =>
-                                                            value.map((option: any, index: any) => (
-                                                                <Chip
-                                                                    deleteIcon={<FaTimes style={{ width: '9px' }} />}
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px'
-                                                                    }}
-                                                                    variant='outlined'
-                                                                    label={state.contacts ? option?.first_name : option}
-                                                                    {...getTagProps({ index })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        popupIcon={<CustomPopupIcon><FaPlus className='input-plus-icon' /></CustomPopupIcon>}
-                                                        renderInput={(params: any) => (
-                                                            <TextField {...params}
-                                                                placeholder='Add Contacts'
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': { '&:hover': { backgroundColor: 'white' } },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        }
-                                                                    }
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.contacts?.[0] || ''}</FormHelperText>
-                                                </FormControl> */}
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Lead Source</div>
-                                                <FormControl sx={{ width: '70%' }}>
-                                                    <Select
-                                                        name="lead_source"
-                                                        value={formData.lead_source}
-                                                        open={leadSelectOpen}
-                                                        onClick={() => setLeadSelectOpen(!leadSelectOpen)}
-                                                        IconComponent={() => (
-                                                            <div
-                                                                onClick={() => setLeadSelectOpen(!leadSelectOpen)}
-                                                                className="select-icon-background"
-                                                            >
-                                                                {leadSelectOpen ? (
-                                                                    <FiChevronUp className="select-icon" />
-                                                                ) : (
-                                                                    <FiChevronDown className="select-icon" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        className={'select'}
-                                                        onChange={handleChange}
-                                                        error={!!errors?.lead_source?.[0]}
-                                                    >
-                                                        {state?.leadSource?.length &&
-                                                            state?.leadSource.map((option: any) => (
-                                                                <MenuItem key={option[0]} value={option[0]}>
-                                                                    {option[1]}
-                                                                </MenuItem>
-                                                            ))}
-                                                    </Select>
-                                                    <FormHelperText className="helperText">
-                                                        {errors?.lead_source?.[0] ? errors?.lead_source[0] : ''}
-                                                    </FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Probability</div>
-                                                <TextField
-                                                    type={'number'}
-                                                    name="probability"
-                                                    value={formData.probability}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.probability?.[0] ? errors?.probability[0] : ''}
-                                                    error={!!errors?.probability?.[0]}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Assign To</div>
-                                                <FormControl error={!!errors?.assigned_to?.[0]} sx={{ width: '70%' }}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        value={selectedAssignTo}
-                                                        limitTags={2}
-                                                        options={state.users || []}
-                                                        getOptionLabel={(option: any) =>
-                                                            state.users ? option?.user_details?.email : option
-                                                        }
-                                                        onChange={(e: any, value: any) =>
-                                                            handleChange2('assigned_to', value)
-                                                        }
-                                                        size="small"
-                                                        filterSelectedOptions
-                                                        renderTags={(value, getTagProps) =>
-                                                            value.map((option, index) => (
-                                                                <Chip
-                                                                    deleteIcon={
-                                                                        <FaTimes
-                                                                            style={{
-                                                                                width: '9px',
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px',
-                                                                    }}
-                                                                    variant="outlined"
-                                                                    label={
-                                                                        state.users
-                                                                            ? option?.user_details?.email
-                                                                            : option
-                                                                    }
-                                                                    {...getTagProps({
-                                                                        index,
-                                                                    })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        popupIcon={
-                                                            <CustomPopupIcon>
-                                                                <FaPlus className="input-plus-icon" />
-                                                            </CustomPopupIcon>
-                                                        }
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                placeholder="Add Users"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': {
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'white',
-                                                                            },
-                                                                        },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.assigned_to?.[0] || ''}</FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Due Date</div>
-                                                <TextField
-                                                    type={'date'}
-                                                    name="due_date"
-                                                    value={formData.due_date}
-                                                    onChange={handleChange}
-                                                    style={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={errors?.due_date?.[0] ? errors?.due_date[0] : ''}
-                                                    error={!!errors?.due_date?.[0]}
-                                                    sx={{
-                                                        '& input[type="date"]::-webkit-calendar-picker-indicator': {
-                                                            backgroundColor: 'whitesmoke',
-                                                            padding: '13px',
-                                                            marginRight: '-15px',
-                                                        },
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Tags</div>
-                                                <FormControl error={!!errors?.tags?.[0]} sx={{ width: '70%' }}>
-                                                    <Autocomplete
-                                                        // ref={autocompleteRef}
-                                                        value={selectedTags}
-                                                        multiple
-                                                        limitTags={5}
-                                                        options={state.tags || []}
-                                                        // options={state.contacts ? state.contacts.map((option: any) => option) : ['']}
-                                                        getOptionLabel={(option: any) => option}
-                                                        onChange={(e: any, value: any) => handleChange2('tags', value)}
-                                                        size="small"
-                                                        filterSelectedOptions
-                                                        renderTags={(value, getTagProps) =>
-                                                            value.map((option, index) => (
-                                                                <Chip
-                                                                    deleteIcon={
-                                                                        <FaTimes
-                                                                            style={{
-                                                                                width: '9px',
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px',
-                                                                    }}
-                                                                    variant="outlined"
-                                                                    label={option}
-                                                                    {...getTagProps({
-                                                                        index,
-                                                                    })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        popupIcon={
-                                                            <CustomPopupIcon>
-                                                                <FaPlus className="input-plus-icon" />
-                                                            </CustomPopupIcon>
-                                                        }
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                placeholder="Add Tags"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': {
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'white',
-                                                                            },
-                                                                        },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.tags?.[0] || ''}</FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle">Lead Attachment</div>
-                                                <TextField
-                                                    name="opportunity_attachment"
-                                                    value={formData.opportunity_attachment}
-                                                    InputProps={{
-                                                        endAdornment: (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    disableFocusRipple
-                                                                    disableTouchRipple
-                                                                    sx={{
-                                                                        width: '40px',
-                                                                        height: '40px',
-                                                                        backgroundColor: 'whitesmoke',
-                                                                        borderRadius: '0px',
-                                                                        mr: '-13px',
-                                                                        cursor: 'pointer',
-                                                                    }}
-                                                                >
-                                                                    <label htmlFor="icon-button-file">
-                                                                        <input
-                                                                            hidden
-                                                                            accept="image/*"
-                                                                            id="icon-button-file"
-                                                                            type="file"
-                                                                            name="opportunity_attachment"
-                                                                            onChange={(e: any) => {
-                                                                                //  handleChange(e);
-                                                                                handleFileChange(e);
-                                                                            }}
-                                                                        />
-                                                                        <FaUpload
-                                                                            color="primary"
-                                                                            style={{
-                                                                                fontSize: '15px',
-                                                                                cursor: 'pointer',
-                                                                            }}
-                                                                        />
-                                                                    </label>
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                    sx={{ width: '70%' }}
-                                                    size="small"
-                                                    helperText={
-                                                        errors?.opportunity_attachment?.[0]
-                                                            ? errors?.opportunity_attachment[0]
-                                                            : ''
-                                                    }
-                                                    error={!!errors?.opportunity_attachment?.[0]}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="fieldContainer2">
-                                            <div className="fieldSubContainer">
-                                                <div className="fieldTitle" style={{ width: '35%' }}>
-                                                    Teams
-                                                </div>
-                                                <FormControl error={!!errors?.teams?.[0]} sx={{ width: '85%' }}>
-                                                    <Autocomplete
-                                                        // ref={autocompleteRef}
-                                                        value={selectedTeams}
-                                                        multiple
-                                                        limitTags={5}
-                                                        options={state.teams || []}
-                                                        // options={state.contacts ? state.contacts.map((option: any) => option) : ['']}
-                                                        getOptionLabel={(option: any) => option}
-                                                        onChange={(e: any, value: any) => handleChange2('teams', value)}
-                                                        size="small"
-                                                        filterSelectedOptions
-                                                        renderTags={(value, getTagProps) =>
-                                                            value.map((option, index) => (
-                                                                <Chip
-                                                                    deleteIcon={
-                                                                        <FaTimes
-                                                                            style={{
-                                                                                width: '9px',
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                                                        height: '18px',
-                                                                    }}
-                                                                    variant="outlined"
-                                                                    label={option}
-                                                                    {...getTagProps({
-                                                                        index,
-                                                                    })}
-                                                                />
-                                                            ))
-                                                        }
-                                                        popupIcon={
-                                                            <CustomPopupIcon>
-                                                                <FaPlus className="input-plus-icon" />
-                                                            </CustomPopupIcon>
-                                                        }
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                placeholder="Add Teams"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    sx: {
-                                                                        '& .MuiAutocomplete-popupIndicator': {
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'white',
-                                                                            },
-                                                                        },
-                                                                        '& .MuiAutocomplete-endAdornment': {
-                                                                            mt: '-8px',
-                                                                            mr: '-8px',
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        )}
-                                                    />
-                                                    <FormHelperText>{errors?.teams?.[0] || ''}</FormHelperText>
-                                                </FormControl>
-                                            </div>
-                                            <div className="fieldSubContainer"></div>
-                                        </div>
-                                    </Box>
-                                </AccordionDetails>
-                            </Accordion>
-                        </div>
-                        {/* Description details  */}
-                        <div className="leadContainer">
-                            <Accordion defaultExpanded style={{ width: '98%' }}>
-                                <AccordionSummary expandIcon={<FiChevronDown style={{ fontSize: '25px' }} />}>
-                                    <Typography className="accordion-header">Description</Typography>
-                                </AccordionSummary>
-                                <Divider className="divider" />
-                                <AccordionDetails>
-                                    <Box sx={{ width: '100%', mb: 1 }} component="form" noValidate autoComplete="off">
-                                        <div className="DescriptionDetail">
-                                            <div className="descriptionTitle">Description</div>
-                                            <div
-                                                style={{
-                                                    width: '100%',
-                                                    marginBottom: '3%',
-                                                }}
-                                            >
-                                                <div ref={quillRef} />
-                                            </div>
-                                        </div>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                mt: 1.5,
-                                            }}
-                                        >
-                                            <Button
-                                                className="header-button"
-                                                onClick={emptyDescription}
-                                                size="small"
-                                                variant="contained"
-                                                startIcon={
-                                                    <FaTimesCircle
-                                                        style={{
-                                                            fill: 'white',
-                                                            width: '16px',
-                                                            marginLeft: '2px',
-                                                        }}
-                                                    />
-                                                }
-                                                sx={{
-                                                    backgroundColor: '#2b5075',
-                                                    ':hover': {
-                                                        backgroundColor: '#1e3750',
-                                                    },
-                                                }}
-                                            >
-                                                Cancel
-                                            </Button>
-                                            <Button
-                                                className="header-button"
-                                                onClick={() =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        description: quillRef.current.firstChild.innerHTML,
-                                                    })
-                                                }
-                                                variant="contained"
-                                                size="small"
-                                                startIcon={
-                                                    <FaCheckCircle
-                                                        style={{
-                                                            fill: 'white',
-                                                            width: '16px',
-                                                            marginLeft: '2px',
-                                                        }}
-                                                    />
-                                                }
-                                                sx={{ ml: 1 }}
-                                            >
-                                                Save
-                                            </Button>
-                                        </Box>
-                                    </Box>
-                                </AccordionDetails>
-                            </Accordion>
-                        </div>
-                    </div>
-                </form>
+        setBackendErrors({});
+
+        const errors = validateOpportunityForm(formData);
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return;
+        }
+
+        const result = await update(id, formData);
+
+        if (result.success) {
+            if (state?.fromDetails) {
+                navigate(routes.opportunities.details, { state: { opportunityId: id } });
+            } else {
+                navigate(routes.opportunities.main);
+            }
+        } else {
+            if (result.fieldErrors) {
+                setBackendErrors(result.fieldErrors);
+            }
+        }
+    };
+
+    const allErrors: FormErrors = Object.keys(validationErrors).reduce(
+        (acc, key) => {
+            const error = validationErrors[key];
+            acc[key] = error ? [error] : undefined;
+            return acc;
+        },
+        { ...backendErrors } as FormErrors
+    );
+
+    const actions: AppBarAction[] = [
+        {
+            type: 'back',
+            label: state?.fromDetails ? 'Back To Details' : 'Back To Opportunities',
+            onClick: handleBack,
+        },
+        { type: 'cancel', onClick: handleCancel, disabled: isLoading || isLoadingData },
+        {
+            type: 'save',
+            label: 'Save Changes',
+            onClick: handleSubmit,
+            loading: isLoading,
+            disabled: !canSubmit || isLoadingData,
+        },
+    ];
+
+    if (isLoadingData || !formData) {
+        return (
+            <Box>
+                <IModernAppBar module="Opportunities" crntPage="Edit Opportunity" actions={actions} />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '400px',
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
             </Box>
+        );
+    }
+
+    return (
+        <Box>
+            <IModernAppBar module="Opportunities" crntPage="Edit Opportunity" actions={actions} />
+
+            <ILoadingBackdrop open={isLoading} message="Saving changes..." />
+
+            <IForm
+                config={formConfig!}
+                formData={formData}
+                errors={allErrors}
+                onAutocompleteChange={handleAutocompleteChange}
+                onChange={handleChange}
+                disabled={isLoading}
+            />
         </Box>
     );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Paper, TableContainer, Table, TableBody, TableRow, TableCell, Typography } from '@mui/material';
-import { EnhancedTableHead } from '../../EnchancedTableHead';
-import { Spinner } from '../../Spinner';
+import { Paper, TableContainer, Table, TableBody, TableRow, TableCell, Typography, Container } from '@mui/material';
+import { ITableHead } from './ITableHead';
+import { ISpinner } from '../ISpinner';
 
 export interface ITableColumn {
     id: string;
@@ -49,12 +49,8 @@ export function ITable<T>({
     const sortData = (data: T[]) => {
         if (!sortable || !orderBy) return data;
 
-        // Use custom sort function if provided
-        if (customSort) {
-            return customSort(data, order, orderBy);
-        }
+        if (customSort) return customSort(data, order, orderBy);
 
-        // Default sorting for simple fields
         return [...data].sort((a: any, b: any) => {
             const aValue = a[orderBy];
             const bValue = b[orderBy];
@@ -71,7 +67,6 @@ export function ITable<T>({
 
     const sortedData = sortData(data);
 
-    // Convert columns to headCells format for EnhancedTableHead
     const headCells = columns.map((col) => ({
         id: col.id,
         label: col.label,
@@ -80,43 +75,45 @@ export function ITable<T>({
     }));
 
     return (
-        <Paper elevation={0} sx={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e0e7ef' }}>
-            <TableContainer>
-                <Table>
-                    {sortable && (
-                        <EnhancedTableHead
-                            numSelected={0}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={() => {}}
-                            onRequestSort={handleRequestSort}
-                            rowCount={data.length}
-                            headCells={headCells}
-                            numSelectedId={[]}
-                            isSelectedId={[]}
-                        />
-                    )}
-                    <TableBody>
-                        {loading ? (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} sx={{ border: 0, textAlign: 'center', py: 8 }}>
-                                    <Spinner />
-                                </TableCell>
-                            </TableRow>
-                        ) : sortedData.length > 0 ? (
-                            sortedData.map((row, index) => (
-                                <React.Fragment key={getRowKey(row)}>{renderRow(row, index)}</React.Fragment>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} align="center" sx={{ border: 0, py: 8 }}>
-                                    <Typography color="text.secondary">{emptyMessage}</Typography>
-                                </TableCell>
-                            </TableRow>
+        <Container sx={{ p: 3, maxWidth: '100% !important' }}>
+            <Paper elevation={0} sx={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e0e7ef' }}>
+                <TableContainer>
+                    <Table>
+                        {sortable && (
+                            <ITableHead
+                                numSelected={0}
+                                order={order}
+                                orderBy={orderBy}
+                                onSelectAllClick={() => {}}
+                                onRequestSort={handleRequestSort}
+                                rowCount={data.length}
+                                headCells={headCells}
+                                numSelectedId={[]}
+                                isSelectedId={[]}
+                            />
                         )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Paper>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} sx={{ border: 0, textAlign: 'center', py: 8 }}>
+                                        <ISpinner />
+                                    </TableCell>
+                                </TableRow>
+                            ) : sortedData.length > 0 ? (
+                                sortedData.map((row, index) => (
+                                    <React.Fragment key={getRowKey(row)}>{renderRow(row, index)}</React.Fragment>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} align="center" sx={{ border: 0, py: 8 }}>
+                                        <Typography color="text.secondary">{emptyMessage}</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
+        </Container>
     );
 }

@@ -1,6 +1,14 @@
 import { FiUser, FiBriefcase, FiMapPin, FiFileText } from 'react-icons/fi';
 import { IFormConfig } from '../../components/ui/form';
 import { COUNTRIES } from '../../constants/countries';
+import {
+    LEAD_BUDGET_RANGE,
+    LEAD_DECISION_TIMEFRAME,
+    LEAD_INDUSTRY,
+    LEAD_RATING,
+    LEAD_SOURCE,
+    LEAD_STATUS,
+} from '../../constants/lead';
 
 interface Params {
     industries?: Array<{ value: string; label: string }>;
@@ -35,27 +43,7 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     label: 'Industry',
                     type: 'select',
                     placeholder: 'Select industry',
-                    options: params.industries?.length
-                        ? params.industries
-                        : [
-                              { value: 'ADVERTISING', label: 'Advertising' },
-                              { value: 'AGRICULTURE', label: 'Agriculture' },
-                              { value: 'BANKING', label: 'Banking' },
-                              { value: 'BIOTECHNOLOGY', label: 'Biotechnology' },
-                              { value: 'COMPUTER', label: 'Computer' },
-                              { value: 'EDUCATION', label: 'Education' },
-                              { value: 'ELECTRONICS', label: 'Electronics' },
-                              { value: 'ENERGY', label: 'Energy' },
-                              { value: 'FINANCE', label: 'Finance' },
-                              { value: 'HEALTHCARE', label: 'Healthcare' },
-                              { value: 'INSURANCE', label: 'Insurance' },
-                              { value: 'LEGAL', label: 'Legal' },
-                              { value: 'MANUFACTURING', label: 'Manufacturing' },
-                              { value: 'REAL ESTATE', label: 'Real Estate' },
-                              { value: 'SOFTWARE', label: 'Software' },
-                              { value: 'TECHNOLOGY', label: 'Technology' },
-                              { value: 'TELECOMMUNICATIONS', label: 'Telecommunications' },
-                          ],
+                    options: params.industries?.length ? params.industries : LEAD_INDUSTRY,
                 },
                 {
                     name: 'status',
@@ -63,15 +51,7 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     type: 'select',
                     required: true,
                     placeholder: 'Select status',
-                    options: params.statuses?.length
-                        ? params.statuses
-                        : [
-                              { value: 'new', label: 'New' },
-                              { value: 'working', label: 'Working' },
-                              { value: 'qualified', label: 'Qualified' },
-                              { value: 'unqualified', label: 'Unqualified' },
-                              { value: 'on hold', label: 'On Hold' },
-                          ],
+                    options: params.statuses?.length ? params.statuses : LEAD_STATUS,
                 },
                 {
                     name: 'source',
@@ -79,17 +59,7 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     type: 'select',
                     required: true,
                     placeholder: 'Select source',
-                    options: params.sources?.length
-                        ? params.sources
-                        : [
-                              { value: 'call', label: 'Call' },
-                              { value: 'email', label: 'Email' },
-                              { value: 'existing customer', label: 'Existing Customer' },
-                              { value: 'partner', label: 'Partner' },
-                              { value: 'public relations', label: 'Public Relations' },
-                              { value: 'compaign', label: 'Campaign' },
-                              { value: 'other', label: 'Other' },
-                          ],
+                    options: params.sources?.length ? params.sources : LEAD_SOURCE,
                 },
                 {
                     name: 'opportunity_amount',
@@ -108,35 +78,21 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     label: 'Rating',
                     type: 'select',
                     placeholder: 'Select rating',
-                    options: [
-                        { value: 'Hot', label: 'Hot' },
-                        { value: 'Warm', label: 'Warm' },
-                        { value: 'Cold', label: 'Cold' },
-                    ],
+                    options: LEAD_RATING,
                 },
                 {
                     name: 'budget_range',
                     label: 'Budget Range',
                     type: 'select',
                     placeholder: 'Select budget range',
-                    options: [
-                        { value: 'less_than_5000', label: 'Less than €5,000' },
-                        { value: '5000_to_10000', label: '€5,000–€10,000' },
-                        { value: '10000_to_25000', label: '€10,000–€25,000' },
-                        { value: 'over_25000', label: 'Over €25,000' },
-                    ],
+                    options: LEAD_BUDGET_RANGE,
                 },
                 {
                     name: 'decision_timeframe',
                     label: 'Decision Timeframe',
                     type: 'select',
                     placeholder: 'Select timeframe',
-                    options: [
-                        { value: 'within_1_week', label: 'Within 1 week' },
-                        { value: 'within_1_month', label: 'Within 1 month' },
-                        { value: 'within_3_months', label: 'Within 3 months' },
-                        { value: 'more_than_3_months', label: 'More than 3 months' },
-                    ],
+                    options: LEAD_DECISION_TIMEFRAME,
                 },
                 {
                     name: 'close_date',
@@ -147,8 +103,8 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                 {
                     name: 'assigned_to',
                     label: 'Assigned To',
-                    type: 'autocomplete',
-                    placeholder: 'Select users',
+                    type: 'select',
+                    placeholder: 'Select user',
                     options:
                         params.users
                             ?.filter((user) => user.user__is_active)

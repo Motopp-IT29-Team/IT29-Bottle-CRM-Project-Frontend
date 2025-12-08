@@ -1,11 +1,10 @@
 import React, { useEffect, useState, ChangeEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { useFormState } from '../../hooks/useFormState';
 import {
-    ModernAppBar,
+    IModernAppBar,
     AppBarAction,
-    LoadingState,
+    ILoadingState,
     ErrorState,
     IForm,
     FormErrors,
@@ -13,7 +12,7 @@ import {
 } from '../../components/ui';
 import { COUNTRIES } from '../../constants/countries';
 import { routes } from '../../constants/routes';
-import { useLeads, LeadFormData, validateLeadForm, getLeadConfig } from '../../api';
+import { useLeads, LeadFormData, validateLeadForm, getLeadConfig, useForm } from '../../api';
 
 export function EditLead() {
     const navigate = useNavigate();
@@ -30,7 +29,7 @@ export function EditLead() {
     const [formData, setFormData] = useState<LeadFormData>();
     const [users, setUsers] = useState<any[]>([]);
 
-    const { canSubmit } = useFormState({
+    const { canSubmit } = useForm({
         formConfig: getLeadConfig({ users }),
         formData: formData || ({} as LeadFormData),
         initialData: initialFormData,
@@ -104,11 +103,7 @@ export function EditLead() {
                 country: getCountryCode(lead.country) || '',
                 description: lead.description || '',
                 attachments: formattedAttachments,
-                assigned_to:
-                    lead.assigned_to?.map((u: any) => ({
-                        value: u.id,
-                        label: u.user_details?.email || u.email || `User ${u.id}`,
-                    })) || [],
+                assigned_to: lead.assigned_to?.id || null,
                 contacts: [],
                 tags: lead.tags?.map((tag) => tag.name) || [],
             };
@@ -189,7 +184,7 @@ export function EditLead() {
     };
 
     if (isLoading) {
-        return <LoadingState message="Loading lead data..." />;
+        return <ILoadingState message="Loading lead data..." />;
     }
 
     if (error || !formData) {
@@ -212,20 +207,18 @@ export function EditLead() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-            <ModernAppBar module="Leads" crntPage="Edit Lead" actions={actions} />
+        <Box>
+            <IModernAppBar module="Leads" crntPage="Edit Lead" actions={actions} />
 
             <ILoadingBackdrop open={isSubmitting} message="Updating lead..." />
 
-            <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
-                <IForm
-                    config={getLeadConfig({ users })}
-                    formData={formData}
-                    errors={allErrors}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                />
-            </Box>
+            <IForm
+                config={getLeadConfig({ users })}
+                formData={formData}
+                errors={allErrors}
+                onChange={handleChange}
+                disabled={isSubmitting}
+            />
         </Box>
     );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { useNotification } from '../../../context/NotificationContext';
+import { useNotification } from './NotificationContext';
 import { INotificationItem } from './INotificationItem';
 
 export const INotificationContainer: React.FC = () => {

@@ -15,7 +15,7 @@ import {
     Divider,
 } from '@mui/material';
 import { FaTrash, FaStickyNote, FaPaperPlane } from 'react-icons/fa';
-import FormateTime from '../../FormateTime';
+import FormateTime from '../../../utils/formateTime';
 
 interface Props {
     comments: any[];
@@ -118,6 +118,7 @@ export const NotesCard: React.FC<Props> = ({ comments, note, onNoteChange, onSen
                                 >
                                     <ListItemAvatar>
                                         <Avatar
+                                            alt={comment.commented_by?.first_name}
                                             src={comment.commented_by?.user_details?.profile_pic}
                                             sx={{
                                                 width: 40,
