@@ -44,4 +44,7 @@ export const routes = {
         edit: '/cases/edit',
         details: '/cases/details',
     },
+    activityLogs: {
+        main: '/activity-logs',
+    },
 };

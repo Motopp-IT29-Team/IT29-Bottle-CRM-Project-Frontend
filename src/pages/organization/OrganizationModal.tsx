@@ -75,13 +75,29 @@ export default function OrganizationModal(props: any) {
         setNewOrganization('');
     };
 
-    const selectedOrganization = (id: any) => {
+    const selectedOrganization = async (id: any) => {
         if (id === currentOrgId) {
             onHandleClose();
             return;
         }
 
         localStorage.setItem('org', id);
+        
+        // Log the org selection as LOGIN
+        try {
+            await fetchData(
+                'auth/log-org-selection/',
+                'POST',
+                null as any,
+                {
+                    ...headers,
+                    org: id,
+                }
+            );
+        } catch (error) {
+            console.error('Error logging org selection:', error);
+        }
+        
         onHandleClose();
         window.location.href = routes.app.main;
     };

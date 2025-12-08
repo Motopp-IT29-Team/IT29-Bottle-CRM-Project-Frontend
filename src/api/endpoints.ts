@@ -54,4 +54,7 @@ export const ENDPOINTS = {
     CASE_DETAIL: (id: string) => `cases/${id}/`,
     CASE_COMMENT: (commentId: string) => `cases/comment/${commentId}/`,
     CASE_ATTACHMENT: (attachmentId: string) => `cases/attachments/${attachmentId}/`,
+
+    // Activity Logs
+    ACTIVITY_LOGS: 'activity-logs/',
 } as const;

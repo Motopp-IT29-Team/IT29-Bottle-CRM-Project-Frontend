@@ -17,7 +17,7 @@ const columns: ITableColumn[] = [
 
 const tabs = [
     { value: 'open', label: 'Open' },
-    { value: 'closed', label: 'Closed' },
+    { value: 'closed', label: 'Converted' },
 ];
 
 export function Leads() {
@@ -141,7 +141,7 @@ export function Leads() {
                 data={leads}
                 columns={columns}
                 loading={isLoading}
-                emptyMessage={`No ${tab} leads found`}
+                emptyMessage={`No ${tab === 'closed' ? 'converted' : tab} leads found`}
                 renderRow={(lead) => <LeadTableRow key={lead.id} lead={lead} onViewDetail={navigateToLeadDetail} />}
                 getRowKey={(lead) => lead.id}
                 sortable={true}
