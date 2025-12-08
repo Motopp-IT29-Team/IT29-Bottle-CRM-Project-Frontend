@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Link } from '@mui/material';
 import { FaUser, FaMapMarkerAlt, FaFileAlt, FaShareAlt } from 'react-icons/fa';
-import { ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
+import { IModernAppBar, AppBarAction, ILoadingState, ErrorState, IActionModal } from '../../components/ui';
 import { useContacts } from '../../api';
 import { routes } from '../../constants/routes';
 import { DetailField, DetailSection } from '../../components/leads/details';
 import { getCountryNameByCode } from '../../utils/userHelpers';
-import { DeleteModal } from '../../components/DeleteModal';
 import { IContact } from '../../types';
 
 export function ContactDetails() {
@@ -51,7 +50,7 @@ export function ContactDetails() {
     };
 
     if (isLoading) {
-        return <LoadingState message="Loading..." />;
+        return <ILoadingState message="Loading..." />;
     }
 
     if (!contactId || !contactDetails) {
@@ -65,10 +64,10 @@ export function ContactDetails() {
     ];
 
     return (
-        <Box sx={{ mt: '60px' }}>
-            <ModernAppBar module="Contacts" crntPage="Contact Details" actions={actions} />
+        <Box>
+            <IModernAppBar module="Contacts" crntPage="Contact Details" actions={actions} />
 
-            <Box sx={{ mt: '120px', p: 3, maxWidth: '1400px', mx: 'auto' }}>
+            <Box sx={{ p: 3, mx: 'auto' }}>
                 {/* Hero Section */}
                 <Box
                     sx={{
@@ -203,14 +202,15 @@ export function ContactDetails() {
                 </DetailSection>
             </Box>
 
-            <DeleteModal
-                onClose={() => setDeleteModal(false)}
+            <IActionModal
                 open={deleteModal}
-                id={contactId}
-                modalDialog="Are you sure you want to delete this contact?"
-                modalTitle="Delete Contact"
-                buttonName="Delete"
-                onClick={handleDeleteContact}
+                onClose={() => setDeleteModal(false)}
+                onConfirm={handleDeleteContact}
+                variant="warning"
+                title="Delete Contact?"
+                message="Are you sure you want to delete this contact?"
+                confirmText="Delete"
+                cancelText="Cancel"
             />
         </Box>
     );

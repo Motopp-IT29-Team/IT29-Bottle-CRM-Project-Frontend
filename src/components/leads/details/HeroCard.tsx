@@ -1,8 +1,8 @@
 import React from 'react';
-import { Paper, Typography, Stack, Chip, Avatar, Box, Divider, Tooltip } from '@mui/material';
+import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
 import { FaBriefcase, FaDollarSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
-import FormateTime from '../../FormateTime';
 import { ILead } from '../../../types';
+import FormateTime from '../../../utils/formateTime';
 
 interface Props {
     lead: ILead;
@@ -293,51 +293,26 @@ export const HeroCard: React.FC<Props> = ({ lead }) => {
                         <Typography variant="caption" color="text.secondary" fontWeight={600}>
                             Assigned To
                         </Typography>
-                        {lead.assigned_to?.length > 0 ? (
-                            <Stack direction="row" spacing={-1}>
-                                {lead.assigned_to.slice(0, 4).map((user: any, index: number) => (
-                                    <Tooltip key={index} title={getUserDisplayName(user)} arrow>
-                                        <Avatar
-                                            src={user.user_details?.profile_pic}
-                                            alt={getUserDisplayName(user)}
-                                            sx={{
-                                                width: 36,
-                                                height: 36,
-                                                border: '2px solid white',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                bgcolor: user.user_details?.profile_pic ? 'transparent' : '#667eea',
-                                                fontSize: '14px',
-                                                fontWeight: 600,
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            {!user.user_details?.profile_pic && getUserInitials(user)}
-                                        </Avatar>
-                                    </Tooltip>
-                                ))}
-                                {lead.assigned_to.length > 4 && (
-                                    <Tooltip
-                                        title={lead.assigned_to
-                                            .slice(4)
-                                            .map((u: any) => getUserDisplayName(u))
-                                            .join(', ')}
-                                        arrow
-                                    >
-                                        <Avatar
-                                            sx={{
-                                                width: 36,
-                                                height: 36,
-                                                backgroundColor: '#6366f1',
-                                                border: '2px solid white',
-                                                fontSize: '13px',
-                                                fontWeight: 700,
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            +{lead.assigned_to.length - 4}
-                                        </Avatar>
-                                    </Tooltip>
-                                )}
+                        {lead.assigned_to ? (
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <Avatar
+                                    src={lead.assigned_to.user_details?.profile_pic || ''}
+                                    alt={getUserDisplayName(lead.assigned_to)}
+                                    sx={{
+                                        width: 36,
+                                        height: 36,
+                                        border: '2px solid white',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        bgcolor: lead.assigned_to.user_details?.profile_pic ? 'transparent' : '#667eea',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {!lead.assigned_to.user_details?.profile_pic && getUserInitials(lead.assigned_to)}
+                                </Avatar>
+                                <Typography variant="body2" color="text.primary">
+                                    {getUserDisplayName(lead.assigned_to)}
+                                </Typography>
                             </Stack>
                         ) : (
                             <Typography variant="body2" color="text.secondary">

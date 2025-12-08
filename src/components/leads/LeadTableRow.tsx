@@ -1,9 +1,9 @@
 import React from 'react';
 import { TableRow, TableCell, Box, Stack, Avatar, AvatarGroup, Link, Chip } from '@mui/material';
 import { CheckCircle as ConvertedIcon } from '@mui/icons-material';
-import { Label } from '../Label';
-import FormateTime from '../FormateTime';
+import { ILabel } from '../ui/ILabel';
 import { ILead } from '../../types';
+import FormateTime from '../../utils/formateTime';
 
 interface Props {
     lead: ILead;
@@ -90,7 +90,7 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
                 <Stack direction="row" spacing={1} alignItems="center">
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                         {lead.tags.slice(0, 3).map((tagData: any, idx: number) => (
-                            <Label tags={tagData} key={idx} />
+                            <ILabel tags={tagData} key={idx} />
                         ))}
                         {lead.tags.length > 3 && (
                             <Link sx={{ fontSize: '13px', alignSelf: 'center' }}>+{lead.tags.length - 3}</Link>
@@ -114,8 +114,8 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
                 <Stack direction="row" spacing={1} alignItems="center">
                     <Box sx={{ fontSize: '13px', color: '#64748b' }}>{FormateTime(lead.created_at)}</Box>
                     <Avatar
-                        alt={lead.first_name}
-                        src={lead.created_by?.profile_pic || ''}
+                        alt={lead.assigned_to?.first_name}
+                        src={lead.assigned_to?.user_details?.profile_pic || ''}
                         sx={{ width: 24, height: 24 }}
                     />
                 </Stack>

@@ -1,9 +1,9 @@
 import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { ModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
+import { IModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
 import { useContacts, ContactFormData, validateContactForm } from '../../api';
-import { useFormState } from '../../hooks/useFormState';
+import { useForm } from '../../api/hooks/useForm';
 import { getContactConfig } from '../../api/configs/contact.config';
 import { routes } from '../../constants/routes';
 
@@ -42,7 +42,7 @@ export function AddContacts() {
 
     const formConfig = getContactConfig();
 
-    const { canSubmit } = useFormState({
+    const { canSubmit } = useForm({
         formConfig,
         formData,
         isSubmitting: isLoading,
@@ -134,18 +134,16 @@ export function AddContacts() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
-            <ModernAppBar module="Contacts" crntPage="Create Contact" actions={actions} />
+        <Box>
+            <IModernAppBar module="Contacts" crntPage="Create Contact" actions={actions} />
 
-            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
-                <IForm
-                    config={formConfig}
-                    formData={formData}
-                    errors={allErrors}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                />
-            </Box>
+            <IForm
+                config={formConfig}
+                formData={formData}
+                errors={allErrors}
+                onChange={handleChange}
+                disabled={isLoading}
+            />
         </Box>
     );
 }

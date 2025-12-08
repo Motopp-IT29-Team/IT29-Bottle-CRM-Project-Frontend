@@ -1,538 +1,408 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, Link, Avatar, Box, Snackbar, Alert, Stack, Button, Chip } from '@mui/material';
-import { fetchData } from '../../components/FetchData';
-import { AccountsUrl, CasesUrl } from '../../services/ApiUrls';
-import { Tags } from '../../components/Tags';
-import { CustomAppBar } from '../../components/CustomAppBar';
-import { FaPlus, FaStar } from 'react-icons/fa';
-import FormateTime from '../../components/FormateTime';
-import { Label } from '../../components/Label';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+    Box,
+    Container,
+    Typography,
+    Paper,
+    CircularProgress,
+    Grid,
+    Chip,
+    Avatar,
+    AvatarGroup,
+    Tooltip,
+    Divider,
+} from '@mui/material';
+import { IModernAppBar } from '../../components/ui';
+import { ICase } from '../../types';
 import { routes } from '../../constants/routes';
+import { useCases } from '../../api';
 
-type response = {
-    created_by: {
-        email: string;
-        id: string;
-        profile_pic: string;
-    };
-    user_details: {
-        email: string;
-        id: string;
-        profile_pic: string;
-    };
-    org: { name: string };
-    lead: { account_name: string };
-    account_attachment: [];
-    assigned_to: [];
-    contact_name: string;
-    name: string;
+// Helper component for displaying detail fields
+function DetailField({ label, value }: { label: string; value?: string | null }) {
+    return (
+        <Box sx={{ mb: 2 }}>
+            <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+                {label}
+            </Typography>
+            <Typography variant="body1" sx={{ color: '#1A3353', fontWeight: 500 }}>
+                {value || '-'}
+            </Typography>
+        </Box>
+    );
+}
 
-    created_at: string;
-    created_on: string;
-    created_on_arrow: string;
-    date_of_birth: string;
-    title: string;
-    first_name: string;
-    last_name: string;
-    account_name: string;
-    phone: string;
-    email: string;
-    lead_attachment: string;
-    opportunity_amount: string;
-    website: string;
-    description: string;
-    status: string;
-    source: string;
-    address_line: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-    tags: [];
-    company: string;
-    probability: string;
-    industry: string;
-    skype_ID: string;
-    file: string;
-
-    case_type: string;
-    contacts: [];
-    closed_on: string;
-    priority: string;
-    account: {
-        name: string;
-    };
-    close_date: string;
-    organization: string;
-    created_from_site: boolean;
-    id: string;
-    teams: [];
-    case_attachment: string;
-    leads: string;
+// Status color mapping
+const getStatusColor = (status: string): string => {
+    const statusLower = status?.toLowerCase() || '';
+    if (statusLower.includes('new')) return '#2196f3';
+    if (statusLower.includes('working')) return '#ff9800';
+    if (statusLower.includes('closed')) return '#4caf50';
+    if (statusLower.includes('duplicate')) return '#9e9e9e';
+    return '#757575';
 };
-export const CaseDetails = (props: any) => {
-    const { state } = useLocation();
+
+// Priority color mapping
+const getPriorityColor = (priority: string): string => {
+    const priorityLower = priority?.toLowerCase() || '';
+    if (priorityLower.includes('low')) return '#4caf50';
+    if (priorityLower.includes('medium')) return '#ff9800';
+    if (priorityLower.includes('high')) return '#f44336';
+    return '#757575';
+};
+
+export function CaseDetails() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { getById } = useCases();
 
-    const [caseDetails, setCaseDetails] = useState<response | null>(null);
-    const [usersDetails, setUsersDetails] = useState<
-        Array<{
-            user_details: {
-                email: string;
-                id: string;
-                profile_pic: string;
-            };
-        }>
-    >([]);
-    const [attachments, setAttachments] = useState([]);
-    const [tags, setTags] = useState([]);
-    const [countries, setCountries] = useState<string[][]>([]);
-    const [contacts, setContacts] = useState([]);
-    const [teams, setTeams] = useState([]);
-    const [comments, setComments] = useState([]);
-    const [commentList, setCommentList] = useState('Recent Last');
-    const [note, setNote] = useState('');
-    const [usersMention, setUsersMention] = useState([]);
+    const caseId = location.state?.caseId;
 
+    const [caseData, setCaseData] = useState<ICase | null>(null);
+    const [attachments, setAttachments] = useState<any[]>([]);
+    const [comments, setComments] = useState<any[]>([]);
+    const [contacts, setContacts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Load case data
     useEffect(() => {
-        getCaseDetails(state?.caseId);
-    }, [state?.caseId]);
+        if (!caseId) {
+            navigate(routes.cases.main);
+            return;
+        }
 
-    const getCaseDetails = (id: any) => {
-        const Header = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
+        const loadData = async () => {
+            setLoading(true);
+            const result = await getById(caseId);
+
+            if (result.success && result.data) {
+                // setCaseData(result.data.cases_obj);
+                setAttachments(result.data.attachments || []);
+                setComments(result.data.comments || []);
+                // setContacts(result.data.contacts || []);
+            } else {
+                navigate(routes.cases.main);
+            }
+
+            setLoading(false);
         };
-        fetchData(`${CasesUrl}/${id}/`, 'GET', null as any, Header)
-            .then((res) => {
-                // console.log(res, 'case');
-                if (!res.error) {
-                    setCaseDetails(res?.cases_obj);
-                    setContacts(res?.contacts);
-                    setAttachments(res?.attachments);
-                    setComments(res?.comments);
-                    setUsersMention(res?.users_mention);
-                }
-            })
-            .catch((err) => {
-                // console.error('Error:', err)
-                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate(routes.cases.main)}>
-                    <Alert onClose={() => navigate(routes.cases.main)} severity="error" sx={{ width: '100%' }}>
-                        Failed to load!
-                    </Alert>
-                </Snackbar>;
-            });
-    };
-    // const accountCountry = (country: string) => {
-    //     let countryName: string[] | undefined;
-    //     for (countryName of countries) {
-    //         if (Array.isArray(countryName) && countryName.includes(country)) {
-    //             const ele = countryName;
-    //             break;
-    //         }
-    //     }
-    //     return countryName?.[1]
-    // }
-    const editHandle = () => {
-        // let country: string[] | undefined;
-        // for (country of countries) {
-        //     if (Array.isArray(country) && country.includes(caseDetails?.country || '')) {
-        //         const firstElement = country[0];
-        //         break;
-        //     }
-        // }
-        navigate(routes.cases.edit, {
-            state: {
-                value: {
-                    name: caseDetails?.name,
-                    status: caseDetails?.status,
-                    priority: caseDetails?.priority,
-                    case_type: caseDetails?.case_type,
-                    closed_on: caseDetails?.closed_on,
-                    teams: caseDetails?.teams,
-                    assigned_to: caseDetails?.assigned_to,
-                    account: caseDetails?.account,
-                    case_attachment: caseDetails?.case_attachment,
-                    contacts: caseDetails?.contacts,
-                    description: caseDetails?.description,
-                    // file: caseDetails?.name
-                },
-                id: state?.caseId,
-                contacts: state?.contacts || [],
-                priority: state?.priority || [],
-                typeOfCases: state?.typeOfCases || [],
-                account: state?.account || [],
-                status: state?.status || [],
-            },
-        });
-    };
 
-    const backbtnHandle = () => {
+        loadData();
+    }, [caseId]);
+
+    const handleBack = () => {
         navigate(routes.cases.main);
     };
 
-    const module = 'Cases';
-    const crntPage = 'Case Details';
-    const backBtn = 'Back to Cases';
-    // console.log(state,'detail');
+    const handleEdit = () => {
+        navigate(routes.cases.edit, {
+            state: { caseId, fromDetails: true },
+        });
+    };
+
+    if (loading) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px',
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (!caseData) {
+        return null;
+    }
 
     return (
-        <Box sx={{ mt: '60px' }}>
-            <div>
-                <CustomAppBar
-                    backbtnHandle={backbtnHandle}
-                    module={module}
-                    backBtn={backBtn}
-                    crntPage={crntPage}
-                    editHandle={editHandle}
-                />
-                <Box
-                    sx={{
-                        mt: '110px',
-                        p: '20px',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}
-                >
-                    <Box sx={{ width: '65%' }}>
-                        <Box
-                            sx={{
-                                borderRadius: '10px',
-                                border: '1px solid #80808038',
-                                backgroundColor: 'white',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    borderBottom: '1px solid lightgray',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353f0',
-                                    }}
-                                >
-                                    Cases Information
-                                </div>
-                                <div
-                                    style={{
-                                        color: 'gray',
-                                        fontSize: '16px',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            justifyContent: 'flex-end',
-                                            alignItems: 'center',
-                                            marginRight: '15px',
-                                        }}
-                                    >
-                                        created &nbsp;
-                                        {FormateTime(caseDetails?.created_at)} &nbsp; by &nbsp;
-                                        <Avatar
-                                            src={caseDetails?.created_by?.profile_pic}
-                                            alt={caseDetails?.created_by?.email}
-                                        />
-                                        &nbsp;&nbsp;
-                                        {caseDetails?.created_by?.email}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    marginTop: '10px',
-                                }}
-                            >
-                                <div className="title2">
-                                    {caseDetails?.name}
-                                    <Stack
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            mt: 1,
-                                        }}
-                                    >
-                                        {/* {usersDetails?.length ? usersDetails.map((val: any, i: any) =>
-                                            <Avatar
-                                                key={i}
-                                                alt={val?.user_details?.email}
-                                                src={val?.user_details?.profile_pic}
-                                                sx={{ mr: 1 }}
-                                            />
-                                        ) : ''
-                                        } */}
-                                    </Stack>
-                                </div>
-                                <Stack
-                                    sx={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    {caseDetails?.tags?.length
-                                        ? caseDetails?.tags.map((tagData: any) => <Label tags={tagData} />)
-                                        : ''}
-                                </Stack>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Name</div>
-                                    <div className="title3">{caseDetails?.name || '---'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Status</div>
-                                    <div className="title3">{caseDetails?.status}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Account</div>
-                                    <div className="title3">{caseDetails?.account?.name || '---'}</div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Priority</div>
-                                    <div className="title3">{caseDetails?.priority || '---'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Assigned Users</div>
-                                    <div className="title3">
-                                        {caseDetails?.assigned_to?.length
-                                            ? caseDetails?.assigned_to.map((val: any) => val)
-                                            : '----'}
-                                        {/* {caseDetails?.assigned_to || '---'} */}
-                                    </div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Team</div>
-                                    <div className="title3">
-                                        {caseDetails?.teams?.length
-                                            ? caseDetails?.teams.map((team: any) => (
-                                                  <Chip
-                                                      label={team}
-                                                      sx={{
-                                                          height: '20px',
-                                                          borderRadius: '4px',
-                                                      }}
-                                                  />
-                                              ))
-                                            : '----'}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Type of Case</div>
-                                    <div className="title3">{caseDetails?.case_type || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Users</div>
-                                    <div className="title3">
-                                        {usersMention?.length
-                                            ? usersMention.map((val: any) => (
-                                                  <div
-                                                      style={{
-                                                          display: 'flex',
-                                                          flexDirection: 'column',
-                                                      }}
-                                                  >
-                                                      {' '}
-                                                      {val.user__email}
-                                                  </div>
-                                              ))
-                                            : '----'}
-                                    </div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Contacts</div>
-                                    <div className="title3">
-                                        {caseDetails?.contacts?.length
-                                            ? caseDetails?.contacts.map((val: any) => (
-                                                  <div>
-                                                      <div>{val.mobile_number}</div>
-                                                      <div>{val.secondary_number}</div>
-                                                  </div>
-                                              ))
-                                            : '----'}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Closed Date</div>
-                                    <div className="title3">{caseDetails?.closed_on || '----'}</div>
-                                </div>
-                            </div>
-                            {/* </div> */}
-                            {/* Address details */}
-                            {/* Description */}
-                            <div style={{ marginTop: '2%' }}>
-                                <div
-                                    style={{
-                                        padding: '20px',
-                                        borderBottom: '1px solid lightgray',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            fontWeight: 600,
-                                            fontSize: '18px',
-                                            color: '#1a3353f0',
-                                        }}
-                                    >
-                                        Description
-                                    </div>
-                                </div>
-                                <Box sx={{ p: '15px' }}>
-                                    {caseDetails?.description ? (
-                                        <div
-                                            dangerouslySetInnerHTML={{
-                                                __html: caseDetails?.description,
-                                            }}
-                                        />
-                                    ) : (
-                                        '---'
-                                    )}
-                                </Box>
-                            </div>
-                        </Box>
-                    </Box>
-                    <Box sx={{ width: '34%' }}>
-                        <Box
-                            sx={{
-                                borderRadius: '10px',
-                                border: '1px solid #80808038',
-                                backgroundColor: 'white',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    borderBottom: '1px solid lightgray',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353f0',
-                                    }}
-                                >
-                                    Attachments
-                                </div>
-                                {/* <div style={{ color: "#3E79F7", fontSize: "16px", fontWeight: "bold" }}> */}
-                                {/* Add Social #1E90FF */}
-                                <Button
-                                    type="submit"
-                                    variant="text"
-                                    size="small"
-                                    startIcon={
-                                        <FaPlus
-                                            style={{
-                                                fill: '#3E79F7',
-                                                width: '12px',
-                                            }}
-                                        />
-                                    }
-                                    style={{
-                                        textTransform: 'capitalize',
-                                        fontWeight: 600,
-                                        fontSize: '16px',
-                                    }}
-                                >
-                                    Add Attachments
-                                </Button>
-                                {/* </div> */}
-                            </div>
+        <>
+            <IModernAppBar
+                module="Cases"
+                crntPage="Case Details"
+                actions={[{ label: 'Edit', onClick: handleEdit, type: 'edit' }]}
+            />
 
-                            <div
-                                style={{
-                                    padding: '10px 10px 10px 10px',
-                                    marginTop: '5%',
+            <Container maxWidth="lg" sx={{ mb: 4 }}>
+                <Box sx={{ display: 'flex', gap: 3 }}>
+                    {/* Main Content - 65% */}
+                    <Box sx={{ flex: 1 }}>
+                        {/* Header Section */}
+                        <Paper sx={{ p: 3, mb: 3 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    mb: 2,
                                 }}
                             >
-                                {/* {caseDetails?.account_attachment?.length ? caseDetails?.account_attachment.map((pic: any, i: any) => */}
-                                {attachments?.length
-                                    ? attachments.map((pic: any, i: any) => (
-                                          <Box
-                                              key={i}
-                                              sx={{
-                                                  width: '100px',
-                                                  height: '100px',
-                                                  border: '0.5px solid gray',
-                                                  borderRadius: '5px',
-                                              }}
-                                          >
-                                              <img src={pic} alt={pic} />
-                                          </Box>
-                                      ))
-                                    : ''}
-                            </div>
-                        </Box>
+                                <Box>
+                                    <Typography variant="caption" sx={{ color: '#666' }}>
+                                        Created {new Date(caseData.created_at).toLocaleDateString()} by
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                        <Avatar
+                                            src={caseData.created_by?.profile_pic || ''}
+                                            sx={{ width: 24, height: 24 }}
+                                        >
+                                            {caseData.created_by?.email?.charAt(0).toUpperCase()}
+                                        </Avatar>
+                                        <Typography variant="body2" sx={{ color: '#666' }}>
+                                            {caseData.created_by?.email}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Typography variant="h4" sx={{ color: '#1A3353', fontWeight: 600, mb: 2 }}>
+                                {caseData.name}
+                            </Typography>
+
+                            {/* Assigned Users and Tags */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                {caseData.assigned_to && caseData.assigned_to.length > 0 && (
+                                    <AvatarGroup max={5}>
+                                        {caseData.assigned_to.map((user) => (
+                                            <Tooltip key={user.id} title={user.user_details?.email || 'Unknown'}>
+                                                <Avatar sx={{ width: 32, height: 32, bgcolor: '#1976d2' }}>
+                                                    {user.user_details?.email?.charAt(0).toUpperCase() || 'U'}
+                                                </Avatar>
+                                            </Tooltip>
+                                        ))}
+                                    </AvatarGroup>
+                                )}
+                            </Box>
+                        </Paper>
+
+                        {/* Case Information */}
+                        <Paper sx={{ p: 3, mb: 3 }}>
+                            <Typography variant="h6" sx={{ color: '#1A3353', fontWeight: 600, mb: 3 }}>
+                                Case Information
+                            </Typography>
+
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={4}>
+                                    <DetailField label="Name" value={caseData.name} />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+                                            Status
+                                        </Typography>
+                                        <Chip
+                                            label={caseData.status}
+                                            size="small"
+                                            sx={{
+                                                backgroundColor: getStatusColor(caseData.status),
+                                                color: 'white',
+                                                fontWeight: 500,
+                                                textTransform: 'capitalize',
+                                            }}
+                                        />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <DetailField label="Account" value={caseData.account?.name} />
+                                </Grid>
+
+                                <Grid item xs={12} md={4}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+                                            Priority
+                                        </Typography>
+                                        <Chip
+                                            label={caseData.priority}
+                                            size="small"
+                                            sx={{
+                                                backgroundColor: getPriorityColor(caseData.priority),
+                                                color: 'white',
+                                                fontWeight: 500,
+                                                textTransform: 'capitalize',
+                                            }}
+                                        />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+                                            Teams
+                                        </Typography>
+                                        {caseData.teams && caseData.teams.length > 0 ? (
+                                            <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                                {caseData.teams.map((team) => (
+                                                    <Chip
+                                                        key={team.id}
+                                                        label={team.name}
+                                                        size="small"
+                                                        sx={{ height: '24px' }}
+                                                    />
+                                                ))}
+                                            </Box>
+                                        ) : (
+                                            <Typography variant="body1" sx={{ color: '#1A3353' }}>
+                                                -
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <DetailField label="Case Type" value={caseData.case_type} />
+                                </Grid>
+
+                                <Grid item xs={12} md={4}>
+                                    <DetailField
+                                        label="Closed On"
+                                        value={
+                                            caseData.closed_on
+                                                ? new Date(caseData.closed_on).toLocaleDateString()
+                                                : undefined
+                                        }
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <DetailField
+                                        label="Created At"
+                                        value={new Date(caseData.created_at).toLocaleDateString()}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Paper>
+
+                        {/* Description */}
+                        {caseData.description && (
+                            <Paper sx={{ p: 3, mb: 3 }}>
+                                <Typography variant="h6" sx={{ color: '#1A3353', fontWeight: 600, mb: 2 }}>
+                                    Description
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#666', whiteSpace: 'pre-wrap' }}>
+                                    {caseData.description}
+                                </Typography>
+                            </Paper>
+                        )}
+
+                        {/* Comments Section */}
+                        <Paper sx={{ p: 3 }}>
+                            <Typography variant="h6" sx={{ color: '#1A3353', fontWeight: 600, mb: 2 }}>
+                                Comments ({comments.length})
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
+
+                            {comments.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {comments.map((comment: any) => (
+                                        <Box
+                                            key={comment.id}
+                                            sx={{
+                                                p: 2,
+                                                backgroundColor: '#f9fafb',
+                                                borderRadius: 1,
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <Avatar sx={{ width: 24, height: 24 }}>
+                                                    {comment.commented_by?.user_details?.email?.charAt(0).toUpperCase()}
+                                                </Avatar>
+                                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                    {comment.commented_by?.user_details?.email}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#666' }}>
+                                                    {new Date(comment.created_at).toLocaleDateString()}
+                                                </Typography>
+                                            </Box>
+                                            <Typography variant="body2" sx={{ color: '#666' }}>
+                                                {comment.comment}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" sx={{ color: '#999' }}>
+                                    No comments yet
+                                </Typography>
+                            )}
+                        </Paper>
+                    </Box>
+
+                    {/* Sidebar - 400px */}
+                    <Box sx={{ width: '400px' }}>
+                        {/* Attachments */}
+                        <Paper sx={{ p: 3, mb: 3 }}>
+                            <Typography variant="h6" sx={{ color: '#1A3353', fontWeight: 600, mb: 2 }}>
+                                Attachments ({attachments.length})
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
+
+                            {attachments.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                    {attachments.map((attachment: any) => (
+                                        <Box
+                                            key={attachment.id}
+                                            sx={{
+                                                p: 2,
+                                                backgroundColor: '#f9fafb',
+                                                borderRadius: 1,
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    backgroundColor: '#f0f0f0',
+                                                },
+                                            }}
+                                            onClick={() => window.open(attachment.attachment, '_blank')}
+                                        >
+                                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                {attachment.file_name}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: '#666' }}>
+                                                {new Date(attachment.created_at).toLocaleDateString()}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" sx={{ color: '#999' }}>
+                                    No attachments
+                                </Typography>
+                            )}
+                        </Paper>
+
+                        {/* Contacts */}
+                        {contacts.length > 0 && (
+                            <Paper sx={{ p: 3 }}>
+                                <Typography variant="h6" sx={{ color: '#1A3353', fontWeight: 600, mb: 2 }}>
+                                    Contacts ({contacts.length})
+                                </Typography>
+                                <Divider sx={{ mb: 2 }} />
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {contacts.map((contact: any) => (
+                                        <Box key={contact.id}>
+                                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                {contact.first_name} {contact.last_name}
+                                            </Typography>
+                                            {contact.email && (
+                                                <Typography variant="caption" sx={{ color: '#666' }}>
+                                                    {contact.email}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Box>
+                            </Paper>
+                        )}
                     </Box>
                 </Box>
-            </div>
-        </Box>
+            </Container>
+        </>
     );
-};
+}

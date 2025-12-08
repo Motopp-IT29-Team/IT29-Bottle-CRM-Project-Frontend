@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Container } from '@mui/material';
+import { Box } from '@mui/material';
 import { ITable, ITableColumn, IPagination, ITableToolbar } from '../../components/ui';
 import { useContacts } from '../../api';
 import { routes } from '../../constants/routes';
@@ -30,7 +30,7 @@ export function Contacts() {
             offset,
             limit: recordsPerPage,
         });
-        console.log(result);
+
         if (result.success && result.data) {
             setContacts(result.data.contact_obj_list || []);
             setTotalPages(Math.ceil((result.data.contacts_count || 0) / recordsPerPage));
@@ -95,7 +95,7 @@ export function Contacts() {
     };
 
     return (
-        <Box sx={{ mt: '60px' }}>
+        <Box>
             <ITableToolbar addButtonLabel="Add Contact" onAdd={navigateToAddContact} loading={isLoading}>
                 <IPagination
                     currentPage={currentPage}
@@ -107,22 +107,20 @@ export function Contacts() {
                 />
             </ITableToolbar>
 
-            <Container sx={{ maxWidth: '100% !important', px: 3, py: 3 }}>
-                <ITable
-                    data={contacts}
-                    columns={columns}
-                    loading={isLoading}
-                    emptyMessage="No contacts found"
-                    renderRow={(contact) => (
-                        <ContactTableRow key={contact.id} contact={contact} onViewDetail={navigateToContactDetail} />
-                    )}
-                    getRowKey={(contact) => contact.id}
-                    sortable={true}
-                    defaultOrderBy="created_at"
-                    defaultOrder="desc"
-                    customSort={sortContacts}
-                />
-            </Container>
+            <ITable
+                data={contacts}
+                columns={columns}
+                loading={isLoading}
+                emptyMessage="No contacts found"
+                renderRow={(contact) => (
+                    <ContactTableRow key={contact.id} contact={contact} onViewDetail={navigateToContactDetail} />
+                )}
+                getRowKey={(contact) => contact.id}
+                sortable={true}
+                defaultOrderBy="created_at"
+                defaultOrder="desc"
+                customSort={sortContacts}
+            />
         </Box>
     );
 }

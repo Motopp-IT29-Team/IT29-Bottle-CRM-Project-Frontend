@@ -3,9 +3,6 @@ import { BackendErrorResponse } from './types';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api/';
 
-/**
- * Create configured axios instance
- */
 const createApiClient = (): AxiosInstance => {
     const client = axios.create({
         baseURL: API_BASE_URL,
@@ -44,17 +41,24 @@ const createApiClient = (): AxiosInstance => {
             return response;
         },
         (error: AxiosError<BackendErrorResponse>) => {
+            const isLoginPage = window.location.pathname === '/login';
+            const isLoginRequest = error.config?.url?.includes('/auth/login');
+
             if (error.response?.status === 401 || error.response?.status === 403) {
-                console.warn('Authentication failed - redirecting to login');
+                if (!isLoginPage && !isLoginRequest) {
+                    console.warn('Authentication failed - redirecting to login');
 
-                localStorage.removeItem('Token');
-                localStorage.removeItem('refresh');
-                localStorage.removeItem('org');
-                localStorage.removeItem('user');
+                    localStorage.removeItem('Token');
+                    localStorage.removeItem('refresh');
+                    localStorage.removeItem('org');
+                    localStorage.removeItem('user');
 
-                window.location.href = '/login';
+                    window.location.href = '/login';
 
-                return Promise.reject(new Error('Authentication required'));
+                    return Promise.reject(new Error('Authentication required'));
+                }
+
+                return Promise.reject(error);
             }
 
             if (error.response && error.response.status >= 400 && error.response.status < 500) {

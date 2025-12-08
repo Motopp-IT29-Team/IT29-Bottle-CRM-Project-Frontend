@@ -2,8 +2,8 @@ import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { useUsers, UserFormData, validateUserForm, getUserConfig } from '../../api';
-import { useFormState } from '../../hooks/useFormState';
-import { ILoadingBackdrop, ModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
+import { useForm } from '../../api/hooks/useForm';
+import { ILoadingBackdrop, IModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
 
 const INITIAL_FORM_DATA: UserFormData = {
@@ -27,7 +27,7 @@ export function AddUsers() {
     const { create, isLoading } = useUsers();
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
 
-    const { canSubmit } = useFormState({
+    const { canSubmit } = useForm({
         formConfig: getUserConfig(),
         formData,
         isSubmitting: isLoading,
@@ -102,20 +102,18 @@ export function AddUsers() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-            <ModernAppBar module="Users" crntPage="Create User" actions={actions} />
+        <Box>
+            <IModernAppBar module="Users" crntPage="Create User" actions={actions} />
 
             <ILoadingBackdrop open={isLoading} message="Creating user..." />
 
-            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
-                <IForm
-                    config={getUserConfig()}
-                    formData={formData}
-                    errors={allErrors}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                />
-            </Box>
+            <IForm
+                config={getUserConfig()}
+                formData={formData}
+                errors={allErrors}
+                onChange={handleChange}
+                disabled={isLoading}
+            />
         </Box>
     );
 }

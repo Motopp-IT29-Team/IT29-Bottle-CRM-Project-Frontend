@@ -12,7 +12,7 @@ export const IForm: React.FC<IFormProps> = ({
     disabled = false,
 }) => {
     return (
-        <Box>
+        <Box sx={{ p: 3 }}>
             {config.sections.map((section, index) => (
                 <IFormSection
                     key={`section-${index}`}

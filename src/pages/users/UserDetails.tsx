@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { ModernAppBar, AppBarAction, LoadingState, ErrorState } from '../../components/ui';
+import { IModernAppBar, AppBarAction, ILoadingState, ErrorState, IActionModal } from '../../components/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UserProfileHeader } from '../../components/users/details/UserProfileHeader';
 import { UserInfoSection } from '../../components/users/details/UserInfoSection';
 import { UserAddressSection } from '../../components/users/details/UserAddressSection';
 import { UserActivitySection } from '../../components/users/details/UserActivitySection';
-import { DeleteModal } from '../../components/DeleteModal';
 import { useUsers } from '../../api';
 import { routes } from '../../constants/routes';
 import { IUser } from '../../types';
@@ -71,7 +70,7 @@ export function UserDetails() {
     };
 
     if (isLoading) {
-        return <LoadingState message="Loading user details..." />;
+        return <ILoadingState message="Loading user details..." />;
     }
 
     if (!userId || !userDetails) {
@@ -85,10 +84,10 @@ export function UserDetails() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-            <ModernAppBar module="Users" crntPage="User Details" actions={actions} />
+        <Box>
+            <IModernAppBar module="Users" crntPage="User Details" actions={actions} />
 
-            <Box sx={{ mt: '120px', p: '24px', mx: 'auto' }}>
+            <Box sx={{ p: 3, mx: 'auto' }}>
                 <UserProfileHeader
                     user={userDetails}
                     onResendInvitation={!userDetails.user_details.is_active ? handleResendInvitation : undefined}
@@ -106,14 +105,15 @@ export function UserDetails() {
                 <UserActivitySection user={userDetails} />
             </Box>
 
-            <DeleteModal
-                onClose={modalClose}
+            <IActionModal
                 open={deleteModal}
-                id={userId}
-                modalDialog="Are you sure you want to delete this user?"
-                modalTitle="Delete User"
-                buttonName="Delete"
-                onClick={handleDeleteUser}
+                onClose={modalClose}
+                onConfirm={handleDeleteUser}
+                variant="warning"
+                title="Delete User?"
+                message="Are you sure you want to delete this user?"
+                confirmText="Delete"
+                cancelText="Cancel"
             />
         </Box>
     );

@@ -28,7 +28,6 @@ export const useProfile = () => {
             const organizationName = data?.current_org?.name || 'Organization';
             setOrgName(organizationName);
         } catch (error) {
-            console.error('Error fetching profile:', error);
             setOrgName('Organization');
         } finally {
             setLoading(false);

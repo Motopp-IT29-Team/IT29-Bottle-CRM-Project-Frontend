@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import { Home } from './pages/home/Home';
 import { ActivateUser } from './pages/auth/ActivateUser';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider } from './components/ui/notification/NotificationContext';
 import { INotificationContainer } from './components/ui';
 
 function App() {

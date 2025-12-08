@@ -1,565 +1,339 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, Link, Avatar, Box, Snackbar, Alert, Stack, Button, Chip } from '@mui/material';
-import { fetchData } from '../../components/FetchData';
-import { OpportunityUrl } from '../../services/ApiUrls';
-import { Tags } from '../../components/Tags';
-import { CustomAppBar } from '../../components/CustomAppBar';
-import { FaPlus, FaStar } from 'react-icons/fa';
-import FormateTime from '../../components/FormateTime';
-import { Label } from '../../components/Label';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Box, CircularProgress, Avatar, Chip, Button, Stack } from '@mui/material';
+import { FaPlus } from 'react-icons/fa';
+import { IModernAppBar, AppBarAction } from '../../components/ui';
+import { useOpportunities } from '../../api';
 import { routes } from '../../constants/routes';
+import { IOpportunity, IAttachment, IComment, IProfile } from '../../types';
+import FormateTime from '../../utils/formateTime';
+import { ILabel } from '../../components/ui/ILabel';
 
-export const formatDate = (dateString: any) => {
-    const options: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-};
-type response = {
-    created_by: {
-        email: string;
-        id: string;
-        profile_pic: string;
-    };
-    user_details: {
-        email: string;
-        id: string;
-        profile_pic: string;
-    };
-    org: { name: string };
-    lead: { account_name: string };
-    account_attachment: [];
-    assigned_to: [];
-    billing_address_line: string;
-    billing_city: string;
-    billing_country: string;
-    billing_state: string;
-    billing_postcode: string;
-    billing_street: string;
-    contact_name: string;
-    name: string;
-
-    created_at: string;
-    created_on: string;
-    created_on_arrow: string;
-    date_of_birth: string;
-    title: string;
-    first_name: string;
-    last_name: string;
-    account_name: string;
-    phone: string;
-    email: string;
-    lead_attachment: string;
-    opportunity_amount: string;
-    website: string;
-    description: string;
-    contacts: string;
-    status: string;
-    source: string;
-    address_line: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-    tags: [];
-    company: string;
-    probability: string;
-    industry: string;
-    skype_ID: string;
-    file: string;
-
-    close_date: string;
-    organization: string;
-    created_from_site: boolean;
-    id: string;
-    teams: [];
-    leads: string;
-
-    lead_source: string;
-    amount: string;
-    currency: string;
-    users: string;
-    stage: string;
-    closed_on: string;
-    opportunity_attachment: [];
-    account: { id: string; name: string };
-};
-export const OpportunityDetails = (props: any) => {
-    const { state } = useLocation();
+export function OpportunityDetails() {
     const navigate = useNavigate();
+    const { state } = useLocation();
+    const { id } = useParams<{ id: string }>();
+    const { getById, isLoading } = useOpportunities();
 
-    const [opportunityDetails, setOpportunityDetails] = useState<response | null>(null);
-    const [usersDetails, setUsersDetails] = useState<
-        Array<{
-            user_details: {
-                email: string;
-                id: string;
-                profile_pic: string;
-            };
-        }>
-    >([]);
-    const [selectedCountry, setSelectedCountry] = useState([]);
-    const [attachments, setAttachments] = useState([]);
-    const [tags, setTags] = useState([]);
-    const [countries, setCountries] = useState<string[][]>([]);
-    const [source, setSource] = useState([]);
-    const [status, setStatus] = useState([]);
-    const [industries, setIndustries] = useState([]);
-    const [contacts, setContacts] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [teams, setTeams] = useState([]);
-    const [leads, setLeads] = useState([]);
-    const [comments, setComments] = useState([]);
-    const [commentList, setCommentList] = useState('Recent Last');
-    const [note, setNote] = useState('');
+    const [opportunity, setOpportunity] = useState<IOpportunity | null>(null);
+    const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    const [comments, setComments] = useState<IComment[]>([]);
+    const [users, setUsers] = useState<IProfile[]>([]);
+
+    const opportunityId = id || state?.opportunityId;
 
     useEffect(() => {
-        getOpportunityDetails(state.opportunityId);
-    }, [state.opportunityId]);
+        if (!opportunityId) {
+            navigate(routes.opportunities.main);
+            return;
+        }
 
-    const getOpportunityDetails = (id: any) => {
-        const Header = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('Token'),
-            org: localStorage.getItem('org'),
-        };
-        fetchData(`${OpportunityUrl}/${id}/`, 'GET', null as any, Header)
-            .then((res) => {
-                console.log(res, 'edd');
-                if (!res.error) {
-                    setOpportunityDetails(res?.opportunity_obj);
-                    setUsers(res?.users);
-                    // setContacts(res?.contacts)
-                    // setIndustries(res?.industries)
-                    // setUsers(res?.users)
-                    // setStatus(res?.status)
-                    // setCountries(res?.countries)
-                    // setLeads(res?.leads)
-                    // setTags(res?.tags)
-                    // setTeams(res?.teams)
-                    // setAttachments(res?.attachments)
-                    // setTags(res?.tags)
-                    // setCountries(res?.countries)
-                    // setIndustries(res?.industries)
-                    // setStatus(res?.status)
-                    // setSource(res?.source)
-                    // setUsers(res?.users)
-                    // setContacts(res?.contacts)
-                    // setTeams(res?.teams)
-                    // setComments(res?.comments)
-                }
-            })
-            .catch((err) => {
-                // console.error('Error:', err)
-                <Snackbar open={err} autoHideDuration={4000} onClose={() => navigate(routes.opportunities.main)}>
-                    <Alert onClose={() => navigate(routes.opportunities.main)} severity="error" sx={{ width: '100%' }}>
-                        Failed to load!
-                    </Alert>
-                </Snackbar>;
-            });
-    };
-    const accountCountry = (country: string) => {
-        let countryName: string[] | undefined;
-        for (countryName of countries) {
-            if (Array.isArray(countryName) && countryName.includes(country)) {
-                const ele = countryName;
-                break;
-            }
+        fetchOpportunityDetails();
+    }, [opportunityId]);
+
+    const fetchOpportunityDetails = async () => {
+        if (!opportunityId) return;
+
+        const result = await getById(opportunityId);
+
+        if (result.success && result.data) {
+            setOpportunity(result.data.opportunity);
+            setAttachments(result.data.attachments || []);
+            setComments(result.data.comments || []);
+            setUsers(result.data.users || []);
+        } else {
+            navigate(routes.opportunities.main);
         }
-        return countryName?.[1];
     };
-    const editHandle = () => {
-        let country: string[] | undefined;
-        for (country of countries) {
-            if (Array.isArray(country) && country.includes(opportunityDetails?.country || '')) {
-                const firstElement = country[0];
-                break;
-            }
-        }
-        navigate(routes.opportunities.edit, {
+
+    const handleBack = () => navigate(routes.opportunities.main);
+
+    const handleEdit = () => {
+        navigate(routes.opportunities.edit.replace(':id', opportunityId), {
             state: {
-                value: {
-                    name: opportunityDetails?.name,
-                    account: opportunityDetails?.account?.id,
-                    amount: opportunityDetails?.amount,
-                    currency: opportunityDetails?.currency,
-                    stage: opportunityDetails?.stage,
-                    teams: opportunityDetails?.teams,
-                    lead_source: opportunityDetails?.lead_source,
-                    probability: opportunityDetails?.probability,
-                    description: opportunityDetails?.description,
-                    assigned_to: opportunityDetails?.assigned_to,
-                    contact_name: opportunityDetails?.contact_name,
-                    due_date: opportunityDetails?.closed_on,
-                    tags: opportunityDetails?.tags,
-                    opportunity_attachment: opportunityDetails?.opportunity_attachment,
-                },
-                id: state?.opportunityId,
-                contacts: state?.contacts || [],
-                leadSource: state?.leadSource || [],
-                currency: state?.currency || [],
-                tags: state?.tags || [],
-                account: state?.account || [],
-                stage: state?.stage || [],
-                users: state?.users || [],
-                teams: state?.teams || [],
-                countries: state?.countries || [],
+                fromDetails: true,
             },
         });
     };
 
-    const backbtnHandle = () => {
-        navigate(routes.opportunities.main);
-    };
+    const actions: AppBarAction[] = [
+        { type: 'back', label: 'Back To Opportunities', onClick: handleBack },
+        { type: 'edit', onClick: handleEdit },
+    ];
 
-    const module = 'Opportunities';
-    const crntPage = 'Opportunity Details';
-    const backBtn = 'Back To Opportunities';
-    console.log(state, 'oppdetail');
-
-    return (
-        <Box sx={{ mt: '60px' }}>
-            <div>
-                <CustomAppBar
-                    backbtnHandle={backbtnHandle}
-                    module={module}
-                    backBtn={backBtn}
-                    crntPage={crntPage}
-                    editHandle={editHandle}
-                />
+    if (isLoading || !opportunity) {
+        return (
+            <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
+                <IModernAppBar module="Opportunities" crntPage="Opportunity Details" actions={actions} />
                 <Box
                     sx={{
-                        mt: '110px',
-                        p: '20px',
+                        mt: '120px',
                         display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '400px',
                     }}
                 >
-                    <Box sx={{ width: '65%' }}>
+                    <CircularProgress />
+                </Box>
+            </Box>
+        );
+    }
+
+    return (
+        <Box>
+            <IModernAppBar module="Opportunities" crntPage="Opportunity Details" actions={actions} />
+
+            <Box
+                sx={{
+                    p: 3,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '24px',
+                }}
+            >
+                {/* Main Content - Left Side */}
+                <Box sx={{ flex: 1 }}>
+                    <Box
+                        sx={{
+                            borderRadius: '10px',
+                            border: '1px solid #e0e0e0',
+                            backgroundColor: 'white',
+                            mb: 3,
+                        }}
+                    >
+                        {/* Header Section */}
                         <Box
                             sx={{
-                                borderRadius: '10px',
-                                border: '1px solid #80808038',
-                                backgroundColor: 'white',
+                                p: '20px',
+                                borderBottom: '1px solid #e0e0e0',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
                             }}
                         >
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    borderBottom: '1px solid lightgray',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353f0',
-                                    }}
-                                >
-                                    Opportunity Information
-                                </div>
-                                <div
-                                    style={{
-                                        color: 'gray',
-                                        fontSize: '16px',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            justifyContent: 'flex-end',
-                                            alignItems: 'center',
-                                            marginRight: '15px',
-                                        }}
-                                    >
-                                        created &nbsp;
-                                        {FormateTime(opportunityDetails?.created_at)} &nbsp; by &nbsp;
-                                        <Avatar
-                                            src={opportunityDetails?.created_by?.profile_pic}
-                                            alt={opportunityDetails?.created_by?.email}
-                                        />
-                                        &nbsp; &nbsp;
-                                        {opportunityDetails?.created_by?.email}
-                                        {/* {opportunityDetails?.first_name}&nbsp;
-                                        {opportunityDetails?.last_name} */}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    marginTop: '10px',
-                                }}
-                            >
-                                <div className="title2">
-                                    {opportunityDetails?.name}
-                                    <Stack
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            mt: 1,
-                                        }}
-                                    >
-                                        {/* {
-                                            lead.assigned_to && lead.assigned_to.map((assignItem) => (
-                                                assignItem.user_details.profile_pic
-                                                    ? */}
-                                        {users?.length
-                                            ? users.map((val: any, i: any) => (
-                                                  <Avatar
-                                                      key={i}
-                                                      alt={val?.user_details?.email}
-                                                      src={val?.user_details?.profile_pic}
-                                                      sx={{ mr: 1 }}
-                                                  />
-                                              ))
-                                            : ''}
-                                    </Stack>
-                                </div>
-                                <Stack
-                                    sx={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    {opportunityDetails?.tags?.length
-                                        ? opportunityDetails?.tags.map((tagData: any) => <Label tags={tagData} />)
-                                        : ''}
-                                </Stack>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Name</div>
-                                    <div className="title3">{opportunityDetails?.name || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Lead Source</div>
-                                    <div className="title3">{opportunityDetails?.lead_source || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Account</div>
-                                    <div className="title3">{opportunityDetails?.account?.name || '----'}</div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Probability</div>
-                                    <div className="title3">
-                                        {/* {lead.pipeline ? lead.pipeline : '------'} */}
-                                        {opportunityDetails?.probability || '----'}
-                                    </div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Amount</div>
-                                    <div className="title3">{opportunityDetails?.amount || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Team</div>
-                                    <div className="title3">
-                                        {opportunityDetails?.teams?.length
-                                            ? opportunityDetails?.teams.map((team: any) => (
-                                                  <Chip
-                                                      label={team}
-                                                      sx={{
-                                                          height: '20px',
-                                                          borderRadius: '4px',
-                                                      }}
-                                                  />
-                                              ))
-                                            : '----'}
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Currency</div>
-                                    <div className="title3">{opportunityDetails?.currency || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Users</div>
-                                    <div className="title3">{opportunityDetails?.users || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Contacts</div>
-                                    <div className="title3">{opportunityDetails?.contact_name || '----'}</div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Stage</div>
-                                    <div className="title3">{opportunityDetails?.stage || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Assigned Users</div>
-                                    <div className="title3">{opportunityDetails?.assigned_to || '----'}</div>
-                                </div>
-                                <div style={{ width: '32%' }}>
-                                    <div className="title2">Closed Date</div>
-                                    <div className="title3">{opportunityDetails?.closed_on || '----'}</div>
-                                </div>
-                            </div>
-                            {/* </div> */}
-                            {/* Description */}
-                            <div style={{ marginTop: '2%' }}>
-                                <div
-                                    style={{
-                                        padding: '20px',
-                                        borderBottom: '1px solid lightgray',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            fontWeight: 600,
-                                            fontSize: '18px',
-                                            color: '#1a3353f0',
-                                        }}
-                                    >
-                                        Description
-                                    </div>
-                                </div>
-                                <Box sx={{ p: '15px' }}>
-                                    {opportunityDetails?.description ? (
-                                        <div
-                                            dangerouslySetInnerHTML={{
-                                                __html: opportunityDetails?.description,
-                                            }}
-                                        />
+                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>
+                                Opportunity Information
+                            </Box>
+                            <Box sx={{ color: 'gray', fontSize: '14px', display: 'flex', alignItems: 'center' }}>
+                                <span>created {FormateTime(opportunity.created_at)} by</span>
+                                <Avatar
+                                    src={opportunity.created_by?.profile_pic || ''}
+                                    alt={opportunity.created_by?.email}
+                                    sx={{ width: 24, height: 24, mx: 1 }}
+                                />
+                                <span>{opportunity.created_by?.email}</span>
+                            </Box>
+                        </Box>
+
+                        {/* Title and Assigned Users */}
+                        <Box sx={{ p: '20px' }}>
+                            <Box sx={{ fontSize: '24px', fontWeight: 600, color: '#1a3353', mb: 2 }}>
+                                {opportunity.name}
+                            </Box>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                                {opportunity.assigned_to?.map((user: any) => (
+                                    <Avatar
+                                        key={user.id}
+                                        alt={user.email}
+                                        src={user.profile_pic}
+                                        sx={{ width: 32, height: 32 }}
+                                    />
+                                ))}
+                            </Stack>
+                            <Stack direction="row" spacing={1}>
+                                {opportunity.tags?.map((tag: any) => (
+                                    <ILabel key={tag.id || tag} tags={tag} />
+                                ))}
+                            </Stack>
+                        </Box>
+
+                        {/* Details Grid */}
+                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <DetailField label="Name" value={opportunity.name} />
+                            <DetailField label="Lead Source" value={opportunity.lead_source} />
+                            <DetailField label="Account" value={opportunity.account?.name} />
+                        </Box>
+
+                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <DetailField label="Probability" value={`${opportunity.probability}%`} />
+                            <DetailField
+                                label="Amount"
+                                value={
+                                    opportunity.amount
+                                        ? `${getCurrencySymbol(opportunity.currency)}${opportunity.amount}`
+                                        : undefined
+                                }
+                            />
+                            <Box sx={{ flex: 1 }}>
+                                <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>Teams</Box>
+                                <Box>
+                                    {opportunity.teams && opportunity.teams.length > 0 ? (
+                                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                                            {opportunity.teams.map((team: any) => (
+                                                <Chip
+                                                    key={team.id || team}
+                                                    label={team.name || team}
+                                                    size="small"
+                                                    sx={{ height: '24px', borderRadius: '4px' }}
+                                                />
+                                            ))}
+                                        </Stack>
                                     ) : (
-                                        '---'
+                                        <Box sx={{ color: '#999' }}>----</Box>
                                     )}
                                 </Box>
-                            </div>
+                            </Box>
+                        </Box>
+
+                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <DetailField label="Currency" value={opportunity.currency} />
+                            <DetailField label="Stage" value={opportunity.stage} />
+                            <DetailField label="Closed Date" value={opportunity.closed_on} />
+                        </Box>
+
+                        {/* Description Section */}
+                        {opportunity.description && (
+                            <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
+                                <Box
+                                    sx={{
+                                        p: '20px',
+                                        borderBottom: '1px solid #e0e0e0',
+                                        fontWeight: 600,
+                                        fontSize: '18px',
+                                        color: '#1a3353',
+                                    }}
+                                >
+                                    Description
+                                </Box>
+                                <Box sx={{ p: '20px' }} dangerouslySetInnerHTML={{ __html: opportunity.description }} />
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+
+                {/* Sidebar - Right Side */}
+                <Box sx={{ width: '400px' }}>
+                    {/* Attachments Section */}
+                    <Box
+                        sx={{
+                            borderRadius: '10px',
+                            border: '1px solid #e0e0e0',
+                            backgroundColor: 'white',
+                            mb: 3,
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                p: '20px',
+                                borderBottom: '1px solid #e0e0e0',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>Attachments</Box>
+                            <Button
+                                variant="text"
+                                size="small"
+                                startIcon={<FaPlus style={{ fill: '#3E79F7', width: '12px' }} />}
+                                sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+                            >
+                                Add Attachments
+                            </Button>
+                        </Box>
+
+                        <Box sx={{ p: '20px' }}>
+                            {attachments && attachments.length > 0 ? (
+                                <Stack spacing={2}>
+                                    {attachments.map((attachment) => (
+                                        <Box
+                                            key={attachment.id}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                p: 1,
+                                                border: '1px solid #e0e0e0',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                '&:hover': { backgroundColor: '#f5f5f5' },
+                                            }}
+                                        >
+                                            {/*<Box sx={{ flex: 1, fontSize: '14px' }}>*/}
+                                            {/*    {attachment.attachment?.split('/').pop() || 'Attachment'}*/}
+                                            {/*</Box>*/}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Box sx={{ color: '#999', textAlign: 'center', py: 2 }}>No attachments</Box>
+                            )}
                         </Box>
                     </Box>
-                    <Box sx={{ width: '34%' }}>
+
+                    {/* Contacts Section */}
+                    {opportunity.contacts && opportunity.contacts.length > 0 && (
                         <Box
                             sx={{
                                 borderRadius: '10px',
-                                border: '1px solid #80808038',
+                                border: '1px solid #e0e0e0',
                                 backgroundColor: 'white',
                             }}
                         >
-                            <div
-                                style={{
-                                    padding: '20px',
-                                    borderBottom: '1px solid lightgray',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
+                            <Box
+                                sx={{
+                                    p: '20px',
+                                    borderBottom: '1px solid #e0e0e0',
+                                    fontWeight: 600,
+                                    fontSize: '18px',
+                                    color: '#1a3353',
                                 }}
                             >
-                                <div
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353f0',
-                                    }}
-                                >
-                                    Attachments
-                                </div>
-                                <Button
-                                    type="submit"
-                                    variant="text"
-                                    size="small"
-                                    startIcon={
-                                        <FaPlus
-                                            style={{
-                                                fill: '#3E79F7',
-                                                width: '12px',
-                                            }}
-                                        />
-                                    }
-                                    style={{
-                                        textTransform: 'capitalize',
-                                        fontWeight: 600,
-                                        fontSize: '16px',
-                                    }}
-                                >
-                                    Add Attachments
-                                </Button>
-                            </div>
-
-                            <div
-                                style={{
-                                    padding: '10px 10px 10px 15px',
-                                    marginTop: '5%',
-                                }}
-                            >
-                                {opportunityDetails?.opportunity_attachment?.length
-                                    ? opportunityDetails?.opportunity_attachment.map((pic: any, i: any) => (
-                                          <Box
-                                              key={i}
-                                              sx={{
-                                                  width: '100px',
-                                                  height: '100px',
-                                                  border: '0.5px solid gray',
-                                                  borderRadius: '5px',
-                                              }}
-                                          >
-                                              <img src={pic} alt={pic} />
-                                          </Box>
-                                      ))
-                                    : ''}
-                            </div>
+                                Contacts
+                            </Box>
+                            <Box sx={{ p: '20px' }}>
+                                <Stack spacing={1}>
+                                    {opportunity.contacts.map((contact: any) => (
+                                        <Box key={contact.id} sx={{ fontSize: '14px', color: '#333' }}>
+                                            {contact.first_name} {contact.last_name}
+                                            {contact.email && (
+                                                <Box sx={{ fontSize: '12px', color: '#666' }}>{contact.email}</Box>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            </Box>
                         </Box>
-                    </Box>
+                    )}
                 </Box>
-            </div>
+            </Box>
         </Box>
     );
-};
+}
+
+// Helper Components
+interface DetailFieldProps {
+    label: string;
+    value?: string | number | null;
+}
+
+function DetailField({ label, value }: DetailFieldProps) {
+    return (
+        <Box sx={{ flex: 1 }}>
+            <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>{label}</Box>
+            <Box sx={{ fontSize: '14px', color: '#333', fontWeight: 500 }}>
+                {value || <span style={{ color: '#999' }}>----</span>}
+            </Box>
+        </Box>
+    );
+}
+
+function getCurrencySymbol(currency?: string): string {
+    const symbols: Record<string, string> = {
+        USD: '$',
+        EUR: '€',
+        GBP: '£',
+        JPY: '¥',
+    };
+    return symbols[currency || ''] || '';
+}

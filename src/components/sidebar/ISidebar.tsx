@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { createContext, useState } from 'react';
 import { AppBar, Box, Drawer, Toolbar, Typography } from '@mui/material';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import OrganizationModal from '../../pages/organization/OrganizationModal';
-import { Company } from '../../pages/company/Company';
-import { AddCompany } from '../../pages/company/AddCompany';
-import { CompanyDetails } from '../../pages/company/CompanyDetails';
-import { EditCompany } from '../../pages/company/EditCompany';
+import { Companies } from '../../pages/сompanies/Companies';
+import { AddCompany } from '../../pages/сompanies/AddCompany';
+import { CompanyDetails } from '../../pages/сompanies/CompanyDetails';
+import { EditCompany } from '../../pages/сompanies/EditCompany';
 import { Leads } from '../../pages/leads/Leads';
 import { AddLead } from '../../pages/leads/AddLead';
 import { EditLead } from '../../pages/leads/EditLead';
@@ -35,7 +35,6 @@ import { ISidebarNavigation } from './ISidebarNavigation';
 import { ISidebarUserSection } from './ISidebarUserSection';
 import { ISidebarCollapsedUser } from './ISidebarCollapsedUser';
 
-import MyContext from '../../context/Context';
 import { routes } from '../../constants/routes';
 import { FiBriefcase, FiFile, FiFolder, FiPhone, FiTrendingUp, FiUserPlus, FiUsers } from 'react-icons/fi';
 import { useProfile } from '../../api';
@@ -61,6 +60,8 @@ const navItems: NavItem[] = [
 export const getVisibleNavItems = (isAdmin: boolean): NavItem[] => {
     return isAdmin ? navItems : navItems.filter((item) => !item.adminOnly);
 };
+
+const MyContext = createContext<any>(undefined);
 
 export const ISidebar = () => {
     const location = useLocation();
@@ -149,14 +150,7 @@ export const ISidebar = () => {
 
             {/* Main Content */}
             <MyContext.Provider value={context}>
-                <Box
-                    component="main"
-                    sx={{
-                        flexGrow: 1,
-                        backgroundColor: '#f9fafb',
-                        transition: 'margin 0.3s ease',
-                    }}
-                >
+                <Box component="main" sx={{ flexGrow: 1, mt: '60px' }}>
                     <Routes>
                         <Route path="/" element={<Navigate to={routes.leads.main} replace />} />
 
@@ -165,7 +159,7 @@ export const ISidebar = () => {
                         <Route path={routes.leads.edit} element={<EditLead />} />
                         <Route path={routes.leads.details} element={<LeadDetails />} />
 
-                        <Route path={routes.companies.main} element={<Company />} />
+                        <Route path={routes.companies.main} element={<Companies />} />
                         <Route path={routes.companies.create} element={<AddCompany />} />
                         <Route path={routes.companies.edit} element={<EditCompany />} />
                         <Route path={routes.companies.details} element={<CompanyDetails />} />

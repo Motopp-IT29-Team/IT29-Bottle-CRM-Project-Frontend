@@ -1,19 +1,19 @@
 export const ENDPOINTS = {
     // Auth
-    LOGIN: 'auth/login',
-    LOGOUT: 'auth/logout',
-    REFRESH: 'auth/refresh',
-    REGISTER: 'auth/register',
-    FORGOT_PASSWORD: 'auth/forgot-password',
+    LOGIN: 'auth/login/',
+    LOGIN_GOOGLE: 'auth/google/',
+    LOGOUT: 'auth/logout/',
+    REFRESH: 'auth/refresh/',
+    REGISTER: 'auth/register/',
+    FORGOT_PASSWORD: 'auth/forgot-password/',
 
     // Organizations
-    ORGANIZATIONS: 'org',
-    ORGANIZATION_DETAIL: (id: string) => `org/${id}/`,
+    ORGANIZATIONS: 'org/',
 
     // Users
     USERS: 'users/',
     USER_DETAIL: (id: string) => `user/${id}/`,
-    USER_RESEND_INVITATION: (id: string) => `user/${id}/resend_invitation/`,
+    USER_RESEND_INVITATION: (id: string) => `user/${id}/resend-invitation/`,
     USER_TOGGLE_STATUS: (id: string) => `user/${id}/status/`,
     USER: 'user/',
     PROFILE: 'profile/',
@@ -31,8 +31,7 @@ export const ENDPOINTS = {
 
     // Companies
     COMPANIES: 'leads/companies/',
-    COMPANY: 'leads/company/',
-    COMPANY_DETAIL: (id: string) => `leads/company/${id}/`,
+    COMPANY: (id: string) => `leads/company/${id}/`,
 
     // Contacts
     CONTACTS: 'contacts/',
@@ -41,12 +40,18 @@ export const ENDPOINTS = {
     // Accounts
     ACCOUNTS: 'accounts/',
     ACCOUNT_DETAIL: (id: string) => `accounts/${id}/`,
+    ACCOUNT_COMMENT: (commentId: string) => `accounts/comment/${commentId}/`,
+    ACCOUNT_ATTACHMENT: (attachmentId: string) => `accounts/attachment/${attachmentId}/`,
 
     // Opportunities
     OPPORTUNITIES: 'opportunities/',
     OPPORTUNITY_DETAIL: (id: string) => `opportunities/${id}/`,
+    OPPORTUNITY_COMMENT: (commentId: string) => `opportunities/comment/${commentId}/`,
+    OPPORTUNITY_ATTACHMENT: (attachmentId: string) => `opportunities/attachments/${attachmentId}/`,
 
     // Cases
     CASES: 'cases/',
     CASE_DETAIL: (id: string) => `cases/${id}/`,
+    CASE_COMMENT: (commentId: string) => `cases/comment/${commentId}/`,
+    CASE_ATTACHMENT: (attachmentId: string) => `cases/attachments/${attachmentId}/`,
 } as const;

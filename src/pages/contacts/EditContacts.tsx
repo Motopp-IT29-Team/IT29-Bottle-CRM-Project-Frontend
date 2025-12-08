@@ -1,10 +1,10 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { ModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
+import { IModernAppBar, AppBarAction, IForm, FormErrors } from '../../components/ui';
 import { useContacts, ContactFormData, validateContactForm } from '../../api';
 import { routes } from '../../constants/routes';
-import { useFormState } from '../../hooks/useFormState';
+import { useForm } from '../../api/hooks/useForm';
 import { getContactConfig } from '../../api/configs/contact.config';
 
 export function EditContact() {
@@ -20,7 +20,7 @@ export function EditContact() {
     const [initialFormData, setInitialFormData] = useState<ContactFormData | null>(null);
     const [formData, setFormData] = useState<ContactFormData | null>(null);
 
-    const { canSubmit } = useFormState({
+    const { canSubmit } = useForm({
         formConfig: getContactConfig(),
         formData: formData || ({} as ContactFormData),
         initialData: initialFormData,
@@ -184,18 +184,16 @@ export function EditContact() {
     ];
 
     return (
-        <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-            <ModernAppBar module="Contacts" crntPage="Edit Contact" actions={actions} />
+        <Box>
+            <IModernAppBar module="Contacts" crntPage="Edit Contact" actions={actions} />
 
-            <Box sx={{ mt: '120px', p: '24px', maxWidth: '1400px', mx: 'auto' }}>
-                <IForm
-                    config={getContactConfig()}
-                    formData={formData}
-                    errors={allErrors}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                />
-            </Box>
+            <IForm
+                config={getContactConfig()}
+                formData={formData}
+                errors={allErrors}
+                onChange={handleChange}
+                disabled={isSubmitting}
+            />
         </Box>
     );
 }
