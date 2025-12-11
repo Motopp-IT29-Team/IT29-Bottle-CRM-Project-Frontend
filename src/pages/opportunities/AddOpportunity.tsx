@@ -10,9 +10,11 @@ const INITIAL_OPPORTUNITY_FORM_DATA: OpportunityFormData = {
     name: '',
     account: '',
     amount: '',
-    currency: 'USD',
+    currency: 'EUR',
     stage: '',
     probability: 50,
+    budget_range: '',
+    decision_timeframe: '',
     lead_source: '',
     closed_on: '',
     description: '',
@@ -32,21 +34,13 @@ export function AddOpportunity() {
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
 
     const [accounts, setAccounts] = useState<any[]>([]);
-    const [contacts, setContacts] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
-    const [teams, setTeams] = useState<any[]>([]);
-    const [tags, setTags] = useState<any[]>([]);
-    const [currency, setCurrency] = useState<any[]>([]);
     const [stage, setStage] = useState<any[]>([]);
     const [leadSource, setLeadSource] = useState<any[]>([]);
 
     const formConfig = getOpportunityConfig({
         accounts,
-        contacts,
         users,
-        teams,
-        tags,
-        currency,
         stage,
         leadSource,
     });
@@ -62,11 +56,7 @@ export function AddOpportunity() {
             const result = await getAllOpportunities({ limit: 1 });
             if (result.success && result.data) {
                 setAccounts(result.data.accounts_list || []);
-                setContacts(result.data.contacts_list || []);
-                // setUsers(result.data.users || []);
-                // setTeams(result.data.teams || []);
-                setTags(result.data.tags || []);
-                setCurrency(result.data.currency || []);
+                setUsers(result.data.users || []);
                 setStage(result.data.stage || []);
                 setLeadSource(result.data.lead_source || []);
             }

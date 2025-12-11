@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Box, CircularProgress, Avatar, Chip, Button, Stack } from '@mui/material';
-import { FaPlus } from 'react-icons/fa';
-import { IModernAppBar, AppBarAction } from '../../components/ui';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Box, Typography, Paper, Stack, Avatar, Chip } from '@mui/material';
+import { FaEdit, FaTrash, FaDollarSign, FaBuilding, FaFileAlt, FaUsers } from 'react-icons/fa';
+import { IModernAppBar, AppBarAction, IActionModal, ILoadingState, ErrorState } from '../../components/ui';
 import { useOpportunities } from '../../api';
 import { routes } from '../../constants/routes';
 import { IOpportunity, IAttachment, IComment, IProfile } from '../../types';
-import FormateTime from '../../utils/formateTime';
-import { ILabel } from '../../components/ui/ILabel';
+import { OpportunityHeroCard } from '../../components/opportunities/details';
+import { DetailSection, DetailField, AttachmentsCard } from '../../components/leads/details';
 
 export function OpportunityDetails() {
     const navigate = useNavigate();
-    const { state } = useLocation();
-    const { id } = useParams<{ id: string }>();
-    const { getById, isLoading } = useOpportunities();
+    const [searchParams] = useSearchParams();
+    const opportunityId = searchParams.get('id');
+
+    const { getById, deleteOpportunity, isLoading } = useOpportunities();
 
     const [opportunity, setOpportunity] = useState<IOpportunity | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
     const [comments, setComments] = useState<IComment[]>([]);
     const [users, setUsers] = useState<IProfile[]>([]);
 
-    const opportunityId = id || state?.opportunityId;
+    // Modal states
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (!opportunityId) {
@@ -37,7 +40,7 @@ export function OpportunityDetails() {
         const result = await getById(opportunityId);
 
         if (result.success && result.data) {
-            setOpportunity(result.data.opportunity);
+            setOpportunity(result.data.opportunity_obj);
             setAttachments(result.data.attachments || []);
             setComments(result.data.comments || []);
             setUsers(result.data.users || []);
@@ -46,294 +49,194 @@ export function OpportunityDetails() {
         }
     };
 
+    if (!opportunityId) {
+        return null;
+    }
+
     const handleBack = () => navigate(routes.opportunities.main);
 
     const handleEdit = () => {
-        navigate(routes.opportunities.edit.replace(':id', opportunityId), {
-            state: {
-                fromDetails: true,
-            },
-        });
+        navigate(`/opportunities/edit/${opportunityId}`);
+    };
+
+    const handleDeleteClick = () => {
+        setDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!opportunityId) return;
+
+        setIsDeleting(true);
+        const result = await deleteOpportunity(opportunityId);
+        setIsDeleting(false);
+
+        if (result.success) {
+            setDeleteModalOpen(false);
+            navigate(routes.opportunities.main);
+        } else {
+            setDeleteModalOpen(false);
+        }
     };
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Opportunities', onClick: handleBack },
-        { type: 'edit', onClick: handleEdit },
+        { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
+        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
     ];
 
-    if (isLoading || !opportunity) {
-        return (
-            <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
-                <IModernAppBar module="Opportunities" crntPage="Opportunity Details" actions={actions} />
-                <Box
-                    sx={{
-                        mt: '120px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        minHeight: '400px',
-                    }}
-                >
-                    <CircularProgress />
-                </Box>
-            </Box>
-        );
+    if (isLoading) {
+        return <ILoadingState message="Loading opportunity data..." />;
     }
+
+    if (!opportunity) {
+        return <ErrorState message="Opportunity not found" />;
+    }
+
+    const getCurrencySymbol = (currency?: string): string => {
+        const symbols: Record<string, string> = {
+            USD: '$',
+            EUR: '€',
+            GBP: '£',
+            JPY: '¥',
+        };
+        return symbols[currency || ''] || '€';
+    };
+
+    const formatBudgetRange = (value: string): string => {
+        const labels: Record<string, string> = {
+            'less_than_5000': 'Less than €5,000',
+            '5000_to_10000': '€5,000–€10,000',
+            '10000_to_25000': '€10,000–€25,000',
+            'over_25000': 'Over €25,000',
+        };
+        return labels[value] || value;
+    };
+
+    const formatDecisionTimeframe = (value: string): string => {
+        const labels: Record<string, string> = {
+            'within_1_week': 'Within 1 week',
+            'within_1_month': 'Within 1 month',
+            'within_3_months': 'Within 3 months',
+            'more_than_3_months': 'More than 3 months',
+        };
+        return labels[value] || value;
+    };
 
     return (
         <Box>
             <IModernAppBar module="Opportunities" crntPage="Opportunity Details" actions={actions} />
 
-            <Box
-                sx={{
-                    p: 3,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: '24px',
-                }}
-            >
-                {/* Main Content - Left Side */}
-                <Box sx={{ flex: 1 }}>
-                    <Box
-                        sx={{
-                            borderRadius: '10px',
-                            border: '1px solid #e0e0e0',
-                            backgroundColor: 'white',
-                            mb: 3,
-                        }}
-                    >
-                        {/* Header Section */}
-                        <Box
-                            sx={{
-                                p: '20px',
-                                borderBottom: '1px solid #e0e0e0',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>
-                                Opportunity Information
-                            </Box>
-                            <Box sx={{ color: 'gray', fontSize: '14px', display: 'flex', alignItems: 'center' }}>
-                                <span>created {FormateTime(opportunity.created_at)} by</span>
-                                <Avatar
-                                    src={opportunity.created_by?.profile_pic || ''}
-                                    alt={opportunity.created_by?.email}
-                                    sx={{ width: 24, height: 24, mx: 1 }}
-                                />
-                                <span>{opportunity.created_by?.email}</span>
-                            </Box>
-                        </Box>
+            <Box sx={{ p: 3, display: 'flex', gap: 3 }}>
+                {/* Main Content - 68% */}
+                <Box sx={{ flex: '0 0 68%' }}>
+                    <OpportunityHeroCard opportunity={opportunity} />
 
-                        {/* Title and Assigned Users */}
-                        <Box sx={{ p: '20px' }}>
-                            <Box sx={{ fontSize: '24px', fontWeight: 600, color: '#1a3353', mb: 2 }}>
-                                {opportunity.name}
-                            </Box>
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                                {opportunity.assigned_to?.map((user: any) => (
-                                    <Avatar
-                                        key={user.id}
-                                        alt={user.email}
-                                        src={user.profile_pic}
-                                        sx={{ width: 32, height: 32 }}
-                                    />
-                                ))}
-                            </Stack>
-                            <Stack direction="row" spacing={1}>
-                                {opportunity.tags?.map((tag: any) => (
-                                    <ILabel key={tag.id || tag} tags={tag} />
-                                ))}
-                            </Stack>
-                        </Box>
+                    <DetailSection title="Opportunity Details" icon={<FaDollarSign style={{ color: '#6366f1' }} />}>
+                        <DetailField label="Name" value={opportunity.name} />
+                        <DetailField label="Stage" value={opportunity.stage} />
+                        <DetailField label="Lead Source" value={opportunity.lead_source} />
+                        <DetailField 
+                            label="Amount" 
+                            value={opportunity.amount ? `${getCurrencySymbol(opportunity.currency)}${Number(opportunity.amount).toLocaleString()}` : '---'} 
+                        />
+                        <DetailField label="Probability" value={`${opportunity.probability || 0}%`} />
+                        <DetailField label="Budget Range" value={opportunity.budget_range ? formatBudgetRange(opportunity.budget_range) : '---'} />
+                        <DetailField label="Decision Timeframe" value={opportunity.decision_timeframe ? formatDecisionTimeframe(opportunity.decision_timeframe) : '---'} />
+                    </DetailSection>
 
-                        {/* Details Grid */}
-                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <DetailField label="Name" value={opportunity.name} />
-                            <DetailField label="Lead Source" value={opportunity.lead_source} />
-                            <DetailField label="Account" value={opportunity.account?.name} />
-                        </Box>
-
-                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <DetailField label="Probability" value={`${opportunity.probability}%`} />
-                            <DetailField
-                                label="Amount"
-                                value={
-                                    opportunity.amount
-                                        ? `${getCurrencySymbol(opportunity.currency)}${opportunity.amount}`
-                                        : undefined
-                                }
-                            />
-                            <Box sx={{ flex: 1 }}>
-                                <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>Teams</Box>
-                                <Box>
-                                    {opportunity.teams && opportunity.teams.length > 0 ? (
-                                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                                            {opportunity.teams.map((team: any) => (
-                                                <Chip
-                                                    key={team.id || team}
-                                                    label={team.name || team}
-                                                    size="small"
-                                                    sx={{ height: '24px', borderRadius: '4px' }}
-                                                />
-                                            ))}
-                                        </Stack>
-                                    ) : (
-                                        <Box sx={{ color: '#999' }}>----</Box>
-                                    )}
-                                </Box>
-                            </Box>
-                        </Box>
-
-                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <DetailField label="Currency" value={opportunity.currency} />
-                            <DetailField label="Stage" value={opportunity.stage} />
-                            <DetailField label="Closed Date" value={opportunity.closed_on} />
-                        </Box>
-
-                        {/* Description Section */}
-                        {opportunity.description && (
-                            <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
-                                <Box
-                                    sx={{
-                                        p: '20px',
-                                        borderBottom: '1px solid #e0e0e0',
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353',
-                                    }}
-                                >
-                                    Description
-                                </Box>
-                                <Box sx={{ p: '20px' }} dangerouslySetInnerHTML={{ __html: opportunity.description }} />
-                            </Box>
-                        )}
-                    </Box>
-                </Box>
-
-                {/* Sidebar - Right Side */}
-                <Box sx={{ width: '400px' }}>
-                    {/* Attachments Section */}
-                    <Box
-                        sx={{
-                            borderRadius: '10px',
-                            border: '1px solid #e0e0e0',
-                            backgroundColor: 'white',
-                            mb: 3,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                p: '20px',
-                                borderBottom: '1px solid #e0e0e0',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>Attachments</Box>
-                            <Button
-                                variant="text"
-                                size="small"
-                                startIcon={<FaPlus style={{ fill: '#3E79F7', width: '12px' }} />}
-                                sx={{ textTransform: 'capitalize', fontWeight: 600 }}
-                            >
-                                Add Attachments
-                            </Button>
-                        </Box>
-
-                        <Box sx={{ p: '20px' }}>
-                            {attachments && attachments.length > 0 ? (
-                                <Stack spacing={2}>
-                                    {attachments.map((attachment) => (
-                                        <Box
-                                            key={attachment.id}
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                p: 1,
-                                                border: '1px solid #e0e0e0',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                '&:hover': { backgroundColor: '#f5f5f5' },
-                                            }}
-                                        >
-                                            {/*<Box sx={{ flex: 1, fontSize: '14px' }}>*/}
-                                            {/*    {attachment.attachment?.split('/').pop() || 'Attachment'}*/}
-                                            {/*</Box>*/}
-                                        </Box>
-                                    ))}
-                                </Stack>
-                            ) : (
-                                <Box sx={{ color: '#999', textAlign: 'center', py: 2 }}>No attachments</Box>
-                            )}
-                        </Box>
-                    </Box>
+                    <DetailSection title="Account Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
+                        <DetailField label="Account Name" value={opportunity.account?.name} />
+                        <DetailField label="Close Date" value={opportunity.closed_on} />
+                        <DetailField 
+                            label="Teams" 
+                            value={
+                                opportunity.teams && opportunity.teams.length > 0 ? (
+                                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                                        {opportunity.teams.map((team: any) => (
+                                            <Chip
+                                                key={team.id || team}
+                                                label={team.name || team}
+                                                size="small"
+                                                sx={{ height: '24px', borderRadius: '4px' }}
+                                            />
+                                        ))}
+                                    </Stack>
+                                ) : '---'
+                            } 
+                        />
+                    </DetailSection>
 
                     {/* Contacts Section */}
                     {opportunity.contacts && opportunity.contacts.length > 0 && (
-                        <Box
-                            sx={{
-                                borderRadius: '10px',
-                                border: '1px solid #e0e0e0',
-                                backgroundColor: 'white',
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    p: '20px',
-                                    borderBottom: '1px solid #e0e0e0',
-                                    fontWeight: 600,
-                                    fontSize: '18px',
-                                    color: '#1a3353',
-                                }}
-                            >
-                                Contacts
-                            </Box>
-                            <Box sx={{ p: '20px' }}>
-                                <Stack spacing={1}>
-                                    {opportunity.contacts.map((contact: any) => (
-                                        <Box key={contact.id} sx={{ fontSize: '14px', color: '#333' }}>
-                                            {contact.first_name} {contact.last_name}
-                                            {contact.email && (
-                                                <Box sx={{ fontSize: '12px', color: '#666' }}>{contact.email}</Box>
+                        <DetailSection title="Related Contacts" icon={<FaUsers style={{ color: '#6366f1' }} />}>
+                            {opportunity.contacts.map((contact: any) => (
+                                <Box key={contact.id}>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Avatar sx={{ width: 32, height: 32, backgroundColor: '#6366f1', fontSize: '12px' }}>
+                                            {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight={600}>
+                                                {contact.first_name} {contact.last_name}
+                                            </Typography>
+                                            {contact.primary_email && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {contact.primary_email}
+                                                </Typography>
                                             )}
                                         </Box>
-                                    ))}
-                                </Stack>
-                            </Box>
-                        </Box>
+                                    </Stack>
+                                </Box>
+                            ))}
+                        </DetailSection>
                     )}
+
+                    <DetailSection title="Description" icon={<FaFileAlt style={{ color: '#6366f1' }} />}>
+                        {opportunity.description ? (
+                            <Box
+                                sx={{
+                                    gridColumn: 'span 3',
+                                    color: 'text.secondary',
+                                    fontSize: '14px',
+                                    lineHeight: 1.7,
+                                }}
+                                dangerouslySetInnerHTML={{ __html: opportunity.description }}
+                            />
+                        ) : (
+                            <Typography color="text.secondary" sx={{ gridColumn: 'span 3' }}>
+                                No description provided
+                            </Typography>
+                        )}
+                    </DetailSection>
+                </Box>
+
+                {/* Sidebar - 30% */}
+                <Box sx={{ flex: '0 0 30%' }}>
+                    <AttachmentsCard
+                        attachments={attachments.map((a: any) => ({
+                            id: a.id,
+                            file_name: a.file_name || a.attachment?.split('/').pop() || 'Attachment',
+                            file_path: a.attachment || a.file_path || '',
+                            created_at: a.created_at || '',
+                            created_by: a.created_by?.email || '',
+                        }))}
+                        onFileUpload={() => {}}
+                    />
                 </Box>
             </Box>
+
+            {/* Delete Opportunity Modal */}
+            <IActionModal
+                open={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                variant="error"
+                title="Delete Opportunity?"
+                message={`Are you sure you want to delete "${opportunity?.name}"? This action cannot be undone and will remove all associated data.`}
+                confirmText="Delete Opportunity"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
         </Box>
     );
-}
-
-// Helper Components
-interface DetailFieldProps {
-    label: string;
-    value?: string | number | null;
-}
-
-function DetailField({ label, value }: DetailFieldProps) {
-    return (
-        <Box sx={{ flex: 1 }}>
-            <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>{label}</Box>
-            <Box sx={{ fontSize: '14px', color: '#333', fontWeight: 500 }}>
-                {value || <span style={{ color: '#999' }}>----</span>}
-            </Box>
-        </Box>
-    );
-}
-
-function getCurrencySymbol(currency?: string): string {
-    const symbols: Record<string, string> = {
-        USD: '$',
-        EUR: '€',
-        GBP: '£',
-        JPY: '¥',
-    };
-    return symbols[currency || ''] || '';
 }

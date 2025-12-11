@@ -11,6 +11,8 @@ export interface OpportunityFormData {
     amount: string;
     lead_source: string;
     probability: number;
+    budget_range: string;
+    decision_timeframe: string;
     closed_on: string;
     description: string;
     contacts: string[];
@@ -39,6 +41,7 @@ export interface OpportunitiesListResponse {
     page_number: number[];
     accounts_list: IAccount[];
     contacts_list: IContact[];
+    users: IProfile[];
     tags: ITag[];
     stage: IChoiceOption[];
     lead_source: IChoiceOption[];
@@ -148,7 +151,9 @@ export const opportunitiesService = {
         formData.append('amount', data.amount.toString());
         formData.append('lead_source', data.lead_source);
         formData.append('probability', data.probability.toString());
-        formData.append('due_date', data.closed_on);
+        if (data.closed_on) {
+            formData.append('due_date', data.closed_on);
+        }
         formData.append('description', data.description);
 
         if (data.attachments && data.attachments.length > 0) {
@@ -196,7 +201,9 @@ export const opportunitiesService = {
                     value.forEach((item: string) => formData.append(key, item));
                 }
             } else if (key === 'closed_on') {
-                formData.append('due_date', value);
+                if (value) {
+                    formData.append('due_date', value);
+                }
             } else if (value !== undefined && value !== null) {
                 formData.append(key, value.toString());
             }

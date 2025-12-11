@@ -189,7 +189,7 @@ export const ISidebar = () => {
                         <Route path={routes.opportunities.main} element={<Opportunities />} />
                         <Route path={routes.opportunities.create} element={<AddOpportunity />} />
                         <Route path={routes.opportunities.details} element={<OpportunityDetails />} />
-                        <Route path={routes.opportunities.edit} element={<EditOpportunity />} />
+                        <Route path="/opportunities/edit/:id" element={<EditOpportunity />} />
 
                         <Route path={routes.cases.main} element={<Cases />} />
                         <Route path={routes.cases.create} element={<AddCase />} />
