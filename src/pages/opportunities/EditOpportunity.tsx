@@ -24,22 +24,14 @@ export function EditOpportunity() {
     const [isLoadingData, setIsLoadingData] = useState(true);
 
     const [accounts, setAccounts] = useState<any[]>([]);
-    const [contacts, setContacts] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
-    const [teams, setTeams] = useState<any[]>([]);
-    const [tags, setTags] = useState<any[]>([]);
-    const [currency, setCurrency] = useState<any[]>([]);
     const [stage, setStage] = useState<any[]>([]);
     const [leadSource, setLeadSource] = useState<any[]>([]);
 
     const formConfig = formData
         ? getOpportunityConfig({
               accounts,
-              contacts,
               users,
-              teams,
-              tags,
-              currency,
               stage,
               leadSource,
           })
@@ -64,11 +56,7 @@ export function EditOpportunity() {
             const optionsResult = await getAllOpportunities({ limit: 1 });
             if (optionsResult.success && optionsResult.data) {
                 setAccounts(optionsResult.data.accounts_list || []);
-                setContacts(optionsResult.data.contacts_list || []);
-                // setUsers(optionsResult.data.users || []);
-                // setTeams(optionsResult.data.teams || []);
-                setTags(optionsResult.data.tags || []);
-                setCurrency(optionsResult.data.currency || []);
+                setUsers(optionsResult.data.users || []);
                 setStage(optionsResult.data.stage || []);
                 setLeadSource(optionsResult.data.lead_source || []);
             }
@@ -76,15 +64,17 @@ export function EditOpportunity() {
             // Fetch opportunity data
             const result = await getById(id);
             if (result.success && result.data) {
-                const opportunity = result.data.opportunity;
+                const opportunity = result.data.opportunity_obj;
 
                 const data: OpportunityFormData = {
                     name: opportunity.name || '',
                     account: opportunity.account?.id || '',
                     amount: opportunity.amount || '',
-                    currency: opportunity.currency || 'USD',
+                    currency: opportunity.currency || 'EUR',
                     stage: opportunity.stage || '',
                     probability: opportunity.probability || 50,
+                    budget_range: opportunity.budget_range || '',
+                    decision_timeframe: opportunity.decision_timeframe || '',
                     lead_source: opportunity.lead_source || '',
                     closed_on: opportunity.closed_on || '',
                     description: opportunity.description || '',
@@ -147,7 +137,7 @@ export function EditOpportunity() {
 
     const handleBack = () => {
         if (state?.fromDetails) {
-            navigate(routes.opportunities.details, { state: { opportunityId: id } });
+            navigate(`${routes.opportunities.details}?id=${id}`);
         } else {
             navigate(routes.opportunities.main);
         }
@@ -176,7 +166,7 @@ export function EditOpportunity() {
 
         if (result.success) {
             if (state?.fromDetails) {
-                navigate(routes.opportunities.details, { state: { opportunityId: id } });
+                navigate(`${routes.opportunities.details}?id=${id}`);
             } else {
                 navigate(routes.opportunities.main);
             }

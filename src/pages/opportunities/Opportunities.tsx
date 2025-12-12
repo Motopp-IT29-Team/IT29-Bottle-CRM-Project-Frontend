@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { ITable, ITableColumn, IPagination, ITableToolbar } from '../../components/ui';
@@ -14,7 +14,6 @@ const columns: ITableColumn[] = [
     { id: 'stage', label: 'Stage', sortable: true },
     { id: 'amount', label: 'Amount', sortable: true },
     { id: 'created_at', label: 'Created On', sortable: true },
-    { id: 'tags', label: 'Tags', sortable: false },
     { id: 'lead_source', label: 'Lead Source', sortable: false },
 ];
 
@@ -27,19 +26,19 @@ export function Opportunities() {
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
 
-    useEffect(() => {
-        const fetchOpportunities = async () => {
-            const offset = (currentPage - 1) * recordsPerPage;
-            const result = await getAll({ offset, limit: recordsPerPage });
+    const fetchOpportunities = useCallback(async () => {
+        const offset = (currentPage - 1) * recordsPerPage;
+        const result = await getAll({ offset, limit: recordsPerPage });
 
-            if (result.success && result.data) {
-                setOpportunities(result.data.opportunities);
-                setTotalPages(Math.ceil(result.data.opportunities_count / recordsPerPage));
-            }
-        };
-
-        fetchOpportunities();
+        if (result.success && result.data) {
+            setOpportunities(result.data.opportunities);
+            setTotalPages(Math.ceil(result.data.opportunities_count / recordsPerPage));
+        }
     }, [currentPage, recordsPerPage, getAll]);
+
+    useEffect(() => {
+        fetchOpportunities();
+    }, [fetchOpportunities]);
 
     const handleRecordsPerPage = (value: number) => {
         setRecordsPerPage(value);

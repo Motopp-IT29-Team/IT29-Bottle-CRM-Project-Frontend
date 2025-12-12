@@ -1,13 +1,10 @@
 import { IFormConfig } from '../../components/ui/form';
 import { FiDollarSign, FiFileText } from 'react-icons/fi';
+import { LEAD_BUDGET_RANGE, LEAD_DECISION_TIMEFRAME } from '../../constants/lead';
 
 interface Params {
     accounts?: any[];
-    contacts?: any[];
     users?: any[];
-    teams?: any[];
-    tags?: any[];
-    currency?: any[];
     stage?: any[];
     leadSource?: any[];
 }
@@ -15,11 +12,7 @@ interface Params {
 export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
     const {
         accounts = [],
-        contacts = [],
         users = [],
-        teams = [],
-        tags = [],
-        currency = [],
         stage = [],
         leadSource = [],
     } = params;
@@ -56,16 +49,6 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         placeholder: 'Enter amount',
                     },
                     {
-                        name: 'currency',
-                        label: 'Currency',
-                        type: 'select',
-                        placeholder: 'Select currency',
-                        options: currency.map((curr: any) => ({
-                            value: curr[0],
-                            label: curr[1],
-                        })),
-                    },
-                    {
                         name: 'stage',
                         label: 'Stage',
                         type: 'select',
@@ -83,6 +66,20 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         placeholder: 'Enter probability (0-100)',
                     },
                     {
+                        name: 'budget_range',
+                        label: 'Budget Range',
+                        type: 'select',
+                        placeholder: 'Select budget range',
+                        options: LEAD_BUDGET_RANGE,
+                    },
+                    {
+                        name: 'decision_timeframe',
+                        label: 'Decision Timeframe',
+                        type: 'select',
+                        placeholder: 'Select timeframe',
+                        options: LEAD_DECISION_TIMEFRAME,
+                    },
+                    {
                         name: 'lead_source',
                         label: 'Lead Source',
                         type: 'select',
@@ -98,16 +95,6 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         type: 'date',
                     },
                     {
-                        name: 'contacts',
-                        label: 'Contacts',
-                        type: 'autocomplete',
-                        placeholder: 'Select contacts',
-                        options: contacts.map((contact: any) => ({
-                            value: contact.id,
-                            label: `${contact.first_name} ${contact.last_name}`,
-                        })),
-                    },
-                    {
                         name: 'assigned_to',
                         label: 'Assign To',
                         type: 'autocomplete',
@@ -115,26 +102,6 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         options: users.map((user: any) => ({
                             value: user.id,
                             label: user.user__email || user.email || `${user.first_name} ${user.last_name}`,
-                        })),
-                    },
-                    {
-                        name: 'teams',
-                        label: 'Teams',
-                        type: 'autocomplete',
-                        placeholder: 'Select teams',
-                        options: teams.map((team: any) => ({
-                            value: team.id,
-                            label: team.name,
-                        })),
-                    },
-                    {
-                        name: 'tags',
-                        label: 'Tags',
-                        type: 'autocomplete',
-                        placeholder: 'Add tags',
-                        options: tags.map((tag: any) => ({
-                            value: tag.name || tag,
-                            label: tag.name || tag,
                         })),
                     },
                     {

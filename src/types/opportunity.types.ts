@@ -14,6 +14,8 @@ export interface IOpportunity {
     amount: number;
     lead_source: string;
     probability: number;
+    budget_range: string;
+    decision_timeframe: string;
     contacts: IContact[];
     closed_by: IProfile | null;
     closed_on: string | null;

@@ -52,7 +52,7 @@ export function OpportunitiesTableRow({ opportunity, onViewDetail }: Opportuniti
             EUR: '€',
             GBP: '£',
         };
-        const symbol = currencySymbols[currency] || currency;
+        const symbol = currencySymbols[currency] || '€';
         return `${symbol}${Number(amount).toLocaleString()}`;
     };
 
@@ -139,29 +139,6 @@ export function OpportunitiesTableRow({ opportunity, onViewDetail }: Opportuniti
                 <Typography sx={{ fontSize: '14px', color: '#4b5563' }}>
                     {formatDate(opportunity.created_at)}
                 </Typography>
-            </TableCell>
-
-            {/* Tags */}
-            <TableCell sx={{ border: 0 }}>
-                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    {opportunity.tags && opportunity.tags.length > 0 ? (
-                        opportunity.tags.slice(0, 2).map((tag, idx) => <ILabel key={idx} tags={tag} />)
-                    ) : (
-                        <Typography sx={{ fontSize: '14px', color: '#9ca3af' }}>---</Typography>
-                    )}
-                    {opportunity.tags && opportunity.tags.length > 2 && (
-                        <Chip
-                            label={`+${opportunity.tags.length - 2}`}
-                            size="small"
-                            sx={{
-                                height: '20px',
-                                fontSize: '11px',
-                                backgroundColor: '#f3f4f6',
-                                color: '#6b7280',
-                            }}
-                        />
-                    )}
-                </Box>
             </TableCell>
 
             {/* Lead Source */}

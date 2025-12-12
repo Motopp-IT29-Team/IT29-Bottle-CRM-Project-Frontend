@@ -35,7 +35,7 @@ export const routes = {
     opportunities: {
         main: '/opportunities',
         create: '/opportunities/create',
-        edit: '/opportunities/edit',
+        edit: '/opportunities/edit/:id',
         details: '/opportunities/details',
     },
     cases: {
