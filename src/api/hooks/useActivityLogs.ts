@@ -13,6 +13,8 @@ export const useActivityLogs = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [canViewOthers, setCanViewOthers] = useState(false);
+    const [viewingMode, setViewingMode] = useState<'own' | 'all'>('own');
     const { addNotification } = useNotification();
 
     const getAll = useCallback(
@@ -24,6 +26,8 @@ export const useActivityLogs = () => {
                 if (!data.error) {
                     setActivityLogs(data.logs || []);
                     setTotalCount(data.total_count || 0);
+                    setCanViewOthers(data.can_view_others || false);
+                    setViewingMode(data.viewing_mode || 'own');
                     return { success: true, data };
                 } else {
                     const fieldErrors = parseApiErrors(data);
@@ -58,6 +62,8 @@ export const useActivityLogs = () => {
         isLoading,
         activityLogs,
         totalCount,
+        canViewOthers,
+        viewingMode,
         getAll,
         refetch,
     };

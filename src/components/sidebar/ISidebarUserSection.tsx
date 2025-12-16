@@ -147,30 +147,28 @@ export const ISidebarUserSection: React.FC<Props> = ({
                         <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Organization</Typography>
                     </Box>
 
-                    {/* Activity Log - Admin Only */}
-                    {isAdmin && (
-                        <Box
-                            onClick={() => navigate(routes.activityLogs.main)}
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                px: 1.5,
-                                py: 1.25,
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                    color: 'white',
-                                },
-                            }}
-                        >
-                            <FiActivity size={18} />
-                            <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Activity Log</Typography>
-                        </Box>
-                    )}
+                    {/* Activity Log */}
+                    <Box
+                        onClick={() => navigate(routes.activityLogs.main)}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            px: 1.5,
+                            py: 1.25,
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                color: 'white',
+                            },
+                        }}
+                    >
+                        <FiActivity size={18} />
+                        <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Activity Log</Typography>
+                    </Box>
 
                     <Box
                         onClick={handleLogoutClick}

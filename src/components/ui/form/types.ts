@@ -54,6 +54,7 @@ export interface IFormFieldConfig {
 
     minDate?: string;
     maxDate?: string;
+    helperText?: string;
 }
 
 export interface IFormSectionConfig {

@@ -51,6 +51,13 @@ export const getUserConfig = (isCurrentUser: boolean = false): IFormConfig => ({
                     type: 'toggle',
                     disabled: isCurrentUser,
                 },
+                {
+                    name: 'can_view_others_activity_logs',
+                    label: 'Can View Other Users\' Activity Logs',
+                    type: 'toggle',
+                    disabled: isCurrentUser,
+                    helperText: 'Allow this user to view activity logs of all users in the organization. Users can always view their own logs.',
+                },
             ],
         },
         {
