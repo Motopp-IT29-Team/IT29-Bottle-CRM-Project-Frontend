@@ -18,6 +18,7 @@ export interface ActivityLog {
 
 export interface GetActivityLogsParams {
     user?: string;
+    user_id?: string;
     action?: string;
     entity_type?: string;
     date_from?: string;
@@ -30,6 +31,8 @@ export interface GetActivityLogsResponse {
     error: boolean;
     total_count: number;
     logs: ActivityLog[];
+    can_view_others?: boolean;
+    viewing_mode?: 'own' | 'all';
 }
 
 export const activityLogsService = {
@@ -37,6 +40,7 @@ export const activityLogsService = {
         const queryParams = new URLSearchParams();
         
         if (params?.user) queryParams.append('user', params.user);
+        if (params?.user_id) queryParams.append('user_id', params.user_id);
         if (params?.action) queryParams.append('action', params.action);
         if (params?.entity_type) queryParams.append('entity_type', params.entity_type);
         if (params?.date_from) queryParams.append('date_from', params.date_from);

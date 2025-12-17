@@ -176,13 +176,14 @@ export const ISidebar = () => {
                         <Route path={routes.accounts.details} element={<AccountDetails />} />
                         <Route path={routes.accounts.edit} element={<EditAccount />} />
 
+                        <Route path={routes.activityLogs.main} element={<ActivityLogs />} />
+
                         {isAdmin && (
                             <>
                                 <Route path={routes.users.main} element={<Users />} />
                                 <Route path={routes.users.create} element={<AddUsers />} />
                                 <Route path={routes.users.edit} element={<EditUser />} />
                                 <Route path={routes.users.details} element={<UserDetails />} />
-                                <Route path={routes.activityLogs.main} element={<ActivityLogs />} />
                             </>
                         )}
 

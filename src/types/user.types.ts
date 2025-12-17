@@ -15,6 +15,7 @@ export interface IUser {
     user_details: IUserDetails;
     address: IAddress | null;
     date_of_joining: string | null;
+    can_view_others_activity_logs?: boolean;
     created_by_email: string | null;
     created_at: string;
     updated_by_email: string | null;
