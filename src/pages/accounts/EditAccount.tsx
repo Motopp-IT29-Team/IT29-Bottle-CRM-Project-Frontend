@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { IModernAppBar, AppBarAction, ILoadingBackdrop, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
@@ -19,8 +19,6 @@ export function EditAccount() {
 
     const [contacts, setContacts] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
-    // const [teams, setTeams] = useState<any[]>([]);
-    // const [tags, setTags] = useState<any[]>([]);
     const [leads, setLeads] = useState<any[]>([]);
     const [industries, setIndustries] = useState<any[]>([]);
     const [countries, setCountries] = useState<any[]>([]);
@@ -59,8 +57,6 @@ export function EditAccount() {
             if (optionsResult.success && optionsResult.data) {
                 setContacts(optionsResult.data.contacts || []);
                 setUsers(optionsResult.data.users || []);
-                // setTeams(optionsResult.data.teams || []);
-                // setTags(optionsResult.data.tags || []);
                 setLeads(optionsResult.data.leads || []);
                 setIndustries(optionsResult.data.industries || []);
                 setCountries(optionsResult.data.countries || []);
@@ -71,7 +67,7 @@ export function EditAccount() {
             const result = await getById(accountId);
             if (result.success && result.data) {
                 const account = result.data.account;
-                console.log(account);
+
                 const data: AccountFormData = {
                     name: account.name || '',
                     phone: account.phone || '',
