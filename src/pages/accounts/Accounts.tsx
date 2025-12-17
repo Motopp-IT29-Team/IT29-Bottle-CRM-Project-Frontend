@@ -78,7 +78,7 @@ export function Accounts() {
     };
 
     const handleRowClick = (id: string) => {
-        navigate(routes.accounts.details.replace(':id', id));
+        navigate(routes.accounts.details + `?id=${id}`);
     };
 
     const handleAddAccount = () => {

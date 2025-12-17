@@ -32,10 +32,7 @@ export interface AccountFormData {
     lead?: string;
     contact_name?: string;
     contacts?: string[];
-    teams?: string[];
     assigned_to?: string[];
-    tags?: string[];
-    account_attachment?: File | null;
 }
 
 export interface GetAccountsParams {
@@ -178,18 +175,18 @@ export const accountsService = {
         if (data.contacts && data.contacts.length > 0) {
             formData.append('contacts', JSON.stringify(data.contacts));
         }
-        if (data.teams && data.teams.length > 0) {
-            formData.append('teams', JSON.stringify(data.teams));
-        }
+        // if (data.teams && data.teams.length > 0) {
+        //     formData.append('teams', JSON.stringify(data.teams));
+        // }
         if (data.assigned_to && data.assigned_to.length > 0) {
             formData.append('assigned_to', JSON.stringify(data.assigned_to));
         }
-        if (data.tags && data.tags.length > 0) {
-            formData.append('tags', JSON.stringify(data.tags));
-        }
-        if (data.account_attachment) {
-            formData.append('account_attachment', data.account_attachment);
-        }
+        // if (data.tags && data.tags.length > 0) {
+        //     formData.append('tags', JSON.stringify(data.tags));
+        // }
+        // if (data.account_attachment) {
+        //     formData.append('account_attachment', data.account_attachment);
+        // }
 
         const response = await apiClient.post<AccountCreateResponse>(ENDPOINTS.ACCOUNTS, formData, {
             headers: {
@@ -221,18 +218,18 @@ export const accountsService = {
         if (data.contacts && data.contacts.length > 0) {
             formData.append('contacts', JSON.stringify(data.contacts));
         }
-        if (data.teams && data.teams.length > 0) {
-            formData.append('teams', JSON.stringify(data.teams));
-        }
+        // if (data.teams && data.teams.length > 0) {
+        //     formData.append('teams', JSON.stringify(data.teams));
+        // }
         if (data.assigned_to && data.assigned_to.length > 0) {
             formData.append('assigned_to', JSON.stringify(data.assigned_to));
         }
-        if (data.tags && data.tags.length > 0) {
-            formData.append('tags', JSON.stringify(data.tags));
-        }
-        if (data.account_attachment) {
-            formData.append('account_attachment', data.account_attachment);
-        }
+        // if (data.tags && data.tags.length > 0) {
+        //     formData.append('tags', JSON.stringify(data.tags));
+        // }
+        // if (data.account_attachment) {
+        //     formData.append('account_attachment', data.account_attachment);
+        // }
 
         const response = await apiClient.put<AccountUpdateResponse>(ENDPOINTS.ACCOUNT_DETAIL(id), formData, {
             headers: {

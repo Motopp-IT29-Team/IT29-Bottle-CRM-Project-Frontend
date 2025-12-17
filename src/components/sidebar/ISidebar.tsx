@@ -53,9 +53,9 @@ const navItems: NavItem[] = [
     { key: 'contacts', label: 'Contacts', icon: FiPhone, path: routes.contacts.main },
     { key: 'opportunities', label: 'Opportunities', icon: FiTrendingUp, path: routes.opportunities.main },
     { key: 'accounts', label: 'Accounts', icon: FiFolder, path: routes.accounts.main },
-    { key: 'companies', label: 'Companies', icon: FiFile, path: routes.companies.main },
+    // { key: 'companies', label: 'Companies', icon: FiFile, path: routes.companies.main },
     { key: 'users', label: 'Users', icon: FiUserPlus, path: routes.users.main, adminOnly: true },
-    { key: 'cases', label: 'Cases', icon: FiBriefcase, path: routes.cases.main },
+    // { key: 'cases', label: 'Cases', icon: FiBriefcase, path: routes.cases.main },
 ];
 
 export const getVisibleNavItems = (isAdmin: boolean): NavItem[] => {

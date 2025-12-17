@@ -22,10 +22,7 @@ const INITIAL_ACCOUNT_FORM_DATA: AccountFormData = {
     lead: '',
     contact_name: '',
     contacts: [],
-    teams: [],
     assigned_to: [],
-    tags: [],
-    account_attachment: null,
 };
 
 export function AddAccount() {
@@ -38,8 +35,6 @@ export function AddAccount() {
 
     const [contacts, setContacts] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
-    const [teams, setTeams] = useState<any[]>([]);
-    const [tags, setTags] = useState<any[]>([]);
     const [leads, setLeads] = useState<any[]>([]);
     const [industries, setIndustries] = useState<any[]>([]);
     const [countries, setCountries] = useState<any[]>([]);
@@ -48,8 +43,6 @@ export function AddAccount() {
     const formConfig = getAccountConfig({
         contacts,
         users,
-        teams,
-        tags,
         leads,
         industries,
         countries,
@@ -68,8 +61,6 @@ export function AddAccount() {
             if (result.success && result.data) {
                 setContacts(result.data.contacts || []);
                 setUsers(result.data.users || []);
-                setTeams(result.data.teams || []);
-                setTags(result.data.tags || []);
                 setLeads(result.data.leads || []);
                 setIndustries(result.data.industries || []);
                 setCountries(result.data.countries || []);
@@ -118,6 +109,24 @@ export function AddAccount() {
         handleBack();
     };
 
+    const transformFormData = (data: AccountFormData) => {
+        const transformArray = (arr?: any[]) => {
+            if (!arr || arr.length === 0) return [];
+
+            if (typeof arr[0] === 'object' && arr[0]?.value) {
+                return arr.map((item) => item.value);
+            }
+
+            return arr;
+        };
+
+        return {
+            ...data,
+            contacts: transformArray(data.contacts),
+            assigned_to: transformArray(data.assigned_to),
+        };
+    };
+
     const handleSubmit = async () => {
         setBackendErrors({});
 
@@ -127,7 +136,8 @@ export function AddAccount() {
             return;
         }
 
-        const result = await create(formData);
+        const transformedData = transformFormData(formData);
+        const result = await create(transformedData);
 
         if (result.success) {
             resetForm();

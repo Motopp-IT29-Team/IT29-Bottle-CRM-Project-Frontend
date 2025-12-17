@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress, Avatar, Chip, Button, Stack } from '@mui/material';
 import { FaPlus } from 'react-icons/fa';
 import { IModernAppBar, AppBarAction } from '../../components/ui';
@@ -11,15 +11,13 @@ import { ILabel } from '../../components/ui/ILabel';
 
 export function AccountDetails() {
     const navigate = useNavigate();
-    const { state } = useLocation();
-    const { id } = useParams<{ id: string }>();
+    const [searchParams] = useSearchParams();
+    const accountId = searchParams.get('id');
     const { getById, isLoading } = useAccounts();
 
     const [account, setAccount] = useState<IAccount | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
     const [contacts, setContacts] = useState<IContact[]>([]);
-
-    const accountId = id || state?.accountId;
 
     useEffect(() => {
         if (!accountId) {
@@ -36,9 +34,9 @@ export function AccountDetails() {
         const result = await getById(accountId);
 
         if (result.success && result.data) {
-            // setAccount(result.data.account_obj);
+            setAccount(result.data.account);
             setAttachments(result.data.attachments || []);
-            // setContacts(result.data.contacts || []);
+            setContacts(result.data.account.contacts || []);
         } else {
             navigate(routes.accounts.main);
         }
@@ -47,11 +45,7 @@ export function AccountDetails() {
     const handleBack = () => navigate(routes.accounts.main);
 
     const handleEdit = () => {
-        navigate(routes.accounts.edit.replace(':id', accountId), {
-            state: {
-                fromDetails: true,
-            },
-        });
+        navigate(routes.accounts.edit + `?id=${accountId}`);
     };
 
     const actions: AppBarAction[] = [
@@ -61,7 +55,7 @@ export function AccountDetails() {
 
     if (isLoading || !account) {
         return (
-            <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
+            <Box>
                 <IModernAppBar module="Accounts" crntPage="Account Details" actions={actions} />
                 <Box
                     sx={{
@@ -145,40 +139,25 @@ export function AccountDetails() {
                         </Box>
 
                         {/* Details Grid */}
-                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <DetailField label="Website" value={account.website} />
-                            <DetailField label="Contact Name" value={account.contact_name} />
-                            <DetailField label="Organization" value={account.org?.name} />
-                        </Box>
+                        <Box sx={{ p: '20px', borderTop: '1px solid #f5f5f5' }}>
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                    gap: '20px',
+                                }}
+                            >
+                                <DetailField label="Website" value={account.website} />
+                                <DetailField label="Contact Name" value={account.contact_name} />
+                                <DetailField label="Organization" value={account.org?.name} />
 
-                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <DetailField label="Industry" value={account.industry} />
-                            <DetailField label="Lead" value={account.lead?.first_name} />
-                            <Box sx={{ flex: 1 }}>
-                                <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>Teams</Box>
-                                <Box>
-                                    {account.teams && account.teams.length > 0 ? (
-                                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                                            {account.teams.map((team: any) => (
-                                                <Chip
-                                                    key={team.id || team}
-                                                    label={team.name || team}
-                                                    size="small"
-                                                    sx={{ height: '24px', borderRadius: '4px' }}
-                                                />
-                                            ))}
-                                        </Stack>
-                                    ) : (
-                                        <Box sx={{ color: '#999' }}>----</Box>
-                                    )}
-                                </Box>
+                                <DetailField label="Industry" value={account.industry} />
+                                <DetailField label="Lead" value={account.lead?.first_name} />
+                                <DetailField label="Email Address" value={account.email} />
+
+                                <DetailField label="Phone Number" value={account.phone} />
+                                <DetailField label="Status" value={account.status} />
                             </Box>
-                        </Box>
-
-                        <Box sx={{ p: '20px', display: 'flex', gap: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <DetailField label="Email Address" value={account.email} />
-                            <DetailField label="Phone Number" value={account.phone} />
-                            <DetailField label="Status" value={account.status} />
                         </Box>
 
                         {/* Address Section */}
@@ -228,63 +207,6 @@ export function AccountDetails() {
 
                 {/* Sidebar - Right Side */}
                 <Box sx={{ width: '400px' }}>
-                    {/* Attachments Section */}
-                    <Box
-                        sx={{
-                            borderRadius: '10px',
-                            border: '1px solid #e0e0e0',
-                            backgroundColor: 'white',
-                            mb: 3,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                p: '20px',
-                                borderBottom: '1px solid #e0e0e0',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>Attachments</Box>
-                            <Button
-                                variant="text"
-                                size="small"
-                                startIcon={<FaPlus style={{ fill: '#3E79F7', width: '12px' }} />}
-                                sx={{ textTransform: 'capitalize', fontWeight: 600 }}
-                            >
-                                Add Attachments
-                            </Button>
-                        </Box>
-
-                        <Box sx={{ p: '20px' }}>
-                            {attachments && attachments.length > 0 ? (
-                                <Stack spacing={2}>
-                                    {attachments.map((attachment) => (
-                                        <Box
-                                            key={attachment.id}
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                p: 1,
-                                                border: '1px solid #e0e0e0',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                '&:hover': { backgroundColor: '#f5f5f5' },
-                                            }}
-                                        >
-                                            {/*<Box sx={{ flex: 1, fontSize: '14px' }}>*/}
-                                            {/*    {attachment.attachment?.split('/').pop() || 'Attachment'}*/}
-                                            {/*</Box>*/}
-                                        </Box>
-                                    ))}
-                                </Stack>
-                            ) : (
-                                <Box sx={{ color: '#999', textAlign: 'center', py: 2 }}>No attachments</Box>
-                            )}
-                        </Box>
-                    </Box>
-
                     {/* Contacts Section */}
                     {contacts && contacts.length > 0 && (
                         <Box
