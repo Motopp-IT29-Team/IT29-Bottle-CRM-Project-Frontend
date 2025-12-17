@@ -14,6 +14,7 @@ export interface UserFormData {
     postcode?: string;
     country?: string;
     is_active?: boolean;
+    can_view_others_activity_logs?: boolean;
     email: string;
     password?: string;
 }

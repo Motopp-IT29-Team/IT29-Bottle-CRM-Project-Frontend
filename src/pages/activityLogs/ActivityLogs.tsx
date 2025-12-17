@@ -15,9 +15,12 @@ import {
     Grid,
     Chip,
     CircularProgress,
-    TablePagination
+    TablePagination,
+    Alert
 } from '@mui/material';
 import { useActivityLogs } from '../../api/hooks/useActivityLogs';
+import { usersService } from '../../api/services/users.service';
+import { IUser } from '../../types';
 
 const actionOptions = [
     { value: '', label: 'All Actions' },
@@ -56,17 +59,50 @@ const getActionColor = (action: string): 'success' | 'info' | 'warning' | 'error
 };
 
 export function ActivityLogs() {
-    const { isLoading, activityLogs, totalCount, getAll } = useActivityLogs();
+    const { isLoading, activityLogs, totalCount, canViewOthers, viewingMode, getAll } = useActivityLogs();
     
     // Filters
     const [actionFilter, setActionFilter] = useState('');
     const [entityTypeFilter, setEntityTypeFilter] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [userFilter, setUserFilter] = useState('');
+    
+    // Users list for filter
+    const [users, setUsers] = useState<IUser[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     
     // Pagination
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    // Fetch users list if user can view others
+    useEffect(() => {
+        const fetchUsers = async () => {
+            if (canViewOthers) {
+                setLoadingUsers(true);
+                try {
+                    const response = await usersService.getAll({ limit: 1000 });
+                    if (!response.error) {
+                        setUsers(response.users || []);
+                    } else {
+                        // Handle error response gracefully
+                        console.log('Could not fetch users list - permission denied or error');
+                    }
+                } catch (error: any) {
+                    // Silently handle errors - user might not have permission
+                    console.log('Could not fetch users list:', error.message);
+                } finally {
+                    setLoadingUsers(false);
+                }
+            }
+        };
+        
+        // Only fetch if canViewOthers is explicitly true
+        if (canViewOthers) {
+            fetchUsers();
+        }
+    }, [canViewOthers]);
 
     useEffect(() => {
         const fetchLogs = async () => {
@@ -75,6 +111,7 @@ export function ActivityLogs() {
                 entity_type: entityTypeFilter || undefined,
                 date_from: dateFrom || undefined,
                 date_to: dateTo || undefined,
+                user_id: userFilter || undefined,
                 limit: rowsPerPage,
                 offset: page * rowsPerPage,
             };
@@ -82,7 +119,7 @@ export function ActivityLogs() {
         };
         
         fetchLogs();
-    }, [actionFilter, entityTypeFilter, dateFrom, dateTo, page, rowsPerPage, getAll]);
+    }, [actionFilter, entityTypeFilter, dateFrom, dateTo, userFilter, page, rowsPerPage, getAll]);
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
@@ -104,10 +141,39 @@ export function ActivityLogs() {
                     Activity Log
                 </Typography>
 
+                {viewingMode === 'own' && (
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                        You are viewing only your own activity logs. Contact an admin for access to view all organization logs.
+                    </Alert>
+                )}
+
                 {/* Filters */}
                 <Paper sx={{ p: 2, mb: 3 }}>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6} md={3}>
+                        {canViewOthers && (
+                            <Grid item xs={12} sm={6} md={2.4}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    label="User"
+                                    value={userFilter}
+                                    onChange={(e) => {
+                                        setUserFilter(e.target.value);
+                                        handleFilterChange();
+                                    }}
+                                    size="small"
+                                    disabled={loadingUsers}
+                                >
+                                    <MenuItem value="">All Users</MenuItem>
+                                    {users.map((user) => (
+                                        <MenuItem key={user.id} value={user.user_details?.id || user.id}>
+                                            {user.user_details?.email || 'Unknown'}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+                        )}
+                        <Grid item xs={12} sm={6} md={canViewOthers ? 2.4 : 3}>
                             <TextField
                                 select
                                 fullWidth
@@ -126,7 +192,7 @@ export function ActivityLogs() {
                                 ))}
                             </TextField>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={canViewOthers ? 2.4 : 3}>
                             <TextField
                                 select
                                 fullWidth
@@ -145,7 +211,7 @@ export function ActivityLogs() {
                                 ))}
                             </TextField>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={canViewOthers ? 2.4 : 3}>
                             <TextField
                                 type="date"
                                 fullWidth
@@ -159,7 +225,7 @@ export function ActivityLogs() {
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={canViewOthers ? 2.4 : 3}>
                             <TextField
                                 type="date"
                                 fullWidth

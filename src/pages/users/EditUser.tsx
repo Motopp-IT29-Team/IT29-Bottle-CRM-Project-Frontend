@@ -99,6 +99,7 @@ export function EditUser() {
                 postcode: data.address?.postcode || '',
                 country: data.address?.country || '',
                 is_active: data.user_details.is_active,
+                can_view_others_activity_logs: data.can_view_others_activity_logs || false,
                 email: data.user_details.email,
             };
             setFormData(loadedData);

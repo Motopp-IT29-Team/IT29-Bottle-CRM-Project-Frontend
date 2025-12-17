@@ -43,8 +43,39 @@ const createApiClient = (): AxiosInstance => {
         (error: AxiosError<BackendErrorResponse>) => {
             const isLoginPage = window.location.pathname === '/login';
             const isLoginRequest = error.config?.url?.includes('/auth/login');
+            const isUsersRequest = error.config?.url?.includes('/users') || error.config?.url?.includes('users/');
+            const isActivityLogsRequest = error.config?.url?.includes('activity-logs');
 
             if (error.response?.status === 401 || error.response?.status === 403) {
+                // Handle 403 (Forbidden) - user doesn't have permission but is authenticated
+                // Don't logout, just return error response
+                if (error.response?.status === 403) {
+                    return Promise.resolve({
+                        ...error.response,
+                        data: {
+                            error: true,
+                            status: 403,
+                            message: error.response.data?.message || 'You do not have permission to access this resource',
+                            errors: undefined,
+                        },
+                    } as AxiosResponse<BackendErrorResponse>);
+                }
+
+                // Handle 401 (Unauthorized) - session may have expired
+                // However, don't logout on certain endpoints that might return 401 for permission issues
+                if (error.response?.status === 401 && (isUsersRequest || isActivityLogsRequest)) {
+                    return Promise.resolve({
+                        ...error.response,
+                        data: {
+                            error: true,
+                            status: 401,
+                            message: error.response.data?.message || 'Access denied',
+                            errors: undefined,
+                        },
+                    } as AxiosResponse<BackendErrorResponse>);
+                }
+
+                // For actual authentication failures, redirect to login
                 if (!isLoginPage && !isLoginRequest) {
                     console.warn('Authentication failed - redirecting to login');
 
