@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { IModernAppBar, AppBarAction, ILoadingBackdrop, IForm, FormErrors } from '../../components/ui';
 import { routes } from '../../constants/routes';
@@ -7,8 +7,8 @@ import { useAccounts, AccountFormData, validateAccountForm, getAccountConfig, us
 
 export function EditAccount() {
     const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-    const { state } = useLocation();
+    const [searchParams] = useSearchParams();
+    const accountId = searchParams.get('id');
     const { getAll: getAllAccounts, getById, update, isLoading } = useAccounts();
 
     const [formData, setFormData] = useState<AccountFormData | null>(null);
@@ -19,8 +19,6 @@ export function EditAccount() {
 
     const [contacts, setContacts] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
-    const [teams, setTeams] = useState<any[]>([]);
-    const [tags, setTags] = useState<any[]>([]);
     const [leads, setLeads] = useState<any[]>([]);
     const [industries, setIndustries] = useState<any[]>([]);
     const [countries, setCountries] = useState<any[]>([]);
@@ -30,8 +28,8 @@ export function EditAccount() {
         ? getAccountConfig({
               contacts,
               users,
-              teams,
-              tags,
+              // teams,
+              // tags,
               leads,
               industries,
               countries,
@@ -47,7 +45,7 @@ export function EditAccount() {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!id) {
+            if (!accountId) {
                 navigate(routes.accounts.main);
                 return;
             }
@@ -59,8 +57,6 @@ export function EditAccount() {
             if (optionsResult.success && optionsResult.data) {
                 setContacts(optionsResult.data.contacts || []);
                 setUsers(optionsResult.data.users || []);
-                setTeams(optionsResult.data.teams || []);
-                setTags(optionsResult.data.tags || []);
                 setLeads(optionsResult.data.leads || []);
                 setIndustries(optionsResult.data.industries || []);
                 setCountries(optionsResult.data.countries || []);
@@ -68,33 +64,31 @@ export function EditAccount() {
             }
 
             // Fetch account data
-            const result = await getById(id);
+            const result = await getById(accountId);
             if (result.success && result.data) {
-                // const account = result.data.account_obj;
-                // const data: AccountFormData = {
-                //     name: account.name || '',
-                //     phone: account.phone || '',
-                //     email: account.email || '',
-                //     billing_address_line: account.billing_address_line || '',
-                //     billing_street: account.billing_street || '',
-                //     billing_city: account.billing_city || '',
-                //     billing_state: account.billing_state || '',
-                //     billing_postcode: account.billing_postcode || '',
-                //     billing_country: account.billing_country || '',
-                //     website: account.website || '',
-                //     industry: account.industry || '',
-                //     description: account.description || '',
-                //     status: account.status || ('open' as any),
-                //     lead: account.lead?.id || '',
-                //     contact_name: account.contact_name || '',
-                //     contacts: account.contacts?.map((c: any) => c.id) || [],
-                //     teams: account.teams?.map((t: any) => t.id) || [],
-                //     assigned_to: account.assigned_to?.map((u: any) => u.id) || [],
-                //     tags: account.tags?.map((tag: any) => tag.name || tag) || [],
-                //     account_attachment: null,
-                // };
-                // setFormData(data);
-                // setInitialData(data);
+                const account = result.data.account;
+
+                const data: AccountFormData = {
+                    name: account.name || '',
+                    phone: account.phone || '',
+                    email: account.email || '',
+                    billing_address_line: account.billing_address_line || '',
+                    billing_street: account.billing_street || '',
+                    billing_city: account.billing_city || '',
+                    billing_state: account.billing_state || '',
+                    billing_postcode: account.billing_postcode || '',
+                    billing_country: account.billing_country || '',
+                    website: account.website || '',
+                    industry: account.industry || '',
+                    description: account.description || '',
+                    status: account.status || ('open' as any),
+                    lead: account.lead?.id || '',
+                    contact_name: account.contact_name || '',
+                    contacts: account.contacts?.map((c: any) => c.id) || [],
+                    assigned_to: account.assigned_to?.map((u: any) => u.id) || [],
+                };
+                setFormData(data);
+                setInitialData(data);
             } else {
                 navigate(routes.accounts.main);
             }
@@ -103,7 +97,7 @@ export function EditAccount() {
         };
 
         fetchData();
-    }, [id]);
+    }, [accountId]);
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }
@@ -136,8 +130,8 @@ export function EditAccount() {
     };
 
     const handleBack = () => {
-        if (state?.fromDetails) {
-            navigate(routes.accounts.details.replace(':id', id!));
+        if (accountId) {
+            navigate(routes.accounts.details + `?id=${accountId}`);
         } else {
             navigate(routes.accounts.main);
         }
@@ -152,7 +146,7 @@ export function EditAccount() {
     };
 
     const handleSubmit = async () => {
-        if (!formData || !id) return;
+        if (!formData || !accountId) return;
 
         setBackendErrors({});
 
@@ -162,11 +156,11 @@ export function EditAccount() {
             return;
         }
 
-        const result = await update(id, formData);
+        const result = await update(accountId, formData);
 
         if (result.success) {
-            if (state?.fromDetails) {
-                navigate(routes.accounts.details.replace(':id', id));
+            if (accountId) {
+                navigate(routes.accounts.details + `?id=${accountId}`);
             } else {
                 navigate(routes.accounts.main);
             }
@@ -189,7 +183,7 @@ export function EditAccount() {
     const actions: AppBarAction[] = [
         {
             type: 'back',
-            label: state?.fromDetails ? 'Back To Details' : 'Back To Accounts',
+            label: accountId ? 'Back To Details' : 'Back To Accounts',
             onClick: handleBack,
         },
         { type: 'cancel', onClick: handleCancel, disabled: isLoading || isLoadingData },
@@ -204,7 +198,7 @@ export function EditAccount() {
 
     if (isLoadingData || !formData) {
         return (
-            <Box sx={{ mt: '60px', backgroundColor: '#f9fafb' }}>
+            <Box>
                 <IModernAppBar module="Accounts" crntPage="Edit Account" actions={actions} />
                 <Box
                     sx={{

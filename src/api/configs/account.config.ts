@@ -1,12 +1,13 @@
 import { IFormConfig } from '../../components/ui/form';
 import { FiFileText, FiHome, FiMapPin } from 'react-icons/fi';
+import { IContact, ILead, IUser } from '../../types';
 
 interface GetAccountConfigParams {
-    contacts?: any[];
-    users?: any[];
-    teams?: any[];
-    tags?: any[];
-    leads?: any[];
+    contacts?: IContact[];
+    users?: IUser[];
+    // teams?: any[];
+    // tags?: any[];
+    leads?: ILead[];
     industries?: any[];
     countries?: any[];
     status?: any[];
@@ -16,8 +17,8 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
     const {
         contacts = [],
         users = [],
-        teams = [],
-        tags = [],
+        // teams = [],
+        // tags = [],
         leads = [],
         industries = [],
         countries = [],
@@ -112,31 +113,31 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                             label: user.user__email || user.email || `${user.first_name} ${user.last_name}`,
                         })),
                     },
-                    {
-                        name: 'teams',
-                        label: 'Teams',
-                        type: 'autocomplete',
-                        placeholder: 'Select teams',
-                        options: teams.map((team: any) => ({
-                            value: team.id,
-                            label: team.name,
-                        })),
-                    },
-                    {
-                        name: 'tags',
-                        label: 'Tags',
-                        type: 'autocomplete',
-                        placeholder: 'Add tags',
-                        options: tags.map((tag: any) => ({
-                            value: tag.name || tag,
-                            label: tag.name || tag,
-                        })),
-                    },
-                    {
-                        name: 'account_attachment',
-                        label: 'Attachment',
-                        type: 'file',
-                    },
+                    // {
+                    //     name: 'teams',
+                    //     label: 'Teams',
+                    //     type: 'autocomplete',
+                    //     placeholder: 'Select teams',
+                    //     options: teams.map((team: any) => ({
+                    //         value: team.id,
+                    //         label: team.name,
+                    //     })),
+                    // },
+                    // {
+                    //     name: 'tags',
+                    //     label: 'Tags',
+                    //     type: 'autocomplete',
+                    //     placeholder: 'Add tags',
+                    //     options: tags.map((tag: any) => ({
+                    //         value: tag.name || tag,
+                    //         label: tag.name || tag,
+                    //     })),
+                    // },
+                    // {
+                    //     name: 'account_attachment',
+                    //     label: 'Attachment',
+                    //     type: 'file',
+                    // },
                 ],
             },
             {
