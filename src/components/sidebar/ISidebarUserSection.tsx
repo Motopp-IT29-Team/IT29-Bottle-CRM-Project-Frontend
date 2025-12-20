@@ -35,13 +35,15 @@ export const ISidebarUserSection: React.FC<Props> = ({
         setIsLoggingOut(true);
         try {
             // Call logout API to log the event
-            await apiClient.post(ENDPOINTS.LOGOUT + '/');
+            await apiClient.post(ENDPOINTS.LOGOUT);
         } catch (error) {
             // Continue with logout even if API fails
             console.error('Logout API error:', error);
+        } finally {
+            // Always clear storage and navigate after API call (success or fail)
+            localStorage.clear();
+            navigate('/login');
         }
-        localStorage.clear();
-        navigate('/login');
     };
 
     return (
