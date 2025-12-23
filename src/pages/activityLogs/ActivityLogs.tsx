@@ -27,6 +27,7 @@ const actionOptions = [
     { value: 'CREATE', label: 'Create' },
     { value: 'UPDATE', label: 'Update' },
     { value: 'DELETE', label: 'Delete' },
+    { value: 'VIEW', label: 'View' },
     { value: 'LOGIN', label: 'Login' },
     { value: 'LOGOUT', label: 'Logout' },
 ];
@@ -39,6 +40,7 @@ const entityTypeOptions = [
     { value: 'Opportunity', label: 'Opportunity' },
     { value: 'Case', label: 'Case' },
     { value: 'User', label: 'User' },
+    { value: 'System', label: 'System' },
 ];
 
 const getActionColor = (action: string): 'success' | 'info' | 'warning' | 'error' | 'default' => {
@@ -49,6 +51,8 @@ const getActionColor = (action: string): 'success' | 'info' | 'warning' | 'error
             return 'info';
         case 'DELETE':
             return 'error';
+        case 'VIEW':
+            return 'info';
         case 'LOGIN':
             return 'success';
         case 'LOGOUT':
