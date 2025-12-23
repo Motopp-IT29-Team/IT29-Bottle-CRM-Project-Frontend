@@ -39,6 +39,7 @@ export interface IFormFieldConfig {
 
     multiline?: boolean;
     rows?: number;
+    startAdornment?: ReactNode;
     endAdornment?: ReactNode;
 
     options?: SelectOption[];

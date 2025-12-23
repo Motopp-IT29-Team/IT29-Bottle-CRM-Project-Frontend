@@ -66,6 +66,7 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     label: 'Opportunity Amount',
                     type: 'number',
                     placeholder: '0.00',
+                    startAdornment: '€',
                 },
                 {
                     name: 'probability',
