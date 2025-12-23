@@ -6,6 +6,7 @@ export type FieldType =
     | 'email'
     | 'number'
     | 'tel'
+    | 'phone'
     | 'select'
     | 'toggle'
     | 'textarea'
