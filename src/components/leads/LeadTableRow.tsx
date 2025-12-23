@@ -23,7 +23,7 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
             }}
             onClick={() => !isConverted && onViewDetail(lead.id)}
         >
-            {/* Lead Name */}
+            {/* Company Name */}
             <TableCell sx={{ border: 0, py: 2 }}>
                 <Box>
                     <Box
@@ -34,7 +34,7 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
                             mb: 0.5,
                         }}
                     >
-                        {lead.title}
+                        {lead.account_name || '--'}
                     </Box>
                     <Box sx={{ color: '#64748b', fontSize: '13px' }}>
                         {lead.first_name} {lead.last_name}
