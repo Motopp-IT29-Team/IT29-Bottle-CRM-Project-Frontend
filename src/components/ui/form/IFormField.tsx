@@ -1,5 +1,6 @@
 import React from 'react';
 import { ITextField } from '../ITextField';
+import { IPhoneInput } from '../IPhoneInput';
 import { ISelect } from '../ISelect';
 import { IToggle } from '../IToggle';
 import { IAutocomplete } from '../IAutocomplete';
@@ -38,6 +39,20 @@ export const IFormField: React.FC<IFormFieldProps> = ({
                     rows={field.rows}
                     startAdornment={field.startAdornment}
                     endAdornment={field.endAdornment}
+                />
+            );
+
+        case 'phone':
+            return (
+                <IPhoneInput
+                    label={field.label}
+                    name={field.name}
+                    value={value || ''}
+                    onChange={onChange}
+                    error={errorMessage}
+                    disabled={disabled || field.disabled}
+                    required={field.required}
+                    placeholder={field.placeholder}
                 />
             );
 

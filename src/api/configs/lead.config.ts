@@ -188,9 +188,9 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                 {
                     name: 'phone',
                     label: 'Phone',
-                    type: 'tel',
+                    type: 'phone',
                     required: true,
-                    placeholder: '+1234567890',
+                    placeholder: '',
                 },
                 {
                     name: 'department',
