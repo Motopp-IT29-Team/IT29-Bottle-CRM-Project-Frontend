@@ -36,6 +36,7 @@ export const IFormField: React.FC<IFormFieldProps> = ({
                     type={field.type}
                     multiline={field.multiline}
                     rows={field.rows}
+                    startAdornment={field.startAdornment}
                     endAdornment={field.endAdornment}
                 />
             );

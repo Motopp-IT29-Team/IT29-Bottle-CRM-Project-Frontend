@@ -17,6 +17,7 @@ interface Props {
     type?: 'text' | 'email' | 'number' | 'tel' | 'password';
     multiline?: boolean;
     rows?: number;
+    startAdornment?: React.ReactNode;
     endAdornment?: React.ReactNode;
 }
 
@@ -32,6 +33,7 @@ export const ITextField: React.FC<Props> = ({
     type = 'text',
     multiline = false,
     rows = 1,
+    startAdornment,
     endAdornment,
 }) => {
     const TextFieldComponent = required ? RequiredTextField : TextField;
@@ -39,6 +41,13 @@ export const ITextField: React.FC<Props> = ({
     const [showPassword, setShowPassword] = useState(false);
 
     const inputType = type === 'password' && showPassword ? 'text' : type;
+
+    const getStartAdornment = () => {
+        if (startAdornment) {
+            return <InputAdornment position="start">{startAdornment}</InputAdornment>;
+        }
+        return undefined;
+    };
 
     const getEndAdornment = () => {
         if (type === 'password') {
@@ -87,6 +96,7 @@ export const ITextField: React.FC<Props> = ({
                 disabled={disabled}
                 required={required}
                 InputProps={{
+                    startAdornment: getStartAdornment(),
                     endAdornment: getEndAdornment(),
                 }}
                 sx={TEXT_FIELD_STYLES}
