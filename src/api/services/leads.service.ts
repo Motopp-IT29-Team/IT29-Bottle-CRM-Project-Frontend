@@ -65,6 +65,8 @@ export interface UserMinimal {
     id: string;
     user__email: string;
     user__is_active: boolean;
+    user__first_name?: string;
+    user__last_name?: string;
 }
 
 export interface GetLeadsResponse {

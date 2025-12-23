@@ -1,3 +1,5 @@
+import React from 'react';
+import { Box } from '@mui/material';
 import { FiUser, FiBriefcase, FiMapPin, FiFileText } from 'react-icons/fi';
 import { IFormConfig } from '../../components/ui/form';
 import { COUNTRIES } from '../../constants/countries';
@@ -15,7 +17,7 @@ interface Params {
     statuses?: Array<{ value: string; label: string }>;
     sources?: Array<{ value: string; label: string }>;
     countries?: Array<{ code: string; name: string }>;
-    users?: Array<{ id: string; user__email: string; user__is_active: boolean }>;
+    users?: Array<{ id: string; user__email: string; user__is_active: boolean; user__first_name?: string; user__last_name?: string }>;
 }
 
 export const getLeadConfig = (params: Params = {}): IFormConfig => ({
@@ -109,12 +111,33 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     options:
                         params.users
                             ?.filter((user) => user.user__is_active)
-                            ?.map((user) => ({
-                                value: user.id,
-                                label: user.user__email,
-                            })) || [],
+                            ?.map((user) => {
+                                const firstName = user.user__first_name || '';
+                                const lastName = user.user__last_name || '';
+                                const fullName = `${firstName} ${lastName}`.trim();
+                                const label = fullName ? `${fullName} (${user.user__email})` : user.user__email;
+                                return {
+                                    value: user.id,
+                                    label: label,
+                                    fullName: fullName,
+                                    email: user.user__email,
+                                };
+                            }) || [],
                     getOptionLabel: (option: any) => option.label || option.user__email || option,
-                },
+                    renderBadge: (option: any) => {
+                        if (option.fullName) {
+                            return React.createElement(
+                                React.Fragment,
+                                null,
+                                React.createElement('strong', null, option.fullName),
+                                ' (',
+                                option.email,
+                                ')'
+                            );
+                        }
+                        return option.label || option.email;
+                    },
+                }
             ],
         },
         {
