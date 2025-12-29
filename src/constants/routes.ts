@@ -2,6 +2,9 @@ export const routes = {
     app: {
         main: '/leads',
     },
+    dashboard: {
+        main: '/dashboard',
+    },
     leads: {
         main: '/leads',
         create: '/leads/create',
