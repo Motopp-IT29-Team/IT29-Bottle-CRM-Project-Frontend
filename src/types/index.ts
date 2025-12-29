@@ -5,6 +5,7 @@ export * from './case.types';
 export * from './comment.types';
 export * from './company.types';
 export * from './contact.types';
+export * from './dashboard.types';
 export * from './event.types';
 export * from './invoice.types';
 export * from './lead.types';

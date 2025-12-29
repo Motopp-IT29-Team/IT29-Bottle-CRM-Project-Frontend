@@ -11,6 +11,7 @@ export * from './services/opportunities.service';
 export * from './services/accounts.service';
 export * from './services/companies.service';
 export * from './services/cases.service';
+export * from './services/dashboard.service';
 
 export * from './validations/users.validation';
 export * from './validations/leads.validation';
@@ -29,6 +30,7 @@ export * from './hooks/useAccounts';
 export * from './hooks/useCompanies';
 export * from './hooks/useCases';
 export * from './hooks/useForm';
+export * from './hooks/useDashboard';
 
 export * from './configs/user.config';
 export * from './configs/lead.config';

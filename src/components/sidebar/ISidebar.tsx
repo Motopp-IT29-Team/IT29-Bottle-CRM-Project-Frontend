@@ -2,6 +2,7 @@ import React, { createContext, useState } from 'react';
 import { AppBar, Box, Drawer, Toolbar, Typography } from '@mui/material';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import OrganizationModal from '../../pages/organization/OrganizationModal';
+import { Dashboard } from '../../pages/dashboard/Dashboard';
 import { Companies } from '../../pages/сompanies/Companies';
 import { AddCompany } from '../../pages/сompanies/AddCompany';
 import { CompanyDetails } from '../../pages/сompanies/CompanyDetails';
@@ -37,7 +38,7 @@ import { ISidebarUserSection } from './ISidebarUserSection';
 import { ISidebarCollapsedUser } from './ISidebarCollapsedUser';
 
 import { routes } from '../../constants/routes';
-import { FiBriefcase, FiFile, FiFolder, FiPhone, FiTrendingUp, FiUserPlus, FiUsers } from 'react-icons/fi';
+import { FiBriefcase, FiFile, FiFolder, FiHome, FiPhone, FiTrendingUp, FiUserPlus, FiUsers } from 'react-icons/fi';
 import { useProfile } from '../../api';
 
 export interface NavItem {
@@ -49,13 +50,14 @@ export interface NavItem {
 }
 
 const navItems: NavItem[] = [
+    { key: 'dashboard', label: 'Dashboard', icon: FiHome, path: routes.dashboard.main },
     { key: 'leads', label: 'Leads', icon: FiUsers, path: routes.leads.main },
     { key: 'contacts', label: 'Contacts', icon: FiPhone, path: routes.contacts.main },
     { key: 'opportunities', label: 'Opportunities', icon: FiTrendingUp, path: routes.opportunities.main },
     { key: 'accounts', label: 'Accounts', icon: FiFolder, path: routes.accounts.main },
     // { key: 'companies', label: 'Companies', icon: FiFile, path: routes.companies.main },
     { key: 'users', label: 'Users', icon: FiUserPlus, path: routes.users.main, adminOnly: true },
-    // { key: 'cases', label: 'Cases', icon: FiBriefcase, path: routes.cases.main },
+    { key: 'cases', label: 'Cases', icon: FiBriefcase, path: routes.cases.main },
 ];
 
 export const getVisibleNavItems = (isAdmin: boolean): NavItem[] => {
@@ -154,7 +156,9 @@ export const ISidebar = () => {
             <MyContext.Provider value={context}>
                 <Box component="main" sx={{ flexGrow: 1, mt: '60px' }}>
                     <Routes>
-                        <Route path="/" element={<Navigate to={routes.leads.main} replace />} />
+                        <Route path="/" element={<Navigate to={routes.dashboard.main} replace />} />
+
+                        <Route path={routes.dashboard.main} element={<Dashboard />} />
 
                         <Route path={routes.leads.main} element={<Leads />} />
                         <Route path={routes.leads.create} element={<AddLead />} />
