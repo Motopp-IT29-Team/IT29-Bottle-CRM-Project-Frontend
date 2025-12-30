@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { IModernAppBar, AppBarAction, ILoadingState, ErrorState, IForm, FormErrors } from '../../components/ui';
-import { useUsers, UserFormData, apiClient, ENDPOINTS, getUserConfig } from '../../api';
-import { useForm } from '../../api/hooks/useForm';
+import { useUsers, UserFormData, apiClient, ENDPOINTS, getUserConfig, useForm } from '../../api';
 import { hasFormChanges } from '../../utils/formHelpers';
 import { routes } from '../../constants/routes';
 
@@ -53,6 +52,7 @@ export function EditUser() {
                 'state',
                 'postcode',
                 'country',
+                'is_active',
             ]);
 
             return hasDataChanges || hasPasswordChange;
@@ -110,16 +110,8 @@ export function EditUser() {
         setIsLoading(false);
     };
 
-    const handleChange = async (e: any) => {
+    const handleChange = (e: any) => {
         const { name, value } = e.target;
-
-        if (name === 'is_active' && userId) {
-            const result = await toggleStatus(userId);
-
-            if (!result.success) {
-                return;
-            }
-        }
 
         setFormData({ ...formData, [name]: value });
 
@@ -134,6 +126,15 @@ export function EditUser() {
 
     const handleSubmit = async () => {
         if (!userId) return;
+
+        const isActiveChanged = initialFormData?.is_active !== formData.is_active;
+
+        if (isActiveChanged) {
+            const toggleResult = await toggleStatus(userId);
+            if (!toggleResult.success) {
+                return;
+            }
+        }
 
         const result = await update(userId, formData);
 

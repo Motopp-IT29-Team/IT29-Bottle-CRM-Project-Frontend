@@ -1,5 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Dialog, Divider, IconButton, List, ListItem, Stack, TextField, Typography, Avatar } from '@mui/material';
+import {
+    Box,
+    Dialog,
+    Divider,
+    IconButton,
+    List,
+    ListItem,
+    Stack,
+    TextField,
+    Typography,
+    Avatar,
+    CircularProgress,
+} from '@mui/material';
 import { FiPlus, FiX, FiCheck, FiBriefcase } from 'react-icons/fi';
 import { apiClient, ENDPOINTS } from '../../api';
 import { routes } from '../../constants/routes';
@@ -17,6 +29,8 @@ export default function OrganizationModal(props: any) {
     const [organization, setOrganization] = useState<Item[]>([]);
     const [newOrganization, setNewOrganization] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     const buttonRef = useRef<HTMLButtonElement>(null);
     const currentOrgId = localStorage.getItem('org');
@@ -37,6 +51,7 @@ export default function OrganizationModal(props: any) {
     };
 
     const getOrganization = async () => {
+        setIsLoading(true);
         try {
             const response = await apiClient.get(ENDPOINTS.ORGANIZATIONS);
 
@@ -46,26 +61,34 @@ export default function OrganizationModal(props: any) {
             }
         } catch (error) {
             console.error('Error:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const addOrganization = async () => {
         if (!newOrganization.trim()) return;
 
+        setIsCreating(true);
+        setError('');
+
         try {
             const response = await apiClient.post(ENDPOINTS.ORGANIZATIONS, {
                 name: newOrganization,
             });
 
-            if (response.data?.error) {
-                setError(response.data?.errors?.name[0]);
-            } else if (response.status === 201) {
-                getOrganization();
+            if (response.data?.error === false) {
+                await getOrganization();
                 setError('');
                 setNewOrganization('');
+            } else if (response.data?.error === true) {
+                setError(response.data?.errors?.name?.[0] || 'Failed to create organization');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            setError(err.response?.data?.errors?.name?.[0] || 'Failed to create organization');
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -174,7 +197,18 @@ export default function OrganizationModal(props: any) {
                         },
                     }}
                 >
-                    {organization?.length === 0 ? (
+                    {isLoading ? (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '200px',
+                            }}
+                        >
+                            <CircularProgress size={40} sx={{ color: '#667eea' }} />
+                        </Box>
+                    ) : organization?.length === 0 ? (
                         <Box
                             sx={{
                                 display: 'flex',
@@ -307,6 +341,7 @@ export default function OrganizationModal(props: any) {
                             onKeyDown={handleKeyDown}
                             error={!!error}
                             helperText={error || ''}
+                            disabled={isCreating}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     borderRadius: '10px',
@@ -327,22 +362,26 @@ export default function OrganizationModal(props: any) {
                         <IconButton
                             onClick={addOrganization}
                             ref={buttonRef}
-                            disabled={!newOrganization.trim()}
+                            disabled={!newOrganization.trim() || isCreating}
                             sx={{
                                 width: 44,
                                 height: 44,
                                 borderRadius: '10px',
-                                backgroundColor: newOrganization.trim() ? '#667eea' : '#f3f4f6',
-                                color: newOrganization.trim() ? 'white' : '#9ca3af',
+                                backgroundColor: newOrganization.trim() && !isCreating ? '#667eea' : '#f3f4f6',
+                                color: newOrganization.trim() && !isCreating ? 'white' : '#9ca3af',
                                 '&:hover': {
-                                    backgroundColor: newOrganization.trim() ? '#5568d3' : '#f3f4f6',
+                                    backgroundColor: newOrganization.trim() && !isCreating ? '#5568d3' : '#f3f4f6',
                                 },
                                 '&:disabled': {
                                     backgroundColor: '#f3f4f6',
                                 },
                             }}
                         >
-                            <FiPlus size={20} />
+                            {isCreating ? (
+                                <CircularProgress size={20} sx={{ color: '#9ca3af' }} />
+                            ) : (
+                                <FiPlus size={20} />
+                            )}
                         </IconButton>
                     </Stack>
                 </Box>

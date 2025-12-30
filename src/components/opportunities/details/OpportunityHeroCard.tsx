@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
-import { FaDollarSign, FaPercentage, FaCalendarAlt, FaBuilding, FaTag } from 'react-icons/fa';
+import { FaDollarSign, FaPercentage, FaCalendarAlt, FaBuilding, FaTag, FaEuroSign } from 'react-icons/fa';
 import { IOpportunity } from '../../../types';
 import FormateTime from '../../../utils/formateTime';
 
@@ -54,10 +54,10 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
     const formatBudgetRange = (value?: string): string => {
         if (!value) return '---';
         const labels: Record<string, string> = {
-            'less_than_5000': 'Less than €5,000',
+            less_than_5000: 'Less than €5,000',
             '5000_to_10000': '€5,000–€10,000',
             '10000_to_25000': '€10,000–€25,000',
-            'over_25000': 'Over €25,000',
+            over_25000: 'Over €25,000',
         };
         return labels[value] || value;
     };
@@ -65,10 +65,10 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
     const formatDecisionTimeframe = (value?: string): string => {
         if (!value) return '---';
         const labels: Record<string, string> = {
-            'within_1_week': 'Within 1 week',
-            'within_1_month': 'Within 1 month',
-            'within_3_months': 'Within 3 months',
-            'more_than_3_months': 'More than 3 months',
+            within_1_week: 'Within 1 week',
+            within_1_month: 'Within 1 month',
+            within_3_months: 'Within 3 months',
+            more_than_3_months: 'More than 3 months',
         };
         return labels[value] || value;
     };
@@ -179,7 +179,7 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
                     {/* Amount */}
                     <Box sx={{ minWidth: '140px' }}>
                         <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
-                            <FaDollarSign style={{ color: '#10b981', fontSize: '14px' }} />
+                            <FaEuroSign style={{ color: '#10b981', fontSize: '14px' }} />
                             <Typography variant="caption" color="text.secondary" fontWeight={600}>
                                 AMOUNT
                             </Typography>

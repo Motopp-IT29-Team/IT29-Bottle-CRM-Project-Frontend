@@ -94,6 +94,7 @@ export const IFormField: React.FC<IFormFieldProps> = ({
                 <IToggle
                     label={field.label}
                     name={field.name}
+                    helperText={field.helperText}
                     checked={Boolean(value)}
                     onChange={(e) => onChange({ target: { name: field.name, value: e.target.checked } } as any)}
                     disabled={disabled || field.disabled}

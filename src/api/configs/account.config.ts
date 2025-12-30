@@ -5,8 +5,6 @@ import { IContact, ILead, IUser } from '../../types';
 interface GetAccountConfigParams {
     contacts?: IContact[];
     users?: IUser[];
-    // teams?: any[];
-    // tags?: any[];
     leads?: ILead[];
     industries?: any[];
     countries?: any[];
@@ -14,16 +12,7 @@ interface GetAccountConfigParams {
 }
 
 export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConfig => {
-    const {
-        contacts = [],
-        users = [],
-        // teams = [],
-        // tags = [],
-        leads = [],
-        industries = [],
-        countries = [],
-        status = [],
-    } = params;
+    const { contacts = [], users = [], leads = [], industries = [], countries = [], status = [] } = params;
 
     return {
         sections: [
@@ -113,35 +102,10 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                             label: user.user__email || user.email || `${user.first_name} ${user.last_name}`,
                         })),
                     },
-                    // {
-                    //     name: 'teams',
-                    //     label: 'Teams',
-                    //     type: 'autocomplete',
-                    //     placeholder: 'Select teams',
-                    //     options: teams.map((team: any) => ({
-                    //         value: team.id,
-                    //         label: team.name,
-                    //     })),
-                    // },
-                    // {
-                    //     name: 'tags',
-                    //     label: 'Tags',
-                    //     type: 'autocomplete',
-                    //     placeholder: 'Add tags',
-                    //     options: tags.map((tag: any) => ({
-                    //         value: tag.name || tag,
-                    //         label: tag.name || tag,
-                    //     })),
-                    // },
-                    // {
-                    //     name: 'account_attachment',
-                    //     label: 'Attachment',
-                    //     type: 'file',
-                    // },
                 ],
             },
             {
-                title: 'Billing Address',
+                title: 'Address',
                 icon: FiMapPin,
                 defaultExpanded: true,
                 fields: [

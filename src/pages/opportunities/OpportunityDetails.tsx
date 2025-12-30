@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Paper, Stack, Avatar, Chip } from '@mui/material';
-import { FaEdit, FaTrash, FaDollarSign, FaBuilding, FaFileAlt, FaUsers } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaDollarSign, FaBuilding, FaFileAlt, FaUsers, FaEuroSign } from 'react-icons/fa';
 import { IModernAppBar, AppBarAction, IActionModal, ILoadingState, ErrorState } from '../../components/ui';
 import { useOpportunities } from '../../api';
 import { routes } from '../../constants/routes';
@@ -104,20 +104,20 @@ export function OpportunityDetails() {
 
     const formatBudgetRange = (value: string): string => {
         const labels: Record<string, string> = {
-            'less_than_5000': 'Less than €5,000',
+            less_than_5000: 'Less than €5,000',
             '5000_to_10000': '€5,000–€10,000',
             '10000_to_25000': '€10,000–€25,000',
-            'over_25000': 'Over €25,000',
+            over_25000: 'Over €25,000',
         };
         return labels[value] || value;
     };
 
     const formatDecisionTimeframe = (value: string): string => {
         const labels: Record<string, string> = {
-            'within_1_week': 'Within 1 week',
-            'within_1_month': 'Within 1 month',
-            'within_3_months': 'Within 3 months',
-            'more_than_3_months': 'More than 3 months',
+            within_1_week: 'Within 1 week',
+            within_1_month: 'Within 1 month',
+            within_3_months: 'Within 3 months',
+            more_than_3_months: 'More than 3 months',
         };
         return labels[value] || value;
     };
@@ -131,24 +131,38 @@ export function OpportunityDetails() {
                 <Box sx={{ flex: '0 0 68%' }}>
                     <OpportunityHeroCard opportunity={opportunity} />
 
-                    <DetailSection title="Opportunity Details" icon={<FaDollarSign style={{ color: '#6366f1' }} />}>
+                    <DetailSection title="Opportunity Details" icon={<FaEuroSign style={{ color: '#6366f1' }} />}>
                         <DetailField label="Name" value={opportunity.name} />
                         <DetailField label="Stage" value={opportunity.stage} />
                         <DetailField label="Lead Source" value={opportunity.lead_source} />
-                        <DetailField 
-                            label="Amount" 
-                            value={opportunity.amount ? `${getCurrencySymbol(opportunity.currency)}${Number(opportunity.amount).toLocaleString()}` : '---'} 
+                        <DetailField
+                            label="Amount"
+                            value={
+                                opportunity.amount
+                                    ? `${getCurrencySymbol(opportunity.currency)}${Number(opportunity.amount).toLocaleString()}`
+                                    : '---'
+                            }
                         />
                         <DetailField label="Probability" value={`${opportunity.probability || 0}%`} />
-                        <DetailField label="Budget Range" value={opportunity.budget_range ? formatBudgetRange(opportunity.budget_range) : '---'} />
-                        <DetailField label="Decision Timeframe" value={opportunity.decision_timeframe ? formatDecisionTimeframe(opportunity.decision_timeframe) : '---'} />
+                        <DetailField
+                            label="Budget Range"
+                            value={opportunity.budget_range ? formatBudgetRange(opportunity.budget_range) : '---'}
+                        />
+                        <DetailField
+                            label="Decision Timeframe"
+                            value={
+                                opportunity.decision_timeframe
+                                    ? formatDecisionTimeframe(opportunity.decision_timeframe)
+                                    : '---'
+                            }
+                        />
                     </DetailSection>
 
                     <DetailSection title="Account Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
                         <DetailField label="Account Name" value={opportunity.account?.name} />
                         <DetailField label="Close Date" value={opportunity.closed_on} />
-                        <DetailField 
-                            label="Teams" 
+                        <DetailField
+                            label="Teams"
                             value={
                                 opportunity.teams && opportunity.teams.length > 0 ? (
                                     <Stack direction="row" spacing={0.5} flexWrap="wrap">
@@ -161,8 +175,10 @@ export function OpportunityDetails() {
                                             />
                                         ))}
                                     </Stack>
-                                ) : '---'
-                            } 
+                                ) : (
+                                    '---'
+                                )
+                            }
                         />
                     </DetailSection>
 
@@ -172,8 +188,11 @@ export function OpportunityDetails() {
                             {opportunity.contacts.map((contact: any) => (
                                 <Box key={contact.id}>
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <Avatar sx={{ width: 32, height: 32, backgroundColor: '#6366f1', fontSize: '12px' }}>
-                                            {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
+                                        <Avatar
+                                            sx={{ width: 32, height: 32, backgroundColor: '#6366f1', fontSize: '12px' }}
+                                        >
+                                            {contact.first_name?.charAt(0)}
+                                            {contact.last_name?.charAt(0)}
                                         </Avatar>
                                         <Box>
                                             <Typography variant="body2" fontWeight={600}>

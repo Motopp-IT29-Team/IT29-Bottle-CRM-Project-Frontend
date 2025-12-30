@@ -100,7 +100,7 @@ export function UserDetails() {
                     dateOfJoining={userDetails.date_of_joining}
                 />
 
-                <UserAddressSection address={userDetails.address} />
+                {/*<UserAddressSection address={userDetails.address} />*/}
 
                 <UserActivitySection user={userDetails} />
             </Box>

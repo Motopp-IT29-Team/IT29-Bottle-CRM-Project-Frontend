@@ -196,7 +196,7 @@ export const useUsers = () => {
             const data = await usersService.toggleStatus(id);
 
             if (!data.error) {
-                addNotification('success', 'Status changed', 'User status has been updated');
+                // addNotification('success', 'Status changed', 'User status has been updated');
                 return { success: true };
             } else {
                 const fieldErrors = parseApiErrors(data);
