@@ -3,6 +3,7 @@ import { Card, Box, Avatar, Typography, Chip, Button } from '@mui/material';
 import { FiCheckCircle } from '@react-icons/all-files/fi/FiCheckCircle';
 import { FiXCircle } from '@react-icons/all-files/fi/FiXCircle';
 import { FiMail } from '@react-icons/all-files/fi/FiMail';
+import { FiEye } from '@react-icons/all-files/fi/FiEye';
 import { getInitials } from '../../../utils/userHelpers';
 import {
     USER_PROFILE_HEADER_CARD_STYLES,
@@ -58,6 +59,36 @@ export const UserProfileHeader: React.FC<Props> = ({ user, onResendInvitation, i
                                     label="Inactive"
                                     size="small"
                                     sx={USER_PROFILE_INACTIVE_CHIP_STYLES}
+                                />
+                            )}
+
+                            {user.can_view_others_activity_logs ? (
+                                <Chip
+                                    icon={<FiEye style={CHIP_ICON_STYLES} />}
+                                    label="Can View Logs"
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: '#eff6ff',
+                                        color: '#3b82f6',
+                                        border: '1px solid #93c5fd',
+                                        fontWeight: 600,
+                                        fontSize: '12px',
+                                        height: '24px',
+                                    }}
+                                />
+                            ) : (
+                                <Chip
+                                    icon={<FiEye style={CHIP_ICON_STYLES} />}
+                                    label="Cannot View Logs"
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: '#f3f4f6',
+                                        color: '#6b7280',
+                                        border: '1px solid #d1d5db',
+                                        fontWeight: 600,
+                                        fontSize: '12px',
+                                        height: '24px',
+                                    }}
                                 />
                             )}
                         </Box>

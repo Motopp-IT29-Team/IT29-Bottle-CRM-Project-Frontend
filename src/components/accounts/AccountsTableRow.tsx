@@ -2,6 +2,7 @@ import React from 'react';
 import { TableCell, TableRow, IconButton, Avatar, Stack, Chip, Box } from '@mui/material';
 import { FaTrashAlt } from 'react-icons/fa';
 import { IAccount } from '../../types';
+import { getCountryNameByCode } from '../../utils/userHelpers';
 
 interface AccountsTableRowProps {
     account: IAccount;
@@ -73,7 +74,7 @@ export function AccountsTableRow({ account, onRowClick, onDelete }: AccountsTabl
                             alt={account.created_by.email}
                             sx={{ width: 32, height: 32 }}
                         />
-                        <Box sx={{ color: '#1a3353', textTransform: 'capitalize' }}>{account.created_by.email}</Box>
+                        <Box sx={{ color: '#1a3353' }}>{account.created_by.email}</Box>
                     </Stack>
                 ) : (
                     '---'
@@ -82,42 +83,42 @@ export function AccountsTableRow({ account, onRowClick, onDelete }: AccountsTabl
 
             {/* Country */}
             <TableCell sx={{ color: '#1a3353', textTransform: 'capitalize' }}>
-                {account.billing_country || '---'}
+                {getCountryNameByCode(account.billing_country) || '---'}
             </TableCell>
 
             {/* Tags */}
-            <TableCell>
-                {account.tags && account.tags.length > 0 ? (
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                        {account.tags.slice(0, 2).map((tag: any) => (
-                            <Chip
-                                key={tag.id || tag}
-                                label={tag.name || tag}
-                                size="small"
-                                sx={{
-                                    height: '24px',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#e3f2fd',
-                                    color: '#1976d2',
-                                }}
-                            />
-                        ))}
-                        {account.tags.length > 2 && (
-                            <Chip
-                                label={`+${account.tags.length - 2}`}
-                                size="small"
-                                sx={{
-                                    height: '24px',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#f5f5f5',
-                                }}
-                            />
-                        )}
-                    </Stack>
-                ) : (
-                    '---'
-                )}
-            </TableCell>
+            {/*<TableCell>*/}
+            {/*    {account.tags && account.tags.length > 0 ? (*/}
+            {/*        <Stack direction="row" spacing={0.5} flexWrap="wrap">*/}
+            {/*            {account.tags.slice(0, 2).map((tag: any) => (*/}
+            {/*                <Chip*/}
+            {/*                    key={tag.id || tag}*/}
+            {/*                    label={tag.name || tag}*/}
+            {/*                    size="small"*/}
+            {/*                    sx={{*/}
+            {/*                        height: '24px',*/}
+            {/*                        borderRadius: '4px',*/}
+            {/*                        backgroundColor: '#e3f2fd',*/}
+            {/*                        color: '#1976d2',*/}
+            {/*                    }}*/}
+            {/*                />*/}
+            {/*            ))}*/}
+            {/*            {account.tags.length > 2 && (*/}
+            {/*                <Chip*/}
+            {/*                    label={`+${account.tags.length - 2}`}*/}
+            {/*                    size="small"*/}
+            {/*                    sx={{*/}
+            {/*                        height: '24px',*/}
+            {/*                        borderRadius: '4px',*/}
+            {/*                        backgroundColor: '#f5f5f5',*/}
+            {/*                    }}*/}
+            {/*                />*/}
+            {/*            )}*/}
+            {/*        </Stack>*/}
+            {/*    ) : (*/}
+            {/*        '---'*/}
+            {/*    )}*/}
+            {/*</TableCell>*/}
 
             {/* Actions */}
             <TableCell>

@@ -22,14 +22,17 @@ interface Props {
 }
 
 // Custom component for digit boxes that auto-advance
-const DigitInput = React.forwardRef<HTMLInputElement, {
-    value: string;
-    index: number;
-    maxLength: number;
-    onValueChange: (index: number, value: string) => void;
-    onBackspace: (index: number) => void;
-    disabled?: boolean;
-}>(({ value, index, maxLength, onValueChange, onBackspace, disabled }, ref) => {
+const DigitInput = React.forwardRef<
+    HTMLInputElement,
+    {
+        value: string;
+        index: number;
+        maxLength: number;
+        onValueChange: (index: number, value: string) => void;
+        onBackspace: (index: number) => void;
+        disabled?: boolean;
+    }
+>(({ value, index, maxLength, onValueChange, onBackspace, disabled }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value.replace(/\D/g, '');
         if (newValue.length <= maxLength) {
@@ -55,7 +58,7 @@ const DigitInput = React.forwardRef<HTMLInputElement, {
             maxLength={maxLength}
             style={{
                 width: `${maxLength * 14 + 16}px`,
-                height: '40px',
+                height: '36px',
                 textAlign: 'center',
                 fontSize: '16px',
                 border: '1px solid #d1d5db',
@@ -125,9 +128,8 @@ export const IPhoneInput: React.FC<Props> = ({
     };
 
     const handleDigitChange = (groupIndex: number, digitIndex: number, value: string) => {
-        const absoluteIndex = selectedCountry.format
-            .slice(0, groupIndex)
-            .reduce((sum, group) => sum + group, 0) + digitIndex;
+        const absoluteIndex =
+            selectedCountry.format.slice(0, groupIndex).reduce((sum, group) => sum + group, 0) + digitIndex;
 
         const newDigits = [...digits];
 
@@ -166,9 +168,8 @@ export const IPhoneInput: React.FC<Props> = ({
     };
 
     const handleBackspace = (groupIndex: number, digitIndex: number) => {
-        const absoluteIndex = selectedCountry.format
-            .slice(0, groupIndex)
-            .reduce((sum, group) => sum + group, 0) + digitIndex;
+        const absoluteIndex =
+            selectedCountry.format.slice(0, groupIndex).reduce((sum, group) => sum + group, 0) + digitIndex;
 
         if (absoluteIndex > 0) {
             if (inputRefs.current[absoluteIndex - 1]) {
@@ -214,7 +215,7 @@ export const IPhoneInput: React.FC<Props> = ({
             <Typography sx={FIELD_LABEL_STYLES}>
                 {label} {required && <span style={REQUIRED_ASTERISK_STYLES}>*</span>}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                 {/* Country Selector */}
                 <Select
                     value={selectedCountry.code}
@@ -235,7 +236,6 @@ export const IPhoneInput: React.FC<Props> = ({
                         );
                     }}
                     sx={{
-                        minWidth: '200px',
                         height: '40px',
                         backgroundColor: '#ffffff',
                         '& .MuiOutlinedInput-notchedOutline': {

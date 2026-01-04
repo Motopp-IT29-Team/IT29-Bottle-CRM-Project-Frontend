@@ -65,6 +65,13 @@ export function EditOpportunity() {
             const result = await getById(id);
             if (result.success && result.data) {
                 const opportunity = result.data.opportunity_obj;
+                const attachments = result.data.attachments || [];
+                const formattedAttachments = attachments.map((att: any) => ({
+                    id: att.id,
+                    name: att.file_name,
+                    url: att.file_path,
+                    isNew: false,
+                }));
 
                 const data: OpportunityFormData = {
                     name: opportunity.name || '',
@@ -79,10 +86,21 @@ export function EditOpportunity() {
                     closed_on: opportunity.closed_on || '',
                     description: opportunity.description || '',
                     contacts: opportunity.contacts?.map((c: any) => c.id) || [],
-                    assigned_to: opportunity.assigned_to?.map((u: any) => u.id) || [],
+                    assigned_to:
+                        opportunity.assigned_to?.map((u: any) => ({
+                            value: u.id,
+                            label: (() => {
+                                const firstName = u.first_name || '';
+                                const lastName = u.last_name || '';
+                                const email = u.user_details.email || '';
+                                const fullName = `${firstName} ${lastName}`.trim();
+
+                                return fullName ? `${fullName} (${email})` : email;
+                            })(),
+                        })) || [],
                     teams: opportunity.teams?.map((t: any) => t.id) || [],
                     tags: opportunity.tags?.map((tag: any) => tag.name || tag) || [],
-                    attachments: null,
+                    attachments: formattedAttachments,
                 };
 
                 setFormData(data);

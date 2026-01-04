@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box } from '@mui/material';
 import { FiUser, FiBriefcase, FiMapPin, FiFileText } from 'react-icons/fi';
 import { IFormConfig } from '../../components/ui/form';
 import { COUNTRIES } from '../../constants/countries';
@@ -17,7 +16,13 @@ interface Params {
     statuses?: Array<{ value: string; label: string }>;
     sources?: Array<{ value: string; label: string }>;
     countries?: Array<{ code: string; name: string }>;
-    users?: Array<{ id: string; user__email: string; user__is_active: boolean; user__first_name?: string; user__last_name?: string }>;
+    users?: Array<{
+        id: string;
+        user__email: string;
+        user__is_active: boolean;
+        user__first_name?: string;
+        user__last_name?: string;
+    }>;
 }
 
 export const getLeadConfig = (params: Params = {}): IFormConfig => ({
@@ -137,7 +142,7 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                         }
                         return option.label || option.email;
                     },
-                }
+                },
             ],
         },
         {

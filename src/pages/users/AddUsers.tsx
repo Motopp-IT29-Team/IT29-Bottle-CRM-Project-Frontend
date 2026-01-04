@@ -28,7 +28,7 @@ export function AddUsers() {
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
 
     const { canSubmit } = useForm({
-        formConfig: getUserConfig(),
+        formConfig: getUserConfig(false, true),
         formData,
         isSubmitting: isLoading,
     });
@@ -108,7 +108,7 @@ export function AddUsers() {
             <ILoadingBackdrop open={isLoading} message="Creating user..." />
 
             <IForm
-                config={getUserConfig()}
+                config={getUserConfig(false, true)}
                 formData={formData}
                 errors={allErrors}
                 onChange={handleChange}

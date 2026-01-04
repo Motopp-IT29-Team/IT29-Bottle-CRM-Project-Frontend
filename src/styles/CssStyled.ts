@@ -28,17 +28,34 @@ export const FabLeft = styled(Fab)({
     width: '20px',
     minWidth: '20px',
     borderRadius: '7px 0px 0px 7px',
-    backgroundColor: 'whitesmoke',
+    backgroundColor: '#ffffff',
+    color: '#1e293b',
     marginRight: '7px',
-    boxShadow: '0px 1px 1px -1px rgba(0,0,0,0.2), 0px 0px 3px 0px rgba(0,0,0,0.14), 0px 1px 0px 0px rgba(0,0,0,0.12)',
+    boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
+    '&:hover': {
+        backgroundColor: '#f8fafc',
+    },
+    '&:disabled': {
+        backgroundColor: '#f1f5f9',
+        color: '#cbd5e1',
+    },
 });
+
 export const FabRight = styled(Fab)({
     height: '40px',
     minHeight: '40px',
     width: '20px',
     minWidth: '20px',
     borderRadius: '0px 7px 7px 0px',
-    backgroundColor: 'whitesmoke',
+    backgroundColor: '#ffffff',
+    color: '#1e293b',
     marginLeft: '7px',
-    boxShadow: '0px 1px 1px -1px rgba(0,0,0,0.2), 0px 0px 3px 0px rgba(0,0,0,0.14), 0px 1px 0px 0px rgba(0,0,0,0.12)',
+    boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
+    '&:hover': {
+        backgroundColor: '#f8fafc',
+    },
+    '&:disabled': {
+        backgroundColor: '#f1f5f9',
+        color: '#cbd5e1',
+    },
 });
