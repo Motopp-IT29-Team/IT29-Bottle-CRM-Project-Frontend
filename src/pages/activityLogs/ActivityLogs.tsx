@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Box, 
-    Container, 
-    Typography, 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
-    TableRow, 
+import {
+    Box,
+    Container,
+    Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     Paper,
     TextField,
     MenuItem,
@@ -16,7 +16,7 @@ import {
     Chip,
     CircularProgress,
     TablePagination,
-    Alert
+    Alert,
 } from '@mui/material';
 import { useActivityLogs } from '../../api/hooks/useActivityLogs';
 import { usersService } from '../../api/services/users.service';
@@ -64,18 +64,18 @@ const getActionColor = (action: string): 'success' | 'info' | 'warning' | 'error
 
 export function ActivityLogs() {
     const { isLoading, activityLogs, totalCount, canViewOthers, viewingMode, getAll } = useActivityLogs();
-    
+
     // Filters
     const [actionFilter, setActionFilter] = useState('');
     const [entityTypeFilter, setEntityTypeFilter] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [userFilter, setUserFilter] = useState('');
-    
+
     // Users list for filter
     const [users, setUsers] = useState<IUser[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
-    
+
     // Pagination
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -101,7 +101,7 @@ export function ActivityLogs() {
                 }
             }
         };
-        
+
         // Only fetch if canViewOthers is explicitly true
         if (canViewOthers) {
             fetchUsers();
@@ -121,7 +121,7 @@ export function ActivityLogs() {
             };
             await getAll(params);
         };
-        
+
         fetchLogs();
     }, [actionFilter, entityTypeFilter, dateFrom, dateTo, userFilter, page, rowsPerPage, getAll]);
 
@@ -147,7 +147,8 @@ export function ActivityLogs() {
 
                 {viewingMode === 'own' && (
                     <Alert severity="info" sx={{ mb: 2 }}>
-                        You are viewing only your own activity logs. Contact an admin for access to view all organization logs.
+                        You are viewing only your own activity logs. Contact an admin for access to view all
+                        organization logs.
                     </Alert>
                 )}
 
@@ -159,7 +160,6 @@ export function ActivityLogs() {
                                 <TextField
                                     select
                                     fullWidth
-                                    label="User"
                                     value={userFilter}
                                     onChange={(e) => {
                                         setUserFilter(e.target.value);
@@ -167,11 +167,26 @@ export function ActivityLogs() {
                                     }}
                                     size="small"
                                     disabled={loadingUsers}
+                                    SelectProps={{
+                                        displayEmpty: true,
+                                        renderValue: (value: unknown): string => {
+                                            if (!value || value === '') {
+                                                return 'All Users';
+                                            }
+                                            const selectedUser = users.find(
+                                                (u) => (u.user_details?.id || u.id) === value
+                                            );
+                                            if (selectedUser) {
+                                                return `${selectedUser.first_name} ${selectedUser.last_name} (${selectedUser.user_details?.email})`;
+                                            }
+                                            return String(value);
+                                        },
+                                    }}
                                 >
                                     <MenuItem value="">All Users</MenuItem>
                                     {users.map((user) => (
                                         <MenuItem key={user.id} value={user.user_details?.id || user.id}>
-                                            {user.user_details?.email || 'Unknown'}
+                                            {user.first_name} {user.last_name} ({user.user_details?.email})
                                         </MenuItem>
                                     ))}
                                 </TextField>
@@ -269,9 +284,7 @@ export function ActivityLogs() {
                                     {activityLogs.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={6} align="center">
-                                                <Typography color="textSecondary">
-                                                    No activity logs found
-                                                </Typography>
+                                                <Typography color="textSecondary">No activity logs found</Typography>
                                             </TableCell>
                                         </TableRow>
                                     ) : (
@@ -279,25 +292,19 @@ export function ActivityLogs() {
                                             <TableRow key={log.id}>
                                                 <TableCell>{log.user_email}</TableCell>
                                                 <TableCell>
-                                                    <Chip 
-                                                        label={log.user_role} 
-                                                        size="small" 
-                                                        variant="outlined"
-                                                    />
+                                                    <Chip label={log.user_role} size="small" variant="outlined" />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Chip 
-                                                        label={log.action_display || log.action} 
-                                                        size="small" 
+                                                    <Chip
+                                                        label={log.action_display || log.action}
+                                                        size="small"
                                                         color={getActionColor(log.action)}
                                                     />
                                                 </TableCell>
                                                 <TableCell>
                                                     {log.entity_type_display || log.entity_type || '-'}
                                                 </TableCell>
-                                                <TableCell>
-                                                    {log.entity_name || '-'}
-                                                </TableCell>
+                                                <TableCell>{log.entity_name || '-'}</TableCell>
                                                 <TableCell>
                                                     {log.created_on_arrow || new Date(log.created_at).toLocaleString()}
                                                 </TableCell>

@@ -32,6 +32,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         name: 'email',
                         label: 'Email',
                         type: 'email',
+                        required: true,
                         placeholder: 'Enter email address',
                     },
                     {
@@ -80,6 +81,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         name: 'contact_name',
                         label: 'Contact Name',
                         type: 'text',
+                        required: true,
                         placeholder: 'Enter contact name',
                     },
                     {
@@ -113,42 +115,36 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         name: 'billing_address_line',
                         label: 'Address Line',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter address line',
                     },
                     {
                         name: 'billing_street',
                         label: 'Street',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter street',
                     },
                     {
                         name: 'billing_city',
                         label: 'City',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter city',
                     },
                     {
                         name: 'billing_state',
                         label: 'State',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter state',
                     },
                     {
                         name: 'billing_postcode',
                         label: 'Postal Code',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter postal code',
                     },
                     {
                         name: 'billing_country',
                         label: 'Country',
                         type: 'select',
-                        required: true,
                         placeholder: 'Select country',
                         options: countries.map((country: any) => ({
                             value: country[0],

@@ -95,15 +95,27 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         label: 'Assign To',
                         type: 'autocomplete',
                         placeholder: 'Select users',
-                        options: users.map((user: any) => ({
-                            value: user.id,
-                            label: user.user__email || user.email || `${user.first_name} ${user.last_name}`,
-                        })),
+                        options: users.map((user: any) => {
+                            const firstName = user.user__first_name || user.first_name || '';
+                            const lastName = user.user__last_name || user.last_name || '';
+                            const email = user.user__email || user.email || '';
+                            const fullName = `${firstName} ${lastName}`.trim();
+                            const label = fullName ? `${fullName} (${email})` : email;
+
+                            return {
+                                value: user.id,
+                                label: label,
+                            };
+                        }),
                     },
                     {
                         name: 'attachments',
                         label: 'Attachments',
-                        type: 'file',
+                        type: 'multifile',
+                        placeholder: 'Upload documents, images, or PDFs',
+                        accept: 'image/*,application/pdf,.doc,.docx,.xls,.xlsx',
+                        maxFiles: 10,
+                        maxSizeInMB: 10,
                     },
                 ],
             },
