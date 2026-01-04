@@ -4,7 +4,6 @@ import { IModernAppBar, AppBarAction, ILoadingState, ErrorState, IActionModal } 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UserProfileHeader } from '../../components/users/details/UserProfileHeader';
 import { UserInfoSection } from '../../components/users/details/UserInfoSection';
-import { UserAddressSection } from '../../components/users/details/UserAddressSection';
 import { UserActivitySection } from '../../components/users/details/UserActivitySection';
 import { useUsers } from '../../api';
 import { routes } from '../../constants/routes';
@@ -70,7 +69,7 @@ export function UserDetails() {
     };
 
     if (isLoading) {
-        return <ILoadingState message="Loading user details..." />;
+        return <ILoadingState message="Loading..." />;
     }
 
     if (!userId || !userDetails) {
@@ -99,8 +98,6 @@ export function UserDetails() {
                     role={userDetails.role}
                     dateOfJoining={userDetails.date_of_joining}
                 />
-
-                {/*<UserAddressSection address={userDetails.address} />*/}
 
                 <UserActivitySection user={userDetails} />
             </Box>

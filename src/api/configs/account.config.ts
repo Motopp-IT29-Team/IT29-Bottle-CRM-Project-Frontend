@@ -158,7 +158,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                 ],
             },
             {
-                title: 'Description',
+                title: 'Other',
                 icon: FiFileText,
                 defaultExpanded: true,
                 fields: [

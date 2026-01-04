@@ -34,6 +34,7 @@ export default function OrganizationModal(props: any) {
 
     const buttonRef = useRef<HTMLButtonElement>(null);
     const currentOrgId = localStorage.getItem('org');
+    const userRole = localStorage.getItem('role');
 
     useEffect(() => {
         if (open) {
@@ -314,77 +315,82 @@ export default function OrganizationModal(props: any) {
                     )}
                 </Box>
 
-                <Divider />
+                {userRole === 'ADMIN' && (
+                    <>
+                        <Divider />
 
-                {/* Add New Organization */}
-                <Box sx={{ p: 3, pt: 2.5 }}>
-                    <Typography
-                        sx={{
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: '#374151',
-                            mb: 1.5,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                        }}
-                    >
-                        Create New
-                    </Typography>
-                    <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                        <TextField
-                            autoFocus={organization?.length === 0}
-                            type="text"
-                            fullWidth
-                            placeholder="Enter organization name"
-                            value={newOrganization}
-                            onChange={(e: any) => setNewOrganization(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            error={!!error}
-                            helperText={error || ''}
-                            disabled={isCreating}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: '10px',
-                                    backgroundColor: '#f9fafb',
-                                    '&:hover': {
-                                        backgroundColor: 'white',
-                                    },
-                                    '&.Mui-focused': {
-                                        backgroundColor: 'white',
-                                    },
-                                },
-                                '& .MuiOutlinedInput-input': {
-                                    fontSize: '14px',
-                                    py: 1.5,
-                                },
-                            }}
-                        />
-                        <IconButton
-                            onClick={addOrganization}
-                            ref={buttonRef}
-                            disabled={!newOrganization.trim() || isCreating}
-                            sx={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: '10px',
-                                backgroundColor: newOrganization.trim() && !isCreating ? '#667eea' : '#f3f4f6',
-                                color: newOrganization.trim() && !isCreating ? 'white' : '#9ca3af',
-                                '&:hover': {
-                                    backgroundColor: newOrganization.trim() && !isCreating ? '#5568d3' : '#f3f4f6',
-                                },
-                                '&:disabled': {
-                                    backgroundColor: '#f3f4f6',
-                                },
-                            }}
-                        >
-                            {isCreating ? (
-                                <CircularProgress size={20} sx={{ color: '#9ca3af' }} />
-                            ) : (
-                                <FiPlus size={20} />
-                            )}
-                        </IconButton>
-                    </Stack>
-                </Box>
+                        {/* Add New Organization */}
+                        <Box sx={{ p: 3, pt: 2.5 }}>
+                            <Typography
+                                sx={{
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                    color: '#374151',
+                                    mb: 1.5,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Create New
+                            </Typography>
+                            <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                                <TextField
+                                    autoFocus={organization?.length === 0}
+                                    type="text"
+                                    fullWidth
+                                    placeholder="Enter organization name"
+                                    value={newOrganization}
+                                    onChange={(e: any) => setNewOrganization(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    error={!!error}
+                                    helperText={error || ''}
+                                    disabled={isCreating}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: '10px',
+                                            backgroundColor: '#f9fafb',
+                                            '&:hover': {
+                                                backgroundColor: 'white',
+                                            },
+                                            '&.Mui-focused': {
+                                                backgroundColor: 'white',
+                                            },
+                                        },
+                                        '& .MuiOutlinedInput-input': {
+                                            fontSize: '14px',
+                                            py: 1.5,
+                                        },
+                                    }}
+                                />
+                                <IconButton
+                                    onClick={addOrganization}
+                                    ref={buttonRef}
+                                    disabled={!newOrganization.trim() || isCreating}
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        borderRadius: '10px',
+                                        backgroundColor: newOrganization.trim() && !isCreating ? '#667eea' : '#f3f4f6',
+                                        color: newOrganization.trim() && !isCreating ? 'white' : '#9ca3af',
+                                        '&:hover': {
+                                            backgroundColor:
+                                                newOrganization.trim() && !isCreating ? '#5568d3' : '#f3f4f6',
+                                        },
+                                        '&:disabled': {
+                                            backgroundColor: '#f3f4f6',
+                                        },
+                                    }}
+                                >
+                                    {isCreating ? (
+                                        <CircularProgress size={20} sx={{ color: '#9ca3af' }} />
+                                    ) : (
+                                        <FiPlus size={20} />
+                                    )}
+                                </IconButton>
+                            </Stack>
+                        </Box>
+                    </>
+                )}
             </Box>
         </Dialog>
     );

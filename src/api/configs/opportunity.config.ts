@@ -1,6 +1,7 @@
 import { IFormConfig } from '../../components/ui/form';
 import { FiDollarSign, FiFileText } from 'react-icons/fi';
 import { LEAD_BUDGET_RANGE, LEAD_DECISION_TIMEFRAME } from '../../constants/lead';
+import { toTitleCase } from '../../utils/formHelpers';
 
 interface Params {
     accounts?: any[];
@@ -10,12 +11,7 @@ interface Params {
 }
 
 export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
-    const {
-        accounts = [],
-        users = [],
-        stage = [],
-        leadSource = [],
-    } = params;
+    const { accounts = [], users = [], stage = [], leadSource = [] } = params;
 
     return {
         sections: [
@@ -56,7 +52,7 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         placeholder: 'Select stage',
                         options: stage.map((s: any) => ({
                             value: s[0],
-                            label: s[1],
+                            label: toTitleCase(s[1]),
                         })),
                     },
                     {
@@ -86,7 +82,7 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         placeholder: 'Select lead source',
                         options: leadSource.map((ls: any) => ({
                             value: ls[0],
-                            label: ls[1],
+                            label: toTitleCase(ls[1]),
                         })),
                     },
                     {
