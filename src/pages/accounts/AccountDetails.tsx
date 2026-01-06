@@ -8,6 +8,7 @@ import { routes } from '../../constants/routes';
 import { IAccount, IAttachment, IContact } from '../../types';
 import FormateTime from '../../utils/formateTime';
 import { ILabel } from '../../components/ui/ILabel';
+import { getCountryNameByCode } from '../../utils/userHelpers';
 
 export function AccountDetails() {
     const navigate = useNavigate();
@@ -16,7 +17,7 @@ export function AccountDetails() {
     const { getById, isLoading } = useAccounts();
 
     const [account, setAccount] = useState<IAccount | null>(null);
-    const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    // const [attachments, setAttachments] = useState<IAttachment[]>([]);
     const [contacts, setContacts] = useState<IContact[]>([]);
 
     useEffect(() => {
@@ -35,7 +36,7 @@ export function AccountDetails() {
 
         if (result.success && result.data) {
             setAccount(result.data.account);
-            setAttachments(result.data.attachments || []);
+            // setAttachments(result.data.attachments || []);
             setContacts(result.data.account.contacts || []);
         } else {
             navigate(routes.accounts.main);
@@ -181,7 +182,7 @@ export function AccountDetails() {
                             <Box sx={{ p: '20px', display: 'flex', gap: '20px', pt: 0 }}>
                                 <DetailField label="Postal Code" value={account.billing_postcode} />
                                 <DetailField label="State" value={account.billing_state} />
-                                <DetailField label="Country" value={account.billing_country} />
+                                <DetailField label="Country" value={getCountryNameByCode(account.billing_country)} />
                             </Box>
                         </Box>
 
@@ -199,7 +200,17 @@ export function AccountDetails() {
                                 >
                                     Description
                                 </Box>
-                                <Box sx={{ p: '20px' }} dangerouslySetInnerHTML={{ __html: account.description }} />
+                                <Box
+                                    sx={{
+                                        p: '20px',
+                                        maxWidth: '650px',
+                                        wordWrap: 'break-word',
+                                        overflowWrap: 'break-word',
+                                        whiteSpace: 'pre-wrap',
+                                        overflow: 'hidden',
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: account.description }}
+                                />
                             </Box>
                         )}
                     </Box>

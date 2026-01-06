@@ -5,8 +5,6 @@ import { IContact, ILead, IUser } from '../../types';
 interface GetAccountConfigParams {
     contacts?: IContact[];
     users?: IUser[];
-    // teams?: any[];
-    // tags?: any[];
     leads?: ILead[];
     industries?: any[];
     countries?: any[];
@@ -14,16 +12,7 @@ interface GetAccountConfigParams {
 }
 
 export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConfig => {
-    const {
-        contacts = [],
-        users = [],
-        // teams = [],
-        // tags = [],
-        leads = [],
-        industries = [],
-        countries = [],
-        status = [],
-    } = params;
+    const { contacts = [], users = [], leads = [], industries = [], countries = [], status = [] } = params;
 
     return {
         sections: [
@@ -43,6 +32,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         name: 'email',
                         label: 'Email',
                         type: 'email',
+                        required: true,
                         placeholder: 'Enter email address',
                     },
                     {
@@ -91,6 +81,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         name: 'contact_name',
                         label: 'Contact Name',
                         type: 'text',
+                        required: true,
                         placeholder: 'Enter contact name',
                     },
                     {
@@ -113,35 +104,10 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                             label: user.user__email || user.email || `${user.first_name} ${user.last_name}`,
                         })),
                     },
-                    // {
-                    //     name: 'teams',
-                    //     label: 'Teams',
-                    //     type: 'autocomplete',
-                    //     placeholder: 'Select teams',
-                    //     options: teams.map((team: any) => ({
-                    //         value: team.id,
-                    //         label: team.name,
-                    //     })),
-                    // },
-                    // {
-                    //     name: 'tags',
-                    //     label: 'Tags',
-                    //     type: 'autocomplete',
-                    //     placeholder: 'Add tags',
-                    //     options: tags.map((tag: any) => ({
-                    //         value: tag.name || tag,
-                    //         label: tag.name || tag,
-                    //     })),
-                    // },
-                    // {
-                    //     name: 'account_attachment',
-                    //     label: 'Attachment',
-                    //     type: 'file',
-                    // },
                 ],
             },
             {
-                title: 'Billing Address',
+                title: 'Address',
                 icon: FiMapPin,
                 defaultExpanded: true,
                 fields: [
@@ -149,42 +115,36 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         name: 'billing_address_line',
                         label: 'Address Line',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter address line',
                     },
                     {
                         name: 'billing_street',
                         label: 'Street',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter street',
                     },
                     {
                         name: 'billing_city',
                         label: 'City',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter city',
                     },
                     {
                         name: 'billing_state',
                         label: 'State',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter state',
                     },
                     {
                         name: 'billing_postcode',
                         label: 'Postal Code',
                         type: 'text',
-                        required: true,
                         placeholder: 'Enter postal code',
                     },
                     {
                         name: 'billing_country',
                         label: 'Country',
                         type: 'select',
-                        required: true,
                         placeholder: 'Select country',
                         options: countries.map((country: any) => ({
                             value: country[0],
@@ -194,7 +154,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                 ],
             },
             {
-                title: 'Description',
+                title: 'Other',
                 icon: FiFileText,
                 defaultExpanded: true,
                 fields: [

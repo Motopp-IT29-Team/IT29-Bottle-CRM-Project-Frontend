@@ -66,22 +66,27 @@ export const IPagination: React.FC<Props> = ({
             </Select>
 
             {totalPages > 1 && (
-                <Box sx={ITEMS_CONTAINER_STYLES}>
-                    <FabLeft
-                        onClick={onPreviousPage}
-                        disabled={currentPage === 1}
-                        sx={{ '&:disabled': { opacity: 0.5, cursor: 'not-allowed' } }}
-                    >
+                <Box
+                    sx={{
+                        ...ITEMS_CONTAINER_STYLES,
+                        backgroundColor: '#ffffff',
+                        borderRadius: '8px',
+                    }}
+                >
+                    <FabLeft onClick={onPreviousPage} disabled={currentPage === 1}>
                         <FiChevronLeft />
                     </FabLeft>
-                    <Typography sx={{ px: 2, fontSize: '14px', fontWeight: 500, color: '#475569' }}>
+                    <Typography
+                        sx={{
+                            px: 2,
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            color: '#1e293b',
+                        }}
+                    >
                         {currentPage} / {totalPages}
                     </Typography>
-                    <FabRight
-                        onClick={onNextPage}
-                        disabled={currentPage === totalPages}
-                        sx={{ '&:disabled': { opacity: 0.5, cursor: 'not-allowed' } }}
-                    >
+                    <FabRight onClick={onNextPage} disabled={currentPage === totalPages}>
                         <FiChevronRight />
                     </FabRight>
                 </Box>

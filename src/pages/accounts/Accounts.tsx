@@ -12,7 +12,7 @@ const columns: ITableColumn[] = [
     { id: 'website', label: 'Website', sortable: false },
     { id: 'created_by', label: 'Created By', sortable: false },
     { id: 'country', label: 'Country', sortable: true },
-    { id: 'tags', label: 'Tags', sortable: false },
+    // { id: 'tags', label: 'Tags', sortable: false },
     { id: 'actions', label: 'Actions', sortable: false },
 ];
 

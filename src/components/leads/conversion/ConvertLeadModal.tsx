@@ -212,7 +212,7 @@ export const ConvertLeadModal: React.FC<ConvertLeadModalProps> = ({ open, onClos
                                             >
                                                 {duplicates!.account_matches.map((match) => (
                                                     <MenuItem key={match.id} value={match.id}>
-                                                        {match.name} ({match.match_field} match)
+                                                        {match.name}
                                                     </MenuItem>
                                                 ))}
                                             </Select>

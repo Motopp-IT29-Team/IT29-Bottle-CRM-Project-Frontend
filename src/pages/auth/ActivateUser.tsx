@@ -64,6 +64,7 @@ export const ActivateUser = () => {
                 localStorage.setItem('refresh', response.data.refresh);
                 localStorage.setItem('user_id', response.data.user.id);
                 localStorage.setItem('email', response.data.user.email);
+                localStorage.setItem('org', response.data.org_id);
 
                 window.location.href = routes.app.main;
             } else {
