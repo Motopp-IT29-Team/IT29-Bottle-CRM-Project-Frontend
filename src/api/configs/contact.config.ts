@@ -73,15 +73,15 @@ export const getContactConfig = (params: Params = {}): IFormConfig => {
                     {
                         name: 'mobile_number',
                         label: 'Mobile Number',
-                        type: 'tel',
+                        type: 'phone',
                         required: true,
-                        placeholder: '+1234567890',
+                        placeholder: '',
                     },
                     {
                         name: 'secondary_number',
                         label: 'Secondary Number',
-                        type: 'tel',
-                        placeholder: '+1234567890',
+                        type: 'phone',
+                        placeholder: '',
                     },
                     {
                         name: 'language',
