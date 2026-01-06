@@ -10,6 +10,10 @@ const validatePhone = (phone: string): boolean => {
     return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
 };
 
+const isOnlyNumbers = (value: string): boolean => {
+    return /^\d+$/.test(value.trim());
+};
+
 export const validateLeadForm = (formData: LeadFormData): Record<string, string> => {
     const errors: Record<string, string> = {};
 
@@ -19,6 +23,8 @@ export const validateLeadForm = (formData: LeadFormData): Record<string, string>
 
     if (!formData.first_name || formData.first_name.trim() === '') {
         errors.first_name = 'First name is required';
+    } else if (isOnlyNumbers(formData.first_name)) {
+        errors.first_name = 'First name cannot be only numbers';
     }
 
     if (!formData.title || formData.title.trim() === '') {
@@ -27,6 +33,8 @@ export const validateLeadForm = (formData: LeadFormData): Record<string, string>
 
     if (!formData.last_name || formData.last_name.trim() === '') {
         errors.last_name = 'Last name is required';
+    } else if (isOnlyNumbers(formData.last_name)) {
+        errors.last_name = 'Last name cannot be only numbers';
     }
 
     if (!formData.email || formData.email.trim() === '') {
@@ -79,11 +87,15 @@ export const validateLeadField = (name: string, value: any): string | undefined 
         case 'first_name':
             if (!value || value.trim() === '') {
                 error = 'First name is required';
+            } else if (isOnlyNumbers(value)) {
+                error = 'First name cannot be only numbers';
             }
             break;
         case 'last_name':
             if (!value || value.trim() === '') {
                 error = 'Last name is required';
+            } else if (isOnlyNumbers(value)) {
+                error = 'Last name cannot be only numbers';
             }
             break;
         case 'title':
