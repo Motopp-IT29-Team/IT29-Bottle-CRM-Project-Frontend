@@ -48,8 +48,8 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                     {
                         name: 'phone',
                         label: 'Phone',
-                        type: 'text',
-                        placeholder: 'Enter phone number',
+                        type: 'phone',
+                        placeholder: '',
                     },
                     {
                         name: 'website',
