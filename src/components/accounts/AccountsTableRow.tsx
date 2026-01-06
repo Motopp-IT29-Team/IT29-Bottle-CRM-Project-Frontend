@@ -73,7 +73,7 @@ export function AccountsTableRow({ account, onRowClick, onDelete }: AccountsTabl
                             alt={account.created_by.email}
                             sx={{ width: 32, height: 32 }}
                         />
-                        <Box sx={{ color: '#1a3353', textTransform: 'capitalize' }}>{account.created_by.email}</Box>
+                        <Box sx={{ color: '#1a3353', textTransform: 'lowercase' }}>{account.created_by.email}</Box>
                     </Stack>
                 ) : (
                     '---'
