@@ -166,18 +166,6 @@ export const getContactConfig = (params: Params = {}): IFormConfig => {
                         type: 'text',
                         placeholder: 'https://linkedin.com/in/...',
                     },
-                    {
-                        name: 'facebook_url',
-                        label: 'Facebook URL',
-                        type: 'text',
-                        placeholder: 'https://facebook.com/...',
-                    },
-                    {
-                        name: 'twitter_username',
-                        label: 'Twitter Username',
-                        type: 'text',
-                        placeholder: '@username',
-                    },
                 ],
             },
         ],
