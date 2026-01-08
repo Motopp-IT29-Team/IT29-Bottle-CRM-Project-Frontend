@@ -83,6 +83,7 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         name: 'closed_on',
                         label: 'Expected Close Date',
                         type: 'date',
+                        minDate: new Date().toISOString().split('T')[0],
                     },
                     {
                         name: 'assigned_to',
