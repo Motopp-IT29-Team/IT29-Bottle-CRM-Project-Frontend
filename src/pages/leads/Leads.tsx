@@ -11,7 +11,6 @@ const columns: ITableColumn[] = [
     { id: 'title', label: 'Lead Name', sortable: true },
     { id: 'country', label: 'Country & Source', sortable: false },
     { id: 'status', label: 'Status', sortable: true },
-    { id: 'tags', label: 'Tags & Team', sortable: false },
     { id: 'created_at', label: 'Created', sortable: true },
 ];
 
