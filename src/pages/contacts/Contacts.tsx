@@ -43,7 +43,7 @@ export function Contacts() {
 
     useEffect(() => {
         fetchContacts();
-    }, []);
+    }, [fetchContacts]);
 
     const handleRecordsPerPage = (value: number) => {
         setRecordsPerPage(value);
