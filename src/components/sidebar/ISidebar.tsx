@@ -57,7 +57,6 @@ const navItems: NavItem[] = [
     { key: 'accounts', label: 'Accounts', icon: FiFolder, path: routes.accounts.main },
     // { key: 'companies', label: 'Companies', icon: FiFile, path: routes.companies.main },
     { key: 'users', label: 'Users', icon: FiUserPlus, path: routes.users.main, adminOnly: true },
-    { key: 'cases', label: 'Cases', icon: FiBriefcase, path: routes.cases.main },
 ];
 
 export const getVisibleNavItems = (isAdmin: boolean): NavItem[] => {
@@ -195,11 +194,6 @@ export const ISidebar = () => {
                         <Route path={routes.opportunities.create} element={<AddOpportunity />} />
                         <Route path={routes.opportunities.details} element={<OpportunityDetails />} />
                         <Route path="/opportunities/edit/:id" element={<EditOpportunity />} />
-
-                        <Route path={routes.cases.main} element={<Cases />} />
-                        <Route path={routes.cases.create} element={<AddCase />} />
-                        <Route path={routes.cases.edit} element={<EditCase />} />
-                        <Route path={routes.cases.details} element={<CaseDetails />} />
                     </Routes>
                 </Box>
             </MyContext.Provider>
