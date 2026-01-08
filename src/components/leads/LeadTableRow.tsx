@@ -85,30 +85,6 @@ export const LeadTableRow: React.FC<Props> = ({ lead, onViewDetail }) => {
                 )}
             </TableCell>
 
-            {/* Tags & Team */}
-            <TableCell sx={{ border: 0, py: 2 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                        {lead.tags.slice(0, 3).map((tagData: any, idx: number) => (
-                            <ILabel tags={tagData} key={idx} />
-                        ))}
-                        {lead.tags.length > 3 && (
-                            <Link sx={{ fontSize: '13px', alignSelf: 'center' }}>+{lead.tags.length - 3}</Link>
-                        )}
-                    </Box>
-
-                    {lead.teams && lead.teams.length > 0 && (
-                        <AvatarGroup max={3} sx={{ ml: 1 }}>
-                            {lead.teams.map((team: any, idx: number) => (
-                                <Avatar key={idx} alt={team} src={team} sx={{ width: 28, height: 28 }}>
-                                    {team}
-                                </Avatar>
-                            ))}
-                        </AvatarGroup>
-                    )}
-                </Stack>
-            </TableCell>
-
             {/* Created */}
             <TableCell sx={{ border: 0, py: 2 }}>
                 <Stack direction="row" spacing={1} alignItems="center">
