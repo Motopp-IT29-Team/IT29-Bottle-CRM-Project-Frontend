@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // ← додай Link
 import { FiMail, FiLock } from 'react-icons/fi';
 import imgGoogle from '../../assets/images/auth/google.svg';
 import imgLogo from '../../assets/images/auth/img_logo.png';
@@ -176,6 +176,24 @@ export default function Login() {
                                 disabled={submitting}
                                 endAdornment={<FiLock style={{ color: '#9ca3af' }} />}
                             />
+                        </Box>
+
+                        {/* ✅ ДОДАНО: Forgot Password Link */}
+                        <Box sx={{ textAlign: 'right', mt: 1 }}>
+                            <Link
+                                to="/forgot-password"
+                                style={{
+                                    color: '#6366f1',
+                                    textDecoration: 'none',
+                                    fontSize: '14px',
+                                    fontWeight: 500,
+                                    transition: 'color 0.2s ease',
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#4f46e5')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = '#6366f1')}
+                            >
+                                Forgot password?
+                            </Link>
                         </Box>
 
                         {/* Sign In Button */}
