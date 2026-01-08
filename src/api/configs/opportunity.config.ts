@@ -1,6 +1,6 @@
 import { IFormConfig } from '../../components/ui/form';
 import { FiDollarSign, FiFileText } from 'react-icons/fi';
-import { LEAD_BUDGET_RANGE, LEAD_DECISION_TIMEFRAME } from '../../constants/lead';
+import { LEAD_DECISION_TIMEFRAME } from '../../constants/lead';
 import { toTitleCase } from '../../utils/formHelpers';
 
 interface Params {
@@ -60,13 +60,6 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         label: 'Probability (%)',
                         type: 'number',
                         placeholder: 'Enter probability (0-100)',
-                    },
-                    {
-                        name: 'budget_range',
-                        label: 'Budget Range',
-                        type: 'select',
-                        placeholder: 'Select budget range',
-                        options: LEAD_BUDGET_RANGE,
                     },
                     {
                         name: 'decision_timeframe',

@@ -145,10 +145,6 @@ export function OpportunityDetails() {
                         />
                         <DetailField label="Probability" value={`${opportunity.probability || 0}%`} />
                         <DetailField
-                            label="Budget Range"
-                            value={opportunity.budget_range ? formatBudgetRange(opportunity.budget_range) : '---'}
-                        />
-                        <DetailField
                             label="Decision Timeframe"
                             value={
                                 opportunity.decision_timeframe
@@ -161,25 +157,6 @@ export function OpportunityDetails() {
                     <DetailSection title="Account Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
                         <DetailField label="Account Name" value={opportunity.account?.name} />
                         <DetailField label="Close Date" value={opportunity.closed_on} />
-                        <DetailField
-                            label="Teams"
-                            value={
-                                opportunity.teams && opportunity.teams.length > 0 ? (
-                                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                                        {opportunity.teams.map((team: any) => (
-                                            <Chip
-                                                key={team.id || team}
-                                                label={team.name || team}
-                                                size="small"
-                                                sx={{ height: '24px', borderRadius: '4px' }}
-                                            />
-                                        ))}
-                                    </Stack>
-                                ) : (
-                                    '---'
-                                )
-                            }
-                        />
                     </DetailSection>
 
                     {/* Contacts Section */}
