@@ -11,12 +11,8 @@ const columns: ITableColumn[] = [
     { id: 'title', label: 'Lead Name', sortable: true },
     { id: 'country', label: 'Country & Source', sortable: false },
     { id: 'status', label: 'Status', sortable: true },
+    { id: 'tags', label: 'Tags & Team', sortable: false },
     { id: 'created_at', label: 'Created', sortable: true },
-];
-
-const tabs = [
-    { value: 'open', label: 'Open' },
-    { value: 'closed', label: 'Converted' },
 ];
 
 export function Leads() {
@@ -29,6 +25,10 @@ export function Leads() {
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
 
+    // ✅ ДОДАНО: Стан для кількості лідів
+    const [openLeadsCount, setOpenLeadsCount] = useState(0);
+    const [closedLeadsCount, setClosedLeadsCount] = useState(0);
+
     const fetchLeads = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
         const result = await getAll({
@@ -40,15 +40,19 @@ export function Leads() {
             const openLeadsData = result.data.open_leads?.open_leads || [];
             const closedLeadsData = result.data.close_leads?.close_leads || [];
 
-            const openLeadsCount = result.data.open_leads?.leads_count || 0;
-            const closedLeadsCount = result.data.close_leads?.leads_count || 0;
+            const openCount = result.data.open_leads?.leads_count || 0;
+            const closedCount = result.data.close_leads?.leads_count || 0;
+
+            // ✅ ДОДАНО: Оновлюємо кількість лідів
+            setOpenLeadsCount(openCount);
+            setClosedLeadsCount(closedCount);
 
             if (tab === 'open') {
                 setLeads(openLeadsData);
-                setTotalPages(Math.ceil(openLeadsCount / recordsPerPage));
+                setTotalPages(Math.ceil(openCount / recordsPerPage));
             } else {
                 setLeads(closedLeadsData);
-                setTotalPages(Math.ceil(closedLeadsCount / recordsPerPage));
+                setTotalPages(Math.ceil(closedCount / recordsPerPage));
             }
         }
     }, [tab, currentPage, recordsPerPage, getAll]);
@@ -115,6 +119,12 @@ export function Leads() {
             }
         });
     };
+
+    // ✅ ДОДАНО: Tabs з кількістю
+    const tabs = [
+        { value: 'open', label: `Open (${openLeadsCount})` },
+        { value: 'closed', label: `Converted (${closedLeadsCount})` },
+    ];
 
     return (
         <Box>

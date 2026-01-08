@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ITable, ITableColumn, IPagination, ITableToolbar } from '../../components/ui';
 import { routes } from '../../constants/routes';
 import { IOpportunity } from '../../types';
@@ -25,14 +25,17 @@ export function Opportunities() {
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalOpportunities, setTotalOpportunities] = useState(0);
 
     const fetchOpportunities = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
         const result = await getAll({ offset, limit: recordsPerPage });
 
         if (result.success && result.data) {
+            const count = result.data.opportunities_count || 0;
             setOpportunities(result.data.opportunities);
-            setTotalPages(Math.ceil(result.data.opportunities_count / recordsPerPage));
+            setTotalPages(Math.ceil(count / recordsPerPage));
+            setTotalOpportunities(count);
         }
     }, [currentPage, recordsPerPage, getAll]);
 
@@ -93,14 +96,30 @@ export function Opportunities() {
     return (
         <Box>
             <ITableToolbar addButtonLabel="Add Opportunity" onAdd={navigateToAdd} loading={isLoading}>
-                <IPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    recordsPerPage={recordsPerPage}
-                    onRecordsPerPageChange={handleRecordsPerPage}
-                    onPreviousPage={handlePreviousPage}
-                    onNextPage={handleNextPage}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Typography
+                        sx={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: '#64748b',
+                            px: 2,
+                            py: 1,
+                            backgroundColor: '#f8fafc',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                        }}
+                    >
+                        Total: {totalOpportunities}
+                    </Typography>
+                    <IPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        recordsPerPage={recordsPerPage}
+                        onRecordsPerPageChange={handleRecordsPerPage}
+                        onPreviousPage={handlePreviousPage}
+                        onNextPage={handleNextPage}
+                    />
+                </Box>
             </ITableToolbar>
 
             <ITable

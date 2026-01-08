@@ -12,13 +12,7 @@ const columns: ITableColumn[] = [
     { id: 'website', label: 'Website', sortable: false },
     { id: 'created_by', label: 'Created By', sortable: false },
     { id: 'country', label: 'Country', sortable: true },
-    // { id: 'tags', label: 'Tags', sortable: false },
     { id: 'actions', label: 'Actions', sortable: false },
-];
-
-const tabs = [
-    { value: 'open', label: 'Open' },
-    { value: 'closed', label: 'Closed' },
 ];
 
 export function Accounts() {
@@ -31,6 +25,8 @@ export function Accounts() {
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
+    const [openAccountsCount, setOpenAccountsCount] = useState(0);
+    const [closedAccountsCount, setClosedAccountsCount] = useState(0);
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [accountToDelete, setAccountToDelete] = useState<string | null>(null);
@@ -48,14 +44,15 @@ export function Accounts() {
         const result = await getAll({ offset, limit: recordsPerPage });
 
         if (result.success && result.data) {
-            setOpenAccounts(result.data.active_accounts.open_accounts);
-            setClosedAccounts(result.data.closed_accounts.close_accounts);
+            const openAccs = result.data.active_accounts.open_accounts;
+            const closedAccs = result.data.closed_accounts.close_accounts;
 
-            // Calculate total pages based on current tab
-            const currentCount =
-                tab === 'open'
-                    ? result.data.active_accounts.open_accounts.length
-                    : result.data.closed_accounts.close_accounts.length;
+            setOpenAccounts(openAccs);
+            setClosedAccounts(closedAccs);
+            setOpenAccountsCount(openAccs.length);
+            setClosedAccountsCount(closedAccs.length);
+
+            const currentCount = tab === 'open' ? openAccs.length : closedAccs.length;
             setTotalPages(Math.ceil(currentCount / recordsPerPage));
         }
     };
@@ -128,6 +125,11 @@ export function Accounts() {
             }
         });
     };
+
+    const tabs = [
+        { value: 'open', label: `Open (${openAccountsCount})` },
+        { value: 'closed', label: `Closed (${closedAccountsCount})` },
+    ];
 
     const currentAccounts = tab === 'open' ? openAccounts : closedAccounts;
 

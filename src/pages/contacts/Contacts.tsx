@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ITable, ITableColumn, IPagination, ITableToolbar } from '../../components/ui';
 import { useContacts } from '../../api';
 import { routes } from '../../constants/routes';
@@ -23,6 +23,7 @@ export function Contacts() {
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalContacts, setTotalContacts] = useState(0);
 
     const fetchContacts = useCallback(async () => {
         const offset = (currentPage - 1) * recordsPerPage;
@@ -32,8 +33,11 @@ export function Contacts() {
         });
 
         if (result.success && result.data) {
+            const contactsCount = result.data.contacts_count || 0;
+
             setContacts(result.data.contact_obj_list || []);
-            setTotalPages(Math.ceil((result.data.contacts_count || 0) / recordsPerPage));
+            setTotalPages(Math.ceil(contactsCount / recordsPerPage));
+            setTotalContacts(contactsCount);
         }
     }, [currentPage, recordsPerPage, getAll]);
 
@@ -97,14 +101,30 @@ export function Contacts() {
     return (
         <Box>
             <ITableToolbar addButtonLabel="Add Contact" onAdd={navigateToAddContact} loading={isLoading}>
-                <IPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    recordsPerPage={recordsPerPage}
-                    onRecordsPerPageChange={handleRecordsPerPage}
-                    onPreviousPage={handlePreviousPage}
-                    onNextPage={handleNextPage}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Typography
+                        sx={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: '#64748b',
+                            px: 2,
+                            py: 1,
+                            backgroundColor: '#f8fafc',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                        }}
+                    >
+                        Total: {totalContacts}
+                    </Typography>
+                    <IPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        recordsPerPage={recordsPerPage}
+                        onRecordsPerPageChange={handleRecordsPerPage}
+                        onPreviousPage={handlePreviousPage}
+                        onNextPage={handleNextPage}
+                    />
+                </Box>
             </ITableToolbar>
 
             <ITable

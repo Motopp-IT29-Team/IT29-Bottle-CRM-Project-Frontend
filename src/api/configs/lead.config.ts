@@ -107,6 +107,7 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     label: 'Expected Close Date',
                     type: 'date',
                     placeholder: 'Select date',
+                    minDate: new Date().toISOString().split('T')[0],
                 },
                 {
                     name: 'assigned_to',
