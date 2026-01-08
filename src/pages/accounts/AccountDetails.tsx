@@ -161,31 +161,6 @@ export function AccountDetails() {
                             </Box>
                         </Box>
 
-                        {/* Address Section */}
-                        <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
-                            <Box
-                                sx={{
-                                    p: '20px',
-                                    borderBottom: '1px solid #e0e0e0',
-                                    fontWeight: 600,
-                                    fontSize: '18px',
-                                    color: '#1a3353',
-                                }}
-                            >
-                                Address Details
-                            </Box>
-                            <Box sx={{ p: '20px', display: 'flex', gap: '20px' }}>
-                                <DetailField label="Address Line" value={account.billing_address_line} />
-                                <DetailField label="Street" value={account.billing_street} />
-                                <DetailField label="City" value={account.billing_city} />
-                            </Box>
-                            <Box sx={{ p: '20px', display: 'flex', gap: '20px', pt: 0 }}>
-                                <DetailField label="Postal Code" value={account.billing_postcode} />
-                                <DetailField label="State" value={account.billing_state} />
-                                <DetailField label="Country" value={getCountryNameByCode(account.billing_country)} />
-                            </Box>
-                        </Box>
-
                         {/* Description Section */}
                         {account.description && (
                             <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
