@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
-import { FaBriefcase, FaDollarSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
+import { FaBriefcase, FaEuroSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
 import { ILead } from '../../../types';
 import FormateTime from '../../../utils/formateTime';
 
@@ -195,7 +195,7 @@ export const HeroCard: React.FC<Props> = ({ lead }) => {
                                     justifyContent: 'center',
                                 }}
                             >
-                                <FaDollarSign style={{ color: '#10b981', fontSize: '16px' }} />
+                                <FaEuroSign style={{ color: '#10b981', fontSize: '16px' }} />
                             </Box>
                             <Typography variant="caption" color="text.secondary" fontWeight={600}>
                                 Opportunity

@@ -1,6 +1,7 @@
 import { IFormConfig } from '../../components/ui/form';
 import { FiFileText, FiHome, FiMapPin } from 'react-icons/fi';
 import { IContact, ILead, IUser } from '../../types';
+import { toTitleCase } from '../../utils/formHelpers';
 
 interface GetAccountConfigParams {
     contacts?: IContact[];
@@ -54,7 +55,7 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         placeholder: 'Select industry',
                         options: industries.map((ind: any) => ({
                             value: ind[0],
-                            label: ind[1],
+                            label: toTitleCase(ind[1]),
                         })),
                     },
                     {

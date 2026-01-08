@@ -42,7 +42,8 @@ export const getOpportunityConfig = (params: Params = {}): IFormConfig => {
                         name: 'amount',
                         label: 'Amount',
                         type: 'number',
-                        placeholder: 'Enter amount',
+                        placeholder: '0.00',
+                        startAdornment: '€',
                     },
                     {
                         name: 'stage',
