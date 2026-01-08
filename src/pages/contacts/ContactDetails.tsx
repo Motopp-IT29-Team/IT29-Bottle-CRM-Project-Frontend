@@ -186,19 +186,6 @@ export function ContactDetails() {
                             )
                         }
                     />
-                    <DetailField
-                        label="Facebook URL"
-                        value={
-                            contactDetails.facebook_url ? (
-                                <Link href={contactDetails.facebook_url} target="_blank" rel="noopener">
-                                    {contactDetails.facebook_url}
-                                </Link>
-                            ) : (
-                                '---'
-                            )
-                        }
-                    />
-                    <DetailField label="Twitter Username" value={contactDetails.twitter_username} />
                 </DetailSection>
             </Box>
 
