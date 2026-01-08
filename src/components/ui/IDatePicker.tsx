@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, TextField } from '@mui/material';
 import { RequiredTextField } from '../../styles/CssStyled';
 import { TEXT_FIELD_STYLES } from '../../styles/ITextFieldStyles';
@@ -30,6 +30,26 @@ export const IDatePicker: React.FC<Props> = ({
     maxDate,
 }) => {
     const TextFieldComponent = required ? RequiredTextField : TextField;
+    const [dateError, setDateError] = useState<string>('');
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedDate = e.target.value;
+
+        if (minDate && selectedDate && selectedDate < minDate) {
+            setDateError('Date cannot be in the past');
+            onChange(e);
+            return;
+        }
+
+        if (maxDate && selectedDate && selectedDate > maxDate) {
+            setDateError('Date is too far in the future');
+            onChange(e);
+            return;
+        }
+
+        setDateError('');
+        onChange(e);
+    };
 
     return (
         <Box sx={FIELD_BOX_STYLES}>
@@ -39,12 +59,12 @@ export const IDatePicker: React.FC<Props> = ({
             <TextFieldComponent
                 name={name}
                 value={value || ''}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder={placeholder}
                 size="small"
                 type="date"
-                error={!!error}
-                helperText={error}
+                error={!!error || !!dateError}
+                helperText={error || dateError}
                 disabled={disabled}
                 required={required}
                 InputLabelProps={{
