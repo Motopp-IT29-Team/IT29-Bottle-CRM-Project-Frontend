@@ -210,7 +210,7 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
                                 CLOSE DATE
                             </Typography>
                         </Stack>
-                        <Typography variant="h6" fontWeight={600} color="#111827">
+                        <Typography variant="h5" fontWeight={700} color="#111827">
                             {opportunity.closed_on || '---'}
                         </Typography>
                     </Box>
@@ -220,7 +220,7 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
                         <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
                             BUDGET RANGE
                         </Typography>
-                        <Typography variant="body1" fontWeight={600} color="#111827">
+                        <Typography variant="h5" fontWeight={700} color="#111827">
                             {formatBudgetRange(opportunity.budget_range)}
                         </Typography>
                     </Box>
@@ -230,7 +230,7 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
                         <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
                             DECISION TIMEFRAME
                         </Typography>
-                        <Typography variant="body1" fontWeight={600} color="#111827">
+                        <Typography variant="h5" fontWeight={700} color="#111827">
                             {formatDecisionTimeframe(opportunity.decision_timeframe)}
                         </Typography>
                     </Box>

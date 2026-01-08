@@ -5,8 +5,8 @@ import {
     FiTrendingUp,
     FiFolder,
     FiPhone,
-    FiDollarSign,
 } from 'react-icons/fi';
+import { FaEuroSign } from 'react-icons/fa';
 import { useDashboard } from '../../api';
 import { routes } from '../../constants/routes';
 import { StatCard } from './StatCard';
@@ -128,9 +128,9 @@ export const Dashboard: React.FC = () => {
             path: routes.contacts.main,
         },
         {
-            title: 'Pipeline Value',
+            title: 'Total Value',
             value: formattedPipelineValue,
-            icon: <FiDollarSign size={24} />,
+            icon: <FaEuroSign size={24} />,
             color: '#059669',
             bgColor: '#d1fae5',
             path: routes.opportunities.main,

@@ -8,6 +8,7 @@ import { routes } from '../../constants/routes';
 import { IOpportunity, IAttachment, IComment, IProfile } from '../../types';
 import { OpportunityHeroCard } from '../../components/opportunities/details';
 import { DetailSection, DetailField, AttachmentsCard } from '../../components/leads/details';
+import { toTitleCase } from '../../utils/formHelpers';
 
 export function OpportunityDetails() {
     const navigate = useNavigate();
@@ -133,8 +134,8 @@ export function OpportunityDetails() {
 
                     <DetailSection title="Opportunity Details" icon={<FaEuroSign style={{ color: '#6366f1' }} />}>
                         <DetailField label="Name" value={opportunity.name} />
-                        <DetailField label="Stage" value={opportunity.stage} />
-                        <DetailField label="Lead Source" value={opportunity.lead_source} />
+                        <DetailField label="Stage" value={opportunity.stage ? toTitleCase(opportunity.stage) : '---'} />
+                        <DetailField label="Lead Source" value={opportunity.lead_source ? toTitleCase(opportunity.lead_source) : '---'} />
                         <DetailField
                             label="Amount"
                             value={
