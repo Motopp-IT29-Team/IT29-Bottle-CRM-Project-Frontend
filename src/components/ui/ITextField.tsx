@@ -42,6 +42,17 @@ export const ITextField: React.FC<Props> = ({
 
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
+    const handleChange = (e: any) => {
+        if (type === 'number') {
+            const newValue = e.target.value;
+            if (newValue === '' || Number(newValue) >= 0) {
+                onChange(e);
+            }
+        } else {
+            onChange(e);
+        }
+    };
+
     const getStartAdornment = () => {
         if (startAdornment) {
             return <InputAdornment position="start">{startAdornment}</InputAdornment>;
@@ -85,7 +96,7 @@ export const ITextField: React.FC<Props> = ({
             <TextFieldComponent
                 name={name}
                 value={value}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder={placeholder}
                 size="small"
                 type={inputType}
@@ -95,6 +106,9 @@ export const ITextField: React.FC<Props> = ({
                 helperText={error}
                 disabled={disabled}
                 required={required}
+                inputProps={{
+                    ...(type === 'number' && { min: 0 }),
+                }}
                 InputProps={{
                     startAdornment: getStartAdornment(),
                     endAdornment: getEndAdornment(),

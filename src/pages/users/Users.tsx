@@ -14,11 +14,6 @@ const columns: ITableColumn[] = [
     { id: 'role', label: 'Role', sortable: true },
 ];
 
-const tabs = [
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-];
-
 export function Users() {
     const navigate = useNavigate();
     const { getAll, isLoading } = useUsers();
@@ -28,6 +23,8 @@ export function Users() {
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
+    const [activeUsersCount, setActiveUsersCount] = useState(0);
+    const [inactiveUsersCount, setInactiveUsersCount] = useState(0);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -35,8 +32,16 @@ export function Users() {
             const result = await getAll({ offset, limit: recordsPerPage, status: tab });
 
             if (result.success && result.data) {
+                const totalCount = result.data.total_count || 0;
+
                 setUsers(result.data.users);
-                setTotalPages(Math.ceil(result.data.total_count / recordsPerPage));
+                setTotalPages(Math.ceil(totalCount / recordsPerPage));
+
+                if (tab === 'active') {
+                    setActiveUsersCount(totalCount);
+                } else {
+                    setInactiveUsersCount(totalCount);
+                }
             }
         };
 
@@ -97,6 +102,11 @@ export function Users() {
             }
         });
     };
+
+    const tabs = [
+        { value: 'active', label: `Active (${activeUsersCount})` },
+        { value: 'inactive', label: `Inactive (${inactiveUsersCount})` },
+    ];
 
     return (
         <Box>
