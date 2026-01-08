@@ -315,7 +315,7 @@ export default function OrganizationModal(props: any) {
                     )}
                 </Box>
 
-                {userRole === 'ADMIN' && (
+                {userRole !== 'USER' && (
                     <>
                         <Divider />
 
