@@ -11,7 +11,6 @@ const columns: ITableColumn[] = [
     { id: 'title', label: 'Lead Name', sortable: true },
     { id: 'country', label: 'Country & Source', sortable: false },
     { id: 'status', label: 'Status', sortable: true },
-    { id: 'tags', label: 'Tags & Team', sortable: false },
     { id: 'created_at', label: 'Created', sortable: true },
 ];
 
@@ -25,7 +24,6 @@ export function Leads() {
     const [recordsPerPage, setRecordsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
 
-    // ✅ ДОДАНО: Стан для кількості лідів
     const [openLeadsCount, setOpenLeadsCount] = useState(0);
     const [closedLeadsCount, setClosedLeadsCount] = useState(0);
 
@@ -43,7 +41,6 @@ export function Leads() {
             const openCount = result.data.open_leads?.leads_count || 0;
             const closedCount = result.data.close_leads?.leads_count || 0;
 
-            // ✅ ДОДАНО: Оновлюємо кількість лідів
             setOpenLeadsCount(openCount);
             setClosedLeadsCount(closedCount);
 
@@ -120,7 +117,6 @@ export function Leads() {
         });
     };
 
-    // ✅ ДОДАНО: Tabs з кількістю
     const tabs = [
         { value: 'open', label: `Open (${openLeadsCount})` },
         { value: 'closed', label: `Converted (${closedLeadsCount})` },
