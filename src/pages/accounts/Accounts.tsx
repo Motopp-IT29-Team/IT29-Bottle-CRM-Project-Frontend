@@ -1,7 +1,7 @@
 import React, { useEffect, useState, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { ITable, ITableColumn, ITableToolbar, IPagination, IActionModal } from '../../components/ui';
+import { ITable, ITableColumn, ITableToolbar, IPagination } from '../../components/ui';
 import { useAccounts } from '../../api';
 import { routes } from '../../constants/routes';
 import { IAccount } from '../../types';
@@ -12,12 +12,11 @@ const columns: ITableColumn[] = [
     { id: 'website', label: 'Website', sortable: false },
     { id: 'created_by', label: 'Created By', sortable: false },
     { id: 'country', label: 'Country', sortable: true },
-    { id: 'actions', label: 'Actions', sortable: false },
 ];
 
 export function Accounts() {
     const navigate = useNavigate();
-    const { getAll, deleteAccount, isLoading } = useAccounts();
+    const { getAll, isLoading } = useAccounts();
 
     const [tab, setTab] = useState<'open' | 'closed'>('open');
     const [openAccounts, setOpenAccounts] = useState<IAccount[]>([]);
@@ -27,9 +26,6 @@ export function Accounts() {
     const [totalPages, setTotalPages] = useState(0);
     const [openAccountsCount, setOpenAccountsCount] = useState(0);
     const [closedAccountsCount, setClosedAccountsCount] = useState(0);
-
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [accountToDelete, setAccountToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         fetchAccounts();
@@ -80,27 +76,6 @@ export function Accounts() {
 
     const handleAddAccount = () => {
         if (!isLoading) navigate(routes.accounts.create);
-    };
-
-    const handleDeleteClick = (id: string) => {
-        setAccountToDelete(id);
-        setDeleteModalOpen(true);
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (!accountToDelete) return;
-
-        const result = await deleteAccount(accountToDelete);
-        if (result.success) {
-            setDeleteModalOpen(false);
-            setAccountToDelete(null);
-            fetchAccounts();
-        }
-    };
-
-    const handleDeleteCancel = () => {
-        setDeleteModalOpen(false);
-        setAccountToDelete(null);
     };
 
     const sortAccounts = (accounts: IAccount[], order: 'asc' | 'desc', orderBy: string) => {
@@ -159,28 +134,12 @@ export function Accounts() {
                 loading={isLoading}
                 emptyMessage={`No ${tab} accounts found`}
                 renderRow={(account) => (
-                    <AccountsTableRow
-                        key={account.id}
-                        account={account}
-                        onRowClick={handleRowClick}
-                        onDelete={handleDeleteClick}
-                    />
+                    <AccountsTableRow key={account.id} account={account} onRowClick={handleRowClick} />
                 )}
                 getRowKey={(account) => account.id}
                 sortable={true}
                 defaultOrderBy="name"
                 customSort={sortAccounts}
-            />
-
-            <IActionModal
-                open={deleteModalOpen}
-                onClose={handleDeleteCancel}
-                onConfirm={handleDeleteConfirm}
-                variant="warning"
-                title="Delete Account?"
-                message="Are you sure you want to delete this account? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
             />
         </Box>
     );

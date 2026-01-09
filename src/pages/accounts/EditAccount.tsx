@@ -28,8 +28,6 @@ export function EditAccount() {
         ? getAccountConfig({
               contacts,
               users,
-              // teams,
-              // tags,
               leads,
               industries,
               countries,
@@ -67,7 +65,7 @@ export function EditAccount() {
             const result = await getById(accountId);
             if (result.success && result.data) {
                 const account = result.data.account;
-
+                console.log(account.assigned_to);
                 const data: AccountFormData = {
                     name: account.name || '',
                     phone: account.phone || '',
@@ -138,10 +136,10 @@ export function EditAccount() {
     };
 
     const handleCancel = () => {
-        if (initialData) {
-            setFormData({ ...initialData });
-            setValidationErrors({});
-            setBackendErrors({});
+        if (accountId) {
+            navigate(routes.accounts.details + `?id=${accountId}`);
+        } else {
+            navigate(routes.accounts.main);
         }
     };
 

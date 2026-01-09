@@ -1,27 +1,19 @@
 import React from 'react';
-import { TableCell, TableRow, IconButton, Avatar, Stack, Chip, Box } from '@mui/material';
-import { FaTrashAlt } from 'react-icons/fa';
+import { TableCell, TableRow, Avatar, Stack, Box } from '@mui/material';
 import { IAccount } from '../../types';
 import { getCountryNameByCode } from '../../utils/userHelpers';
 
 interface AccountsTableRowProps {
     account: IAccount;
     onRowClick: (id: string) => void;
-    onDelete: (id: string) => void;
 }
 
-export function AccountsTableRow({ account, onRowClick, onDelete }: AccountsTableRowProps) {
+export function AccountsTableRow({ account, onRowClick }: AccountsTableRowProps) {
     const handleRowClick = (e: React.MouseEvent) => {
-        // Don't trigger row click if clicking on action buttons
         if ((e.target as HTMLElement).closest('.action-button')) {
             return;
         }
         onRowClick(account.id);
-    };
-
-    const handleDelete = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onDelete(account.id);
     };
 
     return (
@@ -84,56 +76,6 @@ export function AccountsTableRow({ account, onRowClick, onDelete }: AccountsTabl
             {/* Country */}
             <TableCell sx={{ color: '#1a3353', textTransform: 'capitalize' }}>
                 {getCountryNameByCode(account.billing_country) || '---'}
-            </TableCell>
-
-            {/* Tags */}
-            {/*<TableCell>*/}
-            {/*    {account.tags && account.tags.length > 0 ? (*/}
-            {/*        <Stack direction="row" spacing={0.5} flexWrap="wrap">*/}
-            {/*            {account.tags.slice(0, 2).map((tag: any) => (*/}
-            {/*                <Chip*/}
-            {/*                    key={tag.id || tag}*/}
-            {/*                    label={tag.name || tag}*/}
-            {/*                    size="small"*/}
-            {/*                    sx={{*/}
-            {/*                        height: '24px',*/}
-            {/*                        borderRadius: '4px',*/}
-            {/*                        backgroundColor: '#e3f2fd',*/}
-            {/*                        color: '#1976d2',*/}
-            {/*                    }}*/}
-            {/*                />*/}
-            {/*            ))}*/}
-            {/*            {account.tags.length > 2 && (*/}
-            {/*                <Chip*/}
-            {/*                    label={`+${account.tags.length - 2}`}*/}
-            {/*                    size="small"*/}
-            {/*                    sx={{*/}
-            {/*                        height: '24px',*/}
-            {/*                        borderRadius: '4px',*/}
-            {/*                        backgroundColor: '#f5f5f5',*/}
-            {/*                    }}*/}
-            {/*                />*/}
-            {/*            )}*/}
-            {/*        </Stack>*/}
-            {/*    ) : (*/}
-            {/*        '---'*/}
-            {/*    )}*/}
-            {/*</TableCell>*/}
-
-            {/* Actions */}
-            <TableCell>
-                <IconButton
-                    className="action-button"
-                    onClick={handleDelete}
-                    size="small"
-                    sx={{
-                        '&:hover': {
-                            backgroundColor: '#ffebee',
-                        },
-                    }}
-                >
-                    <FaTrashAlt style={{ fill: '#d32f2f', width: '14px' }} />
-                </IconButton>
             </TableCell>
         </TableRow>
     );

@@ -173,20 +173,24 @@ export const accountsService = {
         if (data.contact_name) formData.append('contact_name', data.contact_name);
 
         if (data.contacts && data.contacts.length > 0) {
-            formData.append('contacts', JSON.stringify(data.contacts));
+            const contactIds = data.contacts.map((contact: any) => {
+                if (typeof contact === 'object' && contact.value) {
+                    return contact.value;
+                }
+                return contact;
+            });
+            formData.append('contacts', JSON.stringify(contactIds));
         }
-        // if (data.teams && data.teams.length > 0) {
-        //     formData.append('teams', JSON.stringify(data.teams));
-        // }
+
         if (data.assigned_to && data.assigned_to.length > 0) {
-            formData.append('assigned_to', JSON.stringify(data.assigned_to));
+            const userIds = data.assigned_to.map((user: any) => {
+                if (typeof user === 'object' && user.value) {
+                    return user.value;
+                }
+                return user;
+            });
+            formData.append('assigned_to', JSON.stringify(userIds));
         }
-        // if (data.tags && data.tags.length > 0) {
-        //     formData.append('tags', JSON.stringify(data.tags));
-        // }
-        // if (data.account_attachment) {
-        //     formData.append('account_attachment', data.account_attachment);
-        // }
 
         const response = await apiClient.post<AccountCreateResponse>(ENDPOINTS.ACCOUNTS, formData, {
             headers: {
@@ -216,20 +220,24 @@ export const accountsService = {
         if (data.contact_name) formData.append('contact_name', data.contact_name);
 
         if (data.contacts && data.contacts.length > 0) {
-            formData.append('contacts', JSON.stringify(data.contacts));
+            const contactIds = data.contacts.map((contact: any) => {
+                if (typeof contact === 'object' && contact.value) {
+                    return contact.value;
+                }
+                return contact;
+            });
+            formData.append('contacts', JSON.stringify(contactIds));
         }
-        // if (data.teams && data.teams.length > 0) {
-        //     formData.append('teams', JSON.stringify(data.teams));
-        // }
+
         if (data.assigned_to && data.assigned_to.length > 0) {
-            formData.append('assigned_to', JSON.stringify(data.assigned_to));
+            const userIds = data.assigned_to.map((user: any) => {
+                if (typeof user === 'object' && user.value) {
+                    return user.value;
+                }
+                return user;
+            });
+            formData.append('assigned_to', JSON.stringify(userIds));
         }
-        // if (data.tags && data.tags.length > 0) {
-        //     formData.append('tags', JSON.stringify(data.tags));
-        // }
-        // if (data.account_attachment) {
-        //     formData.append('account_attachment', data.account_attachment);
-        // }
 
         const response = await apiClient.put<AccountUpdateResponse>(ENDPOINTS.ACCOUNT_DETAIL(id), formData, {
             headers: {

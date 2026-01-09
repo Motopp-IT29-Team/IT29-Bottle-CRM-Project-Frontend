@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Box, CircularProgress, Avatar, Chip, Button, Stack } from '@mui/material';
-import { FaPlus } from 'react-icons/fa';
-import { IModernAppBar, AppBarAction } from '../../components/ui';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Box, CircularProgress, Avatar, Stack, Typography, Chip, Paper, Divider } from '@mui/material';
+import { FaEdit, FaTrash, FaGlobe, FaEnvelope, FaPhone, FaIndustry, FaMapMarkerAlt } from 'react-icons/fa';
+import { FiUsers, FiFileText } from 'react-icons/fi';
+import { IModernAppBar, AppBarAction, IActionModal } from '../../components/ui';
 import { useAccounts } from '../../api';
 import { routes } from '../../constants/routes';
-import { IAccount, IAttachment, IContact } from '../../types';
+import { IAccount, IContact } from '../../types';
 import FormateTime from '../../utils/formateTime';
 import { ILabel } from '../../components/ui/ILabel';
-import { getCountryNameByCode } from '../../utils/userHelpers';
 
 export function AccountDetails() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const accountId = searchParams.get('id');
-    const { getById, isLoading } = useAccounts();
+    const { getById, deleteAccount, isLoading } = useAccounts();
 
     const [account, setAccount] = useState<IAccount | null>(null);
-    // const [attachments, setAttachments] = useState<IAttachment[]>([]);
     const [contacts, setContacts] = useState<IContact[]>([]);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (!accountId) {
@@ -36,7 +37,6 @@ export function AccountDetails() {
 
         if (result.success && result.data) {
             setAccount(result.data.account);
-            // setAttachments(result.data.attachments || []);
             setContacts(result.data.account.contacts || []);
         } else {
             navigate(routes.accounts.main);
@@ -49,9 +49,29 @@ export function AccountDetails() {
         navigate(routes.accounts.edit + `?id=${accountId}`);
     };
 
+    const handleDeleteClick = () => {
+        setDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!accountId) return;
+
+        setIsDeleting(true);
+        const result = await deleteAccount(accountId);
+        setIsDeleting(false);
+
+        if (result.success) {
+            setDeleteModalOpen(false);
+            navigate(routes.accounts.main);
+        } else {
+            setDeleteModalOpen(false);
+        }
+    };
+
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Accounts', onClick: handleBack },
-        { type: 'edit', onClick: handleEdit },
+        { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
+        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
     ];
 
     if (isLoading || !account) {
@@ -74,177 +94,589 @@ export function AccountDetails() {
     }
 
     return (
-        <Box>
+        <Box sx={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
             <IModernAppBar module="Accounts" crntPage="Account Details" actions={actions} />
 
-            <Box
-                sx={{
-                    p: 3,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: '24px',
-                }}
-            >
-                {/* Main Content - Left Side */}
-                <Box sx={{ flex: 1 }}>
-                    <Box
+            <Box sx={{ p: 3, display: 'flex', gap: 3 }}>
+                {/* Main Content - 68% */}
+                <Box sx={{ flex: '0 0 68%' }}>
+                    {/* Hero Card */}
+                    <Paper
+                        elevation={0}
                         sx={{
-                            borderRadius: '10px',
-                            border: '1px solid #e0e0e0',
-                            backgroundColor: 'white',
+                            borderRadius: '16px',
+                            border: '1px solid #e5e7eb',
+                            overflow: 'hidden',
                             mb: 3,
                         }}
                     >
-                        {/* Header Section */}
+                        {/* Header with gradient background */}
                         <Box
                             sx={{
-                                p: '20px',
-                                borderBottom: '1px solid #e0e0e0',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
+                                p: 4,
+                                backgroundColor: 'white',
+                                borderBottom: '1px solid #e5e7eb',
                             }}
                         >
-                            <Box sx={{ fontWeight: 600, fontSize: '18px', color: '#1a3353' }}>Account Information</Box>
-                            <Box sx={{ color: 'gray', fontSize: '14px', display: 'flex', alignItems: 'center' }}>
-                                <span>created {FormateTime(account.created_at)} by</span>
-                                <Avatar
-                                    src={account.created_by?.profile_pic || ''}
-                                    alt={account.created_by?.email}
-                                    sx={{ width: 24, height: 24, mx: 1 }}
-                                />
-                                <span>{account.created_by?.email}</span>
-                            </Box>
-                        </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 4 }}>
+                                {/* Left Side - Main Info */}
+                                <Box sx={{ flex: 1, display: 'flex', alignItems: 'start', gap: 3 }}>
+                                    {/* Account Icon/Initial */}
+                                    <Box
+                                        sx={{
+                                            width: 72,
+                                            height: 72,
+                                            borderRadius: '16px',
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 8px 16px rgba(102, 126, 234, 0.25)',
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        <Typography sx={{ fontSize: '32px', fontWeight: 700, color: 'white' }}>
+                                            {account.name.charAt(0).toUpperCase()}
+                                        </Typography>
+                                    </Box>
 
-                        {/* Title and Tags */}
-                        <Box sx={{ p: '20px' }}>
-                            <Box sx={{ fontSize: '24px', fontWeight: 600, color: '#1a3353', mb: 2 }}>
-                                {account.name}
-                            </Box>
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                                {account.assigned_to?.map((user: any) => (
-                                    <Avatar
-                                        key={user.id}
-                                        alt={user.email}
-                                        src={user.profile_pic}
-                                        sx={{ width: 32, height: 32 }}
-                                    />
-                                ))}
-                            </Stack>
-                            <Stack direction="row" spacing={1}>
-                                {account.tags?.map((tag: any) => (
-                                    <ILabel key={tag.id || tag} tags={tag} />
-                                ))}
-                            </Stack>
-                        </Box>
+                                    {/* Account Details */}
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <Typography
+                                            sx={{
+                                                fontSize: '32px',
+                                                fontWeight: 700,
+                                                color: '#111827',
+                                                lineHeight: 1.2,
+                                                mb: 1.5,
+                                            }}
+                                        >
+                                            {account.name}
+                                        </Typography>
 
-                        {/* Details Grid */}
-                        <Box sx={{ p: '20px', borderTop: '1px solid #f5f5f5' }}>
-                            <Box
-                                sx={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(3, 1fr)',
-                                    gap: '20px',
-                                }}
-                            >
-                                <DetailField label="Website" value={account.website} />
-                                <DetailField label="Contact Name" value={account.contact_name} />
-                                <DetailField label="Organization" value={account.org?.name} />
+                                        {/* Status & Industry Row */}
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <Box
+                                                    sx={{
+                                                        width: 8,
+                                                        height: 8,
+                                                        borderRadius: '50%',
+                                                        backgroundColor:
+                                                            account.status === 'open' ? '#10b981' : '#6b7280',
+                                                    }}
+                                                />
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: '14px',
+                                                        fontWeight: 600,
+                                                        color: account.status === 'open' ? '#059669' : '#6b7280',
+                                                    }}
+                                                >
+                                                    {account.status === 'open' ? 'Active' : 'Closed'}
+                                                </Typography>
+                                            </Box>
 
-                                <DetailField label="Industry" value={account.industry} />
-                                <DetailField label="Lead" value={account.lead?.first_name} />
-                                <DetailField label="Email Address" value={account.email} />
+                                            {account.industry && (
+                                                <>
+                                                    <Box
+                                                        sx={{
+                                                            width: '1px',
+                                                            height: '16px',
+                                                            backgroundColor: '#e5e7eb',
+                                                        }}
+                                                    />
+                                                    <Typography sx={{ fontSize: '14px', color: '#6b7280' }}>
+                                                        {account.industry}
+                                                    </Typography>
+                                                </>
+                                            )}
 
-                                <DetailField label="Phone Number" value={account.phone} />
-                                <DetailField label="Status" value={account.status} />
-                            </Box>
-                        </Box>
+                                            {account.website && (
+                                                <>
+                                                    <Box
+                                                        sx={{
+                                                            width: '1px',
+                                                            height: '16px',
+                                                            backgroundColor: '#e5e7eb',
+                                                        }}
+                                                    />
+                                                    <Typography
+                                                        component="a"
+                                                        href={account.website}
+                                                        target="_blank"
+                                                        sx={{
+                                                            fontSize: '14px',
+                                                            color: '#6366f1',
+                                                            textDecoration: 'none',
+                                                            '&:hover': {
+                                                                textDecoration: 'underline',
+                                                            },
+                                                        }}
+                                                    >
+                                                        {account.website.replace(/^https?:\/\//, '')}
+                                                    </Typography>
+                                                </>
+                                            )}
+                                        </Box>
+                                    </Box>
+                                </Box>
 
-                        {/* Description Section */}
-                        {account.description && (
-                            <Box sx={{ borderTop: '1px solid #e0e0e0', mt: 2 }}>
+                                {/* Right Side - Created Info */}
                                 <Box
                                     sx={{
-                                        p: '20px',
-                                        borderBottom: '1px solid #e0e0e0',
-                                        fontWeight: 600,
-                                        fontSize: '18px',
-                                        color: '#1a3353',
+                                        p: 2.5,
+                                        backgroundColor: '#f9fafb',
+                                        borderRadius: '12px',
+                                        border: '1px solid #e5e7eb',
+                                        minWidth: '220px',
+                                        flexShrink: 0,
                                     }}
                                 >
-                                    Description
+                                    <Typography
+                                        sx={{
+                                            fontSize: '11px',
+                                            fontWeight: 600,
+                                            color: '#9ca3af',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            mb: 1.5,
+                                        }}
+                                    >
+                                        Created {FormateTime(account.created_at)}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                        <Avatar
+                                            src={account.created_by?.profile_pic || ''}
+                                            sx={{
+                                                width: 28,
+                                                height: 28,
+                                                border: '2px solid white',
+                                            }}
+                                        >
+                                            {account.created_by?.email?.charAt(0).toUpperCase()}
+                                        </Avatar>
+                                        <Typography
+                                            sx={{
+                                                fontSize: '13px',
+                                                color: '#6b7280',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            {account.created_by?.email}
+                                        </Typography>
+                                    </Box>
                                 </Box>
+                            </Box>
+                        </Box>
+
+                        {/* Assigned Users */}
+                        <Box sx={{ p: 3, backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                            <Typography
+                                sx={{
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                    color: '#6b7280',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    mb: 2,
+                                }}
+                            >
+                                Assigned To
+                            </Typography>
+                            <Stack direction="row" spacing={1.5} flexWrap="wrap">
+                                {account.assigned_to && account.assigned_to.length > 0 ? (
+                                    account.assigned_to.map((user: any) => (
+                                        <Box
+                                            key={user.id}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1.5,
+                                                py: 1,
+                                                px: 2,
+                                                backgroundColor: 'white',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '12px',
+                                                transition: 'all 0.2s',
+                                                '&:hover': {
+                                                    borderColor: '#6366f1',
+                                                    boxShadow: '0 2px 8px rgba(99, 102, 241, 0.1)',
+                                                },
+                                            }}
+                                        >
+                                            <Avatar
+                                                alt={user.user_details?.email}
+                                                src={user.user_details?.profile_pic}
+                                                sx={{
+                                                    width: 36,
+                                                    height: 36,
+                                                    border: '2px solid #eef2ff',
+                                                }}
+                                            >
+                                                {user.first_name?.charAt(0).toUpperCase()}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: '14px',
+                                                        fontWeight: 600,
+                                                        color: '#111827',
+                                                        lineHeight: 1.3,
+                                                    }}
+                                                >
+                                                    {user.first_name} {user.last_name}
+                                                </Typography>
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: '12px',
+                                                        color: '#6b7280',
+                                                        lineHeight: 1.3,
+                                                    }}
+                                                >
+                                                    {user.user_details?.email}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    ))
+                                ) : (
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: 1,
+                                            px: 2,
+                                            backgroundColor: 'white',
+                                            border: '1px dashed #d1d5db',
+                                            borderRadius: '12px',
+                                        }}
+                                    >
+                                        <Typography sx={{ fontSize: '13px', color: '#9ca3af' }}>
+                                            No users assigned
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Stack>
+                        </Box>
+                    </Paper>
+
+                    {/* Contact Information */}
+                    <DetailSection title="Contact Information" icon={<FaEnvelope style={{ color: '#6366f1' }} />}>
+                        <DetailField label="Email Address" value={account.email} icon={<FaEnvelope size={14} />} />
+                        <DetailField label="Phone Number" value={account.phone} icon={<FaPhone size={14} />} />
+                        <DetailField label="Website" value={account.website} icon={<FaGlobe size={14} />} />
+                        <DetailField label="Contact Name" value={account.contact_name} />
+                    </DetailSection>
+
+                    {/* Business Information */}
+                    <DetailSection title="Business Information" icon={<FaIndustry style={{ color: '#6366f1' }} />}>
+                        <DetailField label="Industry" value={account.industry} />
+                        <DetailField label="Organization" value={account.org?.name} />
+                        <DetailField label="Lead" value={`${account.lead?.first_name} ${account.lead?.last_name}`} />
+                    </DetailSection>
+
+                    {/* Description */}
+                    <DetailSection title="Description" icon={<FiFileText style={{ color: '#6366f1' }} />}>
+                        {account.description ? (
+                            <Box
+                                sx={{
+                                    gridColumn: 'span 3',
+                                    fontSize: '14px',
+                                    color: '#4b5563',
+                                    lineHeight: 1.7,
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    whiteSpace: 'pre-wrap',
+                                }}
+                                dangerouslySetInnerHTML={{ __html: account.description }}
+                            />
+                        ) : (
+                            <Box
+                                sx={{
+                                    gridColumn: 'span 3',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    py: 4,
+                                    gap: 1,
+                                }}
+                            >
                                 <Box
                                     sx={{
-                                        p: '20px',
-                                        maxWidth: '650px',
-                                        wordWrap: 'break-word',
-                                        overflowWrap: 'break-word',
-                                        whiteSpace: 'pre-wrap',
-                                        overflow: 'hidden',
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: '50%',
+                                        backgroundColor: '#f3f4f6',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        mb: 1,
                                     }}
-                                    dangerouslySetInnerHTML={{ __html: account.description }}
-                                />
+                                >
+                                    <FiFileText size={24} color="#9ca3af" />
+                                </Box>
+                                <Typography
+                                    sx={{
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                        color: '#6b7280',
+                                    }}
+                                >
+                                    No description provided
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontSize: '12px',
+                                        color: '#9ca3af',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    Add a description to provide more details about this account
+                                </Typography>
                             </Box>
                         )}
-                    </Box>
+                    </DetailSection>
                 </Box>
 
-                {/* Sidebar - Right Side */}
-                <Box sx={{ width: '400px' }}>
-                    {/* Contacts Section */}
-                    {contacts && contacts.length > 0 && (
+                {/* Sidebar - 30% */}
+                <Box sx={{ flex: '0 0 30%' }}>
+                    {/* Contacts Card */}
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            borderRadius: '16px',
+                            border: '1px solid #e5e7eb',
+                            overflow: 'hidden',
+                        }}
+                    >
                         <Box
                             sx={{
-                                borderRadius: '10px',
-                                border: '1px solid #e0e0e0',
-                                backgroundColor: 'white',
+                                p: 2.5,
+                                backgroundColor: '#f9fafb',
+                                borderBottom: '1px solid #e5e7eb',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
                             }}
                         >
                             <Box
                                 sx={{
-                                    p: '20px',
-                                    borderBottom: '1px solid #e0e0e0',
-                                    fontWeight: 600,
-                                    fontSize: '18px',
-                                    color: '#1a3353',
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: '10px',
+                                    backgroundColor: '#eef2ff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                 }}
                             >
-                                Contacts
+                                <FiUsers size={18} color="#6366f1" />
                             </Box>
-                            <Box sx={{ p: '20px' }}>
-                                <Stack spacing={1}>
+                            <Box>
+                                <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>
+                                    Contacts
+                                </Typography>
+                                <Typography sx={{ fontSize: '12px', color: '#6b7280' }}>
+                                    {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <Box sx={{ p: 2.5 }}>
+                            {contacts && contacts.length > 0 ? (
+                                <Stack spacing={1.5}>
                                     {contacts.map((contact: any) => (
-                                        <Box key={contact.id} sx={{ fontSize: '14px', color: '#333' }}>
-                                            {contact.first_name} {contact.last_name}
-                                            {contact.email && (
-                                                <Box sx={{ fontSize: '12px', color: '#666' }}>{contact.email}</Box>
+                                        <Box
+                                            key={contact.id}
+                                            sx={{
+                                                p: 2,
+                                                backgroundColor: '#f9fafb',
+                                                borderRadius: '12px',
+                                                border: '1px solid #e5e7eb',
+                                                transition: 'all 0.2s',
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    borderColor: '#6366f1',
+                                                    backgroundColor: 'white',
+                                                    boxShadow: '0 2px 8px rgba(99, 102, 241, 0.1)',
+                                                },
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{
+                                                    fontSize: '14px',
+                                                    fontWeight: 600,
+                                                    color: '#111827',
+                                                    mb: 0.5,
+                                                }}
+                                            >
+                                                {contact.first_name} {contact.last_name}
+                                            </Typography>
+                                            {contact.primary_email && (
+                                                <Typography sx={{ fontSize: '12px', color: '#6b7280' }}>
+                                                    {contact.primary_email}
+                                                </Typography>
                                             )}
                                         </Box>
                                     ))}
                                 </Stack>
-                            </Box>
+                            ) : (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 6,
+                                        gap: 1.5,
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 64,
+                                            height: 64,
+                                            borderRadius: '50%',
+                                            backgroundColor: '#f3f4f6',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <FiUsers size={28} color="#9ca3af" />
+                                    </Box>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            color: '#6b7280',
+                                        }}
+                                    >
+                                        No contacts yet
+                                    </Typography>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '12px',
+                                            color: '#9ca3af',
+                                            textAlign: 'center',
+                                        }}
+                                    >
+                                        Contacts will appear here when added
+                                    </Typography>
+                                </Box>
+                            )}
                         </Box>
-                    )}
+                    </Paper>
                 </Box>
             </Box>
+
+            <IActionModal
+                open={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                variant="error"
+                title="Delete Account?"
+                message={`Are you sure you want to delete "${account?.name}"? This action cannot be undone and will remove all associated data.`}
+                confirmText="Delete Account"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
         </Box>
     );
 }
 
-// Helper Component
+// Helper Components
+interface DetailSectionProps {
+    title: string;
+    icon: React.ReactNode;
+    children: React.ReactNode;
+}
+
+function DetailSection({ title, icon, children }: DetailSectionProps) {
+    return (
+        <Paper
+            elevation={0}
+            sx={{
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                overflow: 'hidden',
+                mb: 3,
+            }}
+        >
+            <Box
+                sx={{
+                    p: 2.5,
+                    backgroundColor: '#f9fafb',
+                    borderBottom: '1px solid #e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                }}
+            >
+                <Box
+                    sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '10px',
+                        backgroundColor: '#eef2ff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    {icon}
+                </Box>
+                <Typography sx={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{title}</Typography>
+            </Box>
+            <Box
+                sx={{
+                    p: 3,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 3,
+                }}
+            >
+                {children}
+            </Box>
+        </Paper>
+    );
+}
+
 interface DetailFieldProps {
     label: string;
     value?: string | number | null;
+    icon?: React.ReactNode;
 }
 
-function DetailField({ label, value }: DetailFieldProps) {
+function DetailField({ label, value, icon }: DetailFieldProps) {
     return (
-        <Box sx={{ flex: 1 }}>
-            <Box sx={{ fontSize: '12px', color: '#666', mb: 0.5 }}>{label}</Box>
-            <Box sx={{ fontSize: '14px', color: '#333', fontWeight: 500 }}>
-                {value || <span style={{ color: '#999' }}>----</span>}
+        <Box>
+            <Typography
+                sx={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    mb: 1,
+                }}
+            >
+                {label}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {icon && <Box sx={{ color: '#9ca3af' }}>{icon}</Box>}
+                <Typography
+                    sx={{
+                        fontSize: '14px',
+                        color: value ? '#111827' : '#9ca3af',
+                        fontWeight: 500,
+                    }}
+                >
+                    {value || '----'}
+                </Typography>
             </Box>
         </Box>
     );

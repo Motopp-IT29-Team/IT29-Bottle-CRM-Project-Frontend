@@ -2,6 +2,7 @@ import { IFormConfig } from '../../components/ui/form';
 import { FiFileText, FiHome, FiMapPin } from 'react-icons/fi';
 import { IContact, ILead, IUser } from '../../types';
 import { toTitleCase } from '../../utils/formHelpers';
+import React from 'react';
 
 interface GetAccountConfigParams {
     contacts?: IContact[];
@@ -92,18 +93,71 @@ export const getAccountConfig = (params: GetAccountConfigParams = {}): IFormConf
                         placeholder: 'Select contacts',
                         options: contacts.map((contact: any) => ({
                             value: contact.id,
-                            label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+                            label:
+                                `${contact.first_name || ''} ${contact.last_name || ''}`.trim() ||
+                                contact.primary_email ||
+                                'Unknown',
                         })),
+                        getOptionLabel: (option: any) => {
+                            if (typeof option === 'object' && option.label) return option.label;
+                            if (typeof option === 'string') {
+                                const found = contacts.find((c: any) => c.id === option);
+                                if (found) {
+                                    const name = `${found.first_name || ''} ${found.last_name || ''}`.trim();
+                                    const email = found.primary_email || found.secondary_email || '';
+                                    return name ? `${name} (${email})` : email;
+                                }
+                            }
+                            return option;
+                        },
                     },
+
                     {
                         name: 'assigned_to',
                         label: 'Assign To',
                         type: 'autocomplete',
                         placeholder: 'Select users',
-                        options: users.map((user: any) => ({
-                            value: user.id,
-                            label: user.user__email || user.email || `${user.first_name} ${user.last_name}`,
-                        })),
+                        options: users.map((user: any) => {
+                            const firstName = user.user__first_name || '';
+                            const lastName = user.user__last_name || '';
+                            const email = user.user__email || user.email || '';
+                            const fullName = `${firstName} ${lastName}`.trim();
+                            const label = fullName ? `${fullName} (${email})` : email;
+
+                            return {
+                                value: user.id,
+                                label: label,
+                                fullName: fullName,
+                                email: email,
+                            };
+                        }),
+                        getOptionLabel: (option: any) => {
+                            if (typeof option === 'object' && option.label) return option.label;
+                            if (typeof option === 'string') {
+                                const found: any = users.find((u: any) => u.id === option);
+                                if (found) {
+                                    const firstName = found.user__first_name || '';
+                                    const lastName = found.user__last_name || '';
+                                    const email = found.user__email || found.email || '';
+                                    const fullName = `${firstName} ${lastName}`.trim();
+                                    return fullName ? `${fullName} (${email})` : email;
+                                }
+                            }
+                            return option;
+                        },
+                        renderBadge: (option: any) => {
+                            if (option.fullName) {
+                                return React.createElement(
+                                    React.Fragment,
+                                    null,
+                                    React.createElement('strong', null, option.fullName),
+                                    ' (',
+                                    option.email,
+                                    ')'
+                                );
+                            }
+                            return option.label || option.email;
+                        },
                     },
                 ],
             },
