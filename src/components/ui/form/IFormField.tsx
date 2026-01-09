@@ -39,6 +39,8 @@ export const IFormField: React.FC<IFormFieldProps> = ({
                     rows={field.rows}
                     startAdornment={field.startAdornment}
                     endAdornment={field.endAdornment}
+                    max={field.max}
+                    min={field.min}
                 />
             );
 

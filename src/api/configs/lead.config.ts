@@ -80,6 +80,8 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
                     label: 'Probability (%)',
                     type: 'number',
                     placeholder: '50',
+                    min: 0,
+                    max: 100,
                 },
                 {
                     name: 'rating',

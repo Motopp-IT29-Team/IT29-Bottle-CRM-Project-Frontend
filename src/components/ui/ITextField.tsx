@@ -19,6 +19,8 @@ interface Props {
     rows?: number;
     startAdornment?: React.ReactNode;
     endAdornment?: React.ReactNode;
+    min?: number;
+    max?: number;
 }
 
 export const ITextField: React.FC<Props> = ({
@@ -35,17 +37,33 @@ export const ITextField: React.FC<Props> = ({
     rows = 1,
     startAdornment,
     endAdornment,
+    min,
+    max,
 }) => {
     const TextFieldComponent = required ? RequiredTextField : TextField;
-
     const [showPassword, setShowPassword] = useState(false);
-
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
     const handleChange = (e: any) => {
         if (type === 'number') {
             const newValue = e.target.value;
-            if (newValue === '' || Number(newValue) >= 0) {
+
+            if (newValue === '') {
+                onChange(e);
+                return;
+            }
+
+            const numValue = Number(newValue);
+
+            if (min !== undefined && numValue < min) {
+                return;
+            }
+
+            if (max !== undefined && numValue > max) {
+                return;
+            }
+
+            if (numValue >= 0) {
                 onChange(e);
             }
         } else {
@@ -107,7 +125,7 @@ export const ITextField: React.FC<Props> = ({
                 disabled={disabled}
                 required={required}
                 inputProps={{
-                    ...(type === 'number' && { min: 0 }),
+                    ...(type === 'number' && { min, max }),
                 }}
                 InputProps={{
                     startAdornment: getStartAdornment(),
