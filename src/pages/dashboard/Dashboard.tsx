@@ -1,22 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
-import {
-    FiUsers,
-    FiTrendingUp,
-    FiFolder,
-    FiPhone,
-} from 'react-icons/fi';
+import { FiUsers, FiTrendingUp, FiFolder, FiPhone } from 'react-icons/fi';
 import { FaEuroSign } from 'react-icons/fa';
 import { useDashboard } from '../../api';
 import { routes } from '../../constants/routes';
 import { StatCard } from './StatCard';
 import { RecentList } from './RecentList';
 import { RecentActivities } from './RecentActivities';
-import {
-    IRecentLead,
-    IRecentOpportunity,
-    IRecentContact,
-} from '../../types';
+import { IRecentLead, IRecentOpportunity, IRecentContact } from '../../types';
 
 export const Dashboard: React.FC = () => {
     const { isLoading, dashboardData, getDashboard } = useDashboard();
@@ -25,30 +16,20 @@ export const Dashboard: React.FC = () => {
         getDashboard();
     }, [getDashboard]);
 
-    // Debug logging
-    console.log('Dashboard isLoading:', isLoading);
-    console.log('Dashboard data:', dashboardData);
-    console.log('Dashboard leads_count:', dashboardData?.leads_count);
-    console.log('Dashboard leads array:', dashboardData?.leads);
-    console.log('Dashboard recentLeads will be:', dashboardData?.leads?.slice(0, 5));
-
-    // Get counts from root level (API returns leads_count, etc. at root) or nested stats
     const leadsCount = dashboardData?.leads_count ?? dashboardData?.stats?.leads_count ?? 0;
     const opportunitiesCount = dashboardData?.opportunities_count ?? dashboardData?.stats?.opportunities_count ?? 0;
     const accountsCount = dashboardData?.accounts_count ?? dashboardData?.stats?.accounts_count ?? 0;
     const contactsCount = dashboardData?.contacts_count ?? dashboardData?.stats?.contacts_count ?? 0;
     const openLeadsCount = dashboardData?.stats?.open_leads_count ?? 0;
     const wonOpportunitiesCount = dashboardData?.stats?.won_opportunities_count ?? 0;
-    
+
     // Pipeline value is at root level from API
     const pipelineValueRaw = dashboardData?.pipeline_value ?? dashboardData?.stats?.pipeline_value ?? 0;
 
     // Format pipeline value
     const formattedPipelineValue = useMemo(() => {
         if (!pipelineValueRaw) return '€0';
-        const value = typeof pipelineValueRaw === 'string' 
-            ? parseFloat(pipelineValueRaw) 
-            : pipelineValueRaw;
+        const value = typeof pipelineValueRaw === 'string' ? parseFloat(pipelineValueRaw) : pipelineValueRaw;
         if (value >= 1000000) {
             return `€${(value / 1000000).toFixed(1)}M`;
         }
@@ -164,7 +145,7 @@ export const Dashboard: React.FC = () => {
             {/* Stats Cards */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
                 {statCards.map((card) => (
-                    <Grid item xs={12} sm={6} md={4} lg={2} key={card.title}>
+                    <Grid item xs={12} sm={6} md={4} lg={2.4} key={card.title}>
                         <StatCard
                             title={card.title}
                             value={card.value}
@@ -219,10 +200,7 @@ export const Dashboard: React.FC = () => {
 
                 {/* Recent Activities */}
                 <Grid item xs={12} lg={8}>
-                    <RecentActivities
-                        activities={dashboardData?.recent_activities || []}
-                        isLoading={isLoading}
-                    />
+                    <RecentActivities activities={dashboardData?.recent_activities || []} isLoading={isLoading} />
                 </Grid>
             </Grid>
         </Box>

@@ -29,7 +29,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         <Paper
             onClick={() => navigate(path)}
             sx={{
-                p: 3,
+                p: 2,
                 cursor: 'pointer',
                 borderRadius: '16px',
                 border: '1px solid #e5e7eb',
@@ -49,7 +49,7 @@ export const StatCard: React.FC<StatCardProps> = ({
                 <Box sx={{ flex: 1 }}>
                     <Typography
                         sx={{
-                            fontSize: '13px',
+                            fontSize: '12px',
                             fontWeight: 500,
                             color: '#6b7280',
                             textTransform: 'uppercase',
