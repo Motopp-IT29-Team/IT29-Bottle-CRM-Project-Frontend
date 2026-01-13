@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Box, Typography, Paper, Stack, Avatar, Chip } from '@mui/material';
-import { FaEdit, FaTrash, FaDollarSign, FaBuilding, FaFileAlt, FaUsers, FaEuroSign } from 'react-icons/fa';
+import { Box, Typography, Stack, Avatar } from '@mui/material';
+import { FaEdit, FaTrash, FaFileAlt, FaUsers } from 'react-icons/fa';
 import { IModernAppBar, AppBarAction, IActionModal, ILoadingState, ErrorState } from '../../components/ui';
 import { useOpportunities } from '../../api';
 import { routes } from '../../constants/routes';
-import { IOpportunity, IAttachment, IComment, IProfile } from '../../types';
+import { IOpportunity, IAttachment } from '../../types';
 import { OpportunityHeroCard } from '../../components/opportunities/details';
-import { DetailSection, DetailField, AttachmentsCard } from '../../components/leads/details';
-import { toTitleCase } from '../../utils/formHelpers';
+import { DetailSection, AttachmentsCard } from '../../components/leads/details';
 
 export function OpportunityDetails() {
     const navigate = useNavigate();
@@ -19,8 +18,6 @@ export function OpportunityDetails() {
 
     const [opportunity, setOpportunity] = useState<IOpportunity | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
-    const [comments, setComments] = useState<IComment[]>([]);
-    const [users, setUsers] = useState<IProfile[]>([]);
 
     // Modal states
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -43,8 +40,6 @@ export function OpportunityDetails() {
         if (result.success && result.data) {
             setOpportunity(result.data.opportunity_obj);
             setAttachments(result.data.attachments || []);
-            setComments(result.data.comments || []);
-            setUsers(result.data.users || []);
         } else {
             navigate(routes.opportunities.main);
         }
@@ -93,36 +88,6 @@ export function OpportunityDetails() {
         return <ErrorState message="Opportunity not found" />;
     }
 
-    const getCurrencySymbol = (currency?: string): string => {
-        const symbols: Record<string, string> = {
-            USD: '$',
-            EUR: '€',
-            GBP: '£',
-            JPY: '¥',
-        };
-        return symbols[currency || ''] || '€';
-    };
-
-    const formatBudgetRange = (value: string): string => {
-        const labels: Record<string, string> = {
-            less_than_5000: 'Less than €5,000',
-            '5000_to_10000': '€5,000–€10,000',
-            '10000_to_25000': '€10,000–€25,000',
-            over_25000: 'Over €25,000',
-        };
-        return labels[value] || value;
-    };
-
-    const formatDecisionTimeframe = (value: string): string => {
-        const labels: Record<string, string> = {
-            within_1_week: 'Within 1 week',
-            within_1_month: 'Within 1 month',
-            within_3_months: 'Within 3 months',
-            more_than_3_months: 'More than 3 months',
-        };
-        return labels[value] || value;
-    };
-
     return (
         <Box>
             <IModernAppBar module="Opportunities" crntPage="Opportunity Details" actions={actions} />
@@ -131,62 +96,6 @@ export function OpportunityDetails() {
                 {/* Main Content - 68% */}
                 <Box sx={{ flex: '0 0 68%' }}>
                     <OpportunityHeroCard opportunity={opportunity} />
-
-                    <DetailSection title="Opportunity Details" icon={<FaEuroSign style={{ color: '#6366f1' }} />}>
-                        <DetailField label="Name" value={opportunity.name} />
-                        <DetailField label="Stage" value={opportunity.stage ? toTitleCase(opportunity.stage) : '---'} />
-                        <DetailField label="Lead Source" value={opportunity.lead_source ? toTitleCase(opportunity.lead_source) : '---'} />
-                        <DetailField
-                            label="Amount"
-                            value={
-                                opportunity.amount
-                                    ? `${getCurrencySymbol(opportunity.currency)}${Number(opportunity.amount).toLocaleString()}`
-                                    : '---'
-                            }
-                        />
-                        <DetailField label="Probability" value={`${opportunity.probability || 0}%`} />
-                        <DetailField
-                            label="Decision Timeframe"
-                            value={
-                                opportunity.decision_timeframe
-                                    ? formatDecisionTimeframe(opportunity.decision_timeframe)
-                                    : '---'
-                            }
-                        />
-                    </DetailSection>
-
-                    <DetailSection title="Account Information" icon={<FaBuilding style={{ color: '#6366f1' }} />}>
-                        <DetailField label="Account Name" value={opportunity.account?.name} />
-                        <DetailField label="Close Date" value={opportunity.closed_on} />
-                    </DetailSection>
-
-                    {/* Contacts Section */}
-                    {opportunity.contacts && opportunity.contacts.length > 0 && (
-                        <DetailSection title="Related Contacts" icon={<FaUsers style={{ color: '#6366f1' }} />}>
-                            {opportunity.contacts.map((contact: any) => (
-                                <Box key={contact.id}>
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                        <Avatar
-                                            sx={{ width: 32, height: 32, backgroundColor: '#6366f1', fontSize: '12px' }}
-                                        >
-                                            {contact.first_name?.charAt(0)}
-                                            {contact.last_name?.charAt(0)}
-                                        </Avatar>
-                                        <Box>
-                                            <Typography variant="body2" fontWeight={600}>
-                                                {contact.first_name} {contact.last_name}
-                                            </Typography>
-                                            {contact.primary_email && (
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {contact.primary_email}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    </Stack>
-                                </Box>
-                            ))}
-                        </DetailSection>
-                    )}
 
                     <DetailSection title="Description" icon={<FaFileAlt style={{ color: '#6366f1' }} />}>
                         {opportunity.description ? (

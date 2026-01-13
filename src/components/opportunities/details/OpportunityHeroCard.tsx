@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
-import { FaDollarSign, FaPercentage, FaCalendarAlt, FaBuilding, FaTag, FaEuroSign } from 'react-icons/fa';
+import { FaPercentage, FaCalendarAlt, FaBuilding, FaTag, FaEuroSign } from 'react-icons/fa';
 import { IOpportunity } from '../../../types';
 import FormateTime from '../../../utils/formateTime';
 
@@ -51,17 +51,6 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
         return `${getCurrencySymbol(currency)}${num.toLocaleString()}`;
     };
 
-    const formatBudgetRange = (value?: string): string => {
-        if (!value) return '---';
-        const labels: Record<string, string> = {
-            less_than_5000: 'Less than €5,000',
-            '5000_to_10000': '€5,000–€10,000',
-            '10000_to_25000': '€10,000–€25,000',
-            over_25000: 'Over €25,000',
-        };
-        return labels[value] || value;
-    };
-
     const formatDecisionTimeframe = (value?: string): string => {
         if (!value) return '---';
         const labels: Record<string, string> = {
@@ -89,7 +78,7 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
         const email = user.user_details?.email || user.email || 'U';
         return email.charAt(0).toUpperCase();
     };
-
+    console.log(opportunity);
     return (
         <Paper
             elevation={0}
@@ -157,19 +146,6 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
                             }}
                         />
                     )}
-                    {opportunity.tags?.map((tag: any) => (
-                        <Chip
-                            key={tag.id || tag.name || tag}
-                            label={tag.name || tag}
-                            size="small"
-                            sx={{
-                                backgroundColor: '#f3f4f6',
-                                color: '#374151',
-                                fontWeight: 500,
-                                fontSize: '12px',
-                            }}
-                        />
-                    ))}
                 </Stack>
 
                 <Divider sx={{ mb: 3 }} />
@@ -212,16 +188,6 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
                         </Stack>
                         <Typography variant="h5" fontWeight={700} color="#111827">
                             {opportunity.closed_on || '---'}
-                        </Typography>
-                    </Box>
-
-                    {/* Budget Range */}
-                    <Box sx={{ minWidth: '120px' }}>
-                        <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={0.5}>
-                            BUDGET RANGE
-                        </Typography>
-                        <Typography variant="h5" fontWeight={700} color="#111827">
-                            {formatBudgetRange(opportunity.budget_range)}
                         </Typography>
                     </Box>
 
