@@ -1,7 +1,7 @@
 import React from 'react';
 import { Paper, Typography, Stack, Chip, Avatar, Box, Divider } from '@mui/material';
 import { FaBriefcase, FaEuroSign, FaCalendarAlt, FaPercentage, FaTag, FaClock } from 'react-icons/fa';
-import { ILead } from '../../../types';
+import { ILead, IUser } from '../../../types';
 import FormateTime from '../../../utils/formateTime';
 
 interface Props {
@@ -42,20 +42,20 @@ export const HeroCard: React.FC<Props> = ({ lead }) => {
         return colors[rating?.toLowerCase()] || '#6b7280';
     };
 
-    const getUserDisplayName = (user: any): string => {
+    const getUserDisplayName = (user: IUser): string => {
         if (user.first_name || user.last_name) {
             return `${user.first_name || ''} ${user.last_name || ''}`.trim();
         }
-        return user.user_details?.email || user.email || 'Unknown User';
+        return user.user_details?.email || 'Unknown User';
     };
 
-    const getUserInitials = (user: any): string => {
+    const getUserInitials = (user: IUser): string => {
         if (user.first_name || user.last_name) {
             const firstInitial = user.first_name?.charAt(0)?.toUpperCase() || '';
             const lastInitial = user.last_name?.charAt(0)?.toUpperCase() || '';
             return `${firstInitial}${lastInitial}`;
         }
-        const email = user.user_details?.email || user.email || 'U';
+        const email = user.user_details?.email || 'U';
         return email.charAt(0).toUpperCase();
     };
 
@@ -145,19 +145,6 @@ export const HeroCard: React.FC<Props> = ({ lead }) => {
                             }}
                         />
                     )}
-                    {lead.tags?.map((tag: any, index: number) => (
-                        <Chip
-                            key={index}
-                            label={tag.name}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                                borderColor: '#d1d5db',
-                                color: '#6b7280',
-                                fontWeight: 500,
-                            }}
-                        />
-                    ))}
                 </Stack>
             </Box>
 
@@ -325,7 +312,7 @@ export const HeroCard: React.FC<Props> = ({ lead }) => {
 
             {/* Footer */}
             <Box sx={{ px: 4, py: 2.5, backgroundColor: '#f9fafb' }}>
-                <Stack direction="row" spacing={3} alignItems="center">
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Stack direction="row" spacing={1.5} alignItems="center">
                         <Avatar src={lead.created_by?.profile_pic || ''} sx={{ width: 28, height: 28 }} />
                         <Box>
