@@ -9,6 +9,7 @@ export const ENDPOINTS = {
 
     // Organizations
     ORGANIZATIONS: 'org/',
+    UPDATE_ORGANIZATION: 'org/update/',
 
     // Users
     USERS: 'users/',

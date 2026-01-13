@@ -11,8 +11,9 @@ import {
     Typography,
     Avatar,
     CircularProgress,
+    Tooltip,
 } from '@mui/material';
-import { FiPlus, FiX, FiCheck, FiBriefcase } from 'react-icons/fi';
+import { FiPlus, FiX, FiCheck, FiBriefcase, FiEdit2 } from 'react-icons/fi';
 import { apiClient, ENDPOINTS } from '../../api';
 import { routes } from '../../constants/routes';
 
@@ -32,22 +33,54 @@ export default function OrganizationModal(props: any) {
     const [isLoading, setIsLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
 
+    // Rename state
+    const [editingOrgId, setEditingOrgId] = useState<string | null>(null);
+    const [editingOrgName, setEditingOrgName] = useState('');
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [renameError, setRenameError] = useState('');
+
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const renameInputRef = useRef<HTMLInputElement>(null);
+    const isCancellingRef = useRef(false);
+
     const currentOrgId = localStorage.getItem('org');
     const userRole = localStorage.getItem('role');
+
+    // Check if user is ADMIN
+    const isAdmin = userRole === 'ADMIN';
 
     useEffect(() => {
         if (open) {
             getOrganization();
             setError('');
             setNewOrganization('');
+            setEditingOrgId(null);
+            setEditingOrgName('');
+            setRenameError('');
         }
     }, [open]);
+
+    // Focus rename input when editing starts
+    useEffect(() => {
+        if (editingOrgId && renameInputRef.current) {
+            renameInputRef.current.focus();
+            renameInputRef.current.select();
+        }
+    }, [editingOrgId]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             buttonRef.current?.click();
+        }
+    };
+
+    const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSaveRename();
+        } else if (e.key === 'Escape') {
+            handleCancelRename();
         }
     };
 
@@ -93,10 +126,94 @@ export default function OrganizationModal(props: any) {
         }
     };
 
+    const handleStartRename = (orgId: string, orgName: string) => {
+        setEditingOrgId(orgId);
+        setEditingOrgName(orgName);
+        setRenameError('');
+    };
+
+    const handleCancelRename = () => {
+        isCancellingRef.current = true;
+        setEditingOrgId(null);
+        setEditingOrgName('');
+        setRenameError('');
+
+        setTimeout(() => {
+            isCancellingRef.current = false;
+        }, 100);
+    };
+
+    const handleSaveRename = async () => {
+        // Check if cancelling
+        if (isCancellingRef.current) {
+            console.log('⚠️ Rename cancelled, skipping save');
+            return;
+        }
+
+        if (!editingOrgName.trim()) {
+            setRenameError('Organization name cannot be empty');
+            return;
+        }
+
+        if (editingOrgId !== currentOrgId) {
+            setRenameError('You can only rename the current organization');
+            return;
+        }
+
+        setIsRenaming(true);
+        setRenameError('');
+
+        try {
+            const token = localStorage.getItem('Token');
+            const org = localStorage.getItem('org');
+
+            if (!token) {
+                setRenameError('Authentication required. Please login again.');
+                setIsRenaming(false);
+                return;
+            }
+
+            const response = await apiClient.put(
+                ENDPOINTS.UPDATE_ORGANIZATION,
+                { name: editingOrgName.trim() },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        org: org,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.data?.error === false) {
+                await getOrganization();
+                setEditingOrgId(null);
+                setEditingOrgName('');
+            } else if (response.data?.error === true) {
+                const errorMsg =
+                    typeof response.data.errors === 'string'
+                        ? response.data.errors
+                        : response.data.errors?.name?.[0] || 'Failed to rename organization';
+                setRenameError(errorMsg);
+            }
+        } catch (err: any) {
+            const errorMsg =
+                typeof err.response?.data?.errors === 'string'
+                    ? err.response.data.errors
+                    : err.response?.data?.errors?.name?.[0] || 'Failed to rename organization';
+            setRenameError(errorMsg);
+        } finally {
+            setIsRenaming(false);
+        }
+    };
+
     const onHandleClose = () => {
         handleClose();
         setError('');
         setNewOrganization('');
+        setEditingOrgId(null);
+        setEditingOrgName('');
+        setRenameError('');
     };
 
     const selectedOrganization = async (id: any) => {
@@ -163,7 +280,7 @@ export default function OrganizationModal(props: any) {
                                 Organizations
                             </Typography>
                             <Typography sx={{ fontSize: '13px', color: '#6b7280' }}>
-                                Switch between organizations
+                                {isAdmin ? 'Manage and switch organizations' : 'Switch between organizations'}
                             </Typography>
                         </Box>
                     </Stack>
@@ -234,10 +351,12 @@ export default function OrganizationModal(props: any) {
                                 .filter((item) => item?.org !== null)
                                 .map((item) => {
                                     const isSelected = item?.org?.id === currentOrgId;
+                                    const isEditing = editingOrgId === item?.org?.id;
+                                    const canRename = isAdmin && isSelected;
+
                                     return (
                                         <ListItem key={item.org!.id} disablePadding sx={{ mb: 1 }}>
                                             <Box
-                                                onClick={() => selectedOrganization(item?.org!.id)}
                                                 sx={{
                                                     width: '100%',
                                                     display: 'flex',
@@ -245,13 +364,15 @@ export default function OrganizationModal(props: any) {
                                                     gap: 2,
                                                     p: 2,
                                                     borderRadius: '12px',
-                                                    cursor: 'pointer',
                                                     border: isSelected ? '2px solid #667eea' : '2px solid transparent',
                                                     backgroundColor: isSelected ? '#f0f4ff' : 'white',
                                                     transition: 'all 0.2s ease',
                                                     '&:hover': {
                                                         backgroundColor: isSelected ? '#f0f4ff' : '#f9fafb',
                                                         border: isSelected ? '2px solid #667eea' : '2px solid #e5e7eb',
+                                                        '& .rename-button': {
+                                                            opacity: canRename ? 1 : 0,
+                                                        },
                                                     },
                                                 }}
                                             >
@@ -263,48 +384,157 @@ export default function OrganizationModal(props: any) {
                                                         color: isSelected ? 'white' : '#6b7280',
                                                         fontSize: '16px',
                                                         fontWeight: 600,
+                                                        flexShrink: 0,
                                                     }}
                                                 >
                                                     {getOrgInitial(item?.org!.name)}
                                                 </Avatar>
+
                                                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography
-                                                        sx={{
-                                                            fontSize: '15px',
-                                                            fontWeight: 600,
-                                                            color: '#111827',
-                                                            whiteSpace: 'nowrap',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                        }}
-                                                    >
-                                                        {item?.org!.name}
-                                                    </Typography>
-                                                    {isSelected && (
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: '12px',
-                                                                color: '#667eea',
-                                                                fontWeight: 500,
+                                                    {isEditing ? (
+                                                        <TextField
+                                                            inputRef={renameInputRef}
+                                                            fullWidth
+                                                            size="small"
+                                                            value={editingOrgName}
+                                                            onChange={(e) => setEditingOrgName(e.target.value)}
+                                                            onKeyDown={handleRenameKeyDown}
+                                                            onBlur={() => {
+                                                                setTimeout(() => {
+                                                                    if (!isCancellingRef.current) {
+                                                                        handleSaveRename();
+                                                                    }
+                                                                }, 150);
                                                             }}
-                                                        >
-                                                            Current organization
-                                                        </Typography>
+                                                            error={!!renameError}
+                                                            helperText={renameError}
+                                                            disabled={isRenaming}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    fontSize: '15px',
+                                                                    fontWeight: 600,
+                                                                },
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            <Typography
+                                                                onClick={() =>
+                                                                    !isEditing && selectedOrganization(item?.org!.id)
+                                                                }
+                                                                sx={{
+                                                                    fontSize: '15px',
+                                                                    fontWeight: 600,
+                                                                    color: '#111827',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    cursor: 'pointer',
+                                                                }}
+                                                            >
+                                                                {item?.org!.name}
+                                                            </Typography>
+                                                            {isSelected && (
+                                                                <Typography
+                                                                    sx={{
+                                                                        fontSize: '12px',
+                                                                        color: '#667eea',
+                                                                        fontWeight: 500,
+                                                                    }}
+                                                                >
+                                                                    Current organization
+                                                                </Typography>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </Box>
-                                                {isSelected && (
+
+                                                {canRename && !isEditing && (
+                                                    <Tooltip title="Rename organization">
+                                                        <IconButton
+                                                            className="rename-button"
+                                                            size="small"
+                                                            onClick={() =>
+                                                                handleStartRename(item?.org!.id, item?.org!.name)
+                                                            }
+                                                            sx={{
+                                                                opacity: 0,
+                                                                transition: 'opacity 0.2s',
+                                                                color: '#6b7280',
+                                                                '&:hover': {
+                                                                    backgroundColor: '#f3f4f6',
+                                                                    color: '#667eea',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <FiEdit2 size={16} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+
+                                                {!isEditing && (
                                                     <Box
+                                                        onClick={() => selectedOrganization(item?.org!.id)}
                                                         sx={{
-                                                            width: 24,
-                                                            height: 24,
-                                                            borderRadius: '50%',
-                                                            backgroundColor: '#667eea',
+                                                            cursor: 'pointer',
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            justifyContent: 'center',
                                                         }}
                                                     >
-                                                        <FiCheck size={14} color="white" />
+                                                        {isSelected && (
+                                                            <Box
+                                                                sx={{
+                                                                    width: 24,
+                                                                    height: 24,
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: '#667eea',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    flexShrink: 0,
+                                                                }}
+                                                            >
+                                                                <FiCheck size={14} color="white" />
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                )}
+
+                                                {isEditing && (
+                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={handleSaveRename}
+                                                            disabled={isRenaming}
+                                                            sx={{
+                                                                color: '#10b981',
+                                                                '&:hover': {
+                                                                    backgroundColor: '#d1fae5',
+                                                                },
+                                                            }}
+                                                        >
+                                                            {isRenaming ? (
+                                                                <CircularProgress size={16} />
+                                                            ) : (
+                                                                <FiCheck size={16} />
+                                                            )}
+                                                        </IconButton>
+                                                        <IconButton
+                                                            size="small"
+                                                            onMouseDown={(e) => {
+                                                                e.preventDefault();
+                                                                handleCancelRename();
+                                                            }}
+                                                            disabled={isRenaming}
+                                                            sx={{
+                                                                color: '#ef4444',
+                                                                '&:hover': {
+                                                                    backgroundColor: '#fee2e2',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <FiX size={16} />
+                                                        </IconButton>
                                                     </Box>
                                                 )}
                                             </Box>
@@ -315,7 +545,7 @@ export default function OrganizationModal(props: any) {
                     )}
                 </Box>
 
-                {userRole !== 'USER' && (
+                {isAdmin && (
                     <>
                         <Divider />
 

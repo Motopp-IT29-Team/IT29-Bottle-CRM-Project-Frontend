@@ -17,7 +17,7 @@ export default function Organization() {
     }, []);
 
     const handleClose = (event: any, reason: any) => {
-        if (reason && reason == 'backdropClick') {
+        if (reason && reason === 'backdropClick') {
             return;
         }
     };
