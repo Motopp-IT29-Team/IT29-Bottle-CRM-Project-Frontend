@@ -129,7 +129,7 @@ export const NotesCard: React.FC<Props> = ({ comments, note, onNoteChange, onSen
                                         />
                                     </ListItemAvatar>
                                     <ListItemText
-                                        sx={{ pr: 5 }}
+                                        sx={{ pr: 2 }}
                                         primary={
                                             <Box>
                                                 <Stack direction="row" spacing={0.5} alignItems="center" mb={0.5}>
