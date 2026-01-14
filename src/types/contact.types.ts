@@ -29,6 +29,7 @@ export interface IContact {
     contact_attachment: IAttachment[];
     assigned_to: IProfile[];
     created_by: IUserDetails;
+    created_by_email: string;
     created_at: string;
     is_active: boolean;
     teams: ITeam[];

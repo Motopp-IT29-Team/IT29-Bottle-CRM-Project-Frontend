@@ -18,6 +18,18 @@ export function ContactDetails() {
     const [contactDetails, setContactDetails] = useState<IContact>();
     const [deleteModal, setDeleteModal] = useState(false);
 
+    const currentUserEmail = localStorage.getItem('userEmail');
+
+    const currentUserRole = localStorage.getItem('role');
+
+    const canModifyContact = () => {
+        if (!contactDetails) return false;
+        const isAdmin = currentUserRole === 'ADMIN';
+
+        const isCreator = contactDetails.created_by_email === currentUserEmail;
+        return isAdmin || isCreator;
+    };
+
     useEffect(() => {
         if (contactId) {
             fetchContactDetails();
@@ -59,8 +71,12 @@ export function ContactDetails() {
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Contacts', onClick: handleBack },
-        { type: 'edit', onClick: handleEdit },
-        { type: 'delete', onClick: () => setDeleteModal(true) },
+        ...(canModifyContact()
+            ? [
+                  { type: 'edit' as const, onClick: handleEdit },
+                  { type: 'delete' as const, onClick: () => setDeleteModal(true) },
+              ]
+            : []),
     ];
 
     return (
@@ -68,7 +84,6 @@ export function ContactDetails() {
             <IModernAppBar module="Contacts" crntPage="Contact Details" actions={actions} />
 
             <Box sx={{ p: 3, mx: 'auto' }}>
-                {/* Hero Section */}
                 <Box
                     sx={{
                         backgroundColor: 'white',
@@ -107,7 +122,6 @@ export function ContactDetails() {
                     </Box>
                 </Box>
 
-                {/* Contact Information */}
                 <DetailSection title="Contact Information" icon={<FaUser style={{ color: '#6366f1' }} />}>
                     <DetailField label="First Name" value={contactDetails.first_name} />
                     <DetailField label="Last Name" value={contactDetails.last_name} />
@@ -143,7 +157,6 @@ export function ContactDetails() {
                     <DetailField label="Do Not Call" value={contactDetails.do_not_call ? 'Yes' : 'No'} />
                 </DetailSection>
 
-                {/* Address Information */}
                 <DetailSection title="Address Information" icon={<FaMapMarkerAlt style={{ color: '#6366f1' }} />}>
                     <DetailField label="Address Line" value={contactDetails.address.address_line} />
                     <DetailField label="Street" value={contactDetails.address.street} />
@@ -153,7 +166,6 @@ export function ContactDetails() {
                     <DetailField label="Country" value={getCountryNameByCode(contactDetails.address.country || '')} />
                 </DetailSection>
 
-                {/* Description */}
                 <DetailSection title="Description" icon={<FaFileAlt style={{ color: '#6366f1' }} />}>
                     {contactDetails.description ? (
                         <Box
@@ -172,7 +184,6 @@ export function ContactDetails() {
                     )}
                 </DetailSection>
 
-                {/* Social Links */}
                 <DetailSection title="Social Links" icon={<FaShareAlt style={{ color: '#6366f1' }} />}>
                     <DetailField
                         label="LinkedIn URL"

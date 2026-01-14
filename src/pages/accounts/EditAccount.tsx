@@ -12,7 +12,6 @@ export function EditAccount() {
     const { getAll: getAllAccounts, getById, update, isLoading } = useAccounts();
 
     const [formData, setFormData] = useState<AccountFormData | null>(null);
-    const [initialData, setInitialData] = useState<AccountFormData | null>(null);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [backendErrors, setBackendErrors] = useState<FormErrors>({});
     const [isLoadingData, setIsLoadingData] = useState(true);
@@ -65,7 +64,7 @@ export function EditAccount() {
             const result = await getById(accountId);
             if (result.success && result.data) {
                 const account = result.data.account;
-                console.log(account.assigned_to);
+
                 const data: AccountFormData = {
                     name: account.name || '',
                     phone: account.phone || '',
@@ -86,7 +85,6 @@ export function EditAccount() {
                     assigned_to: account.assigned_to?.map((u: any) => u.id) || [],
                 };
                 setFormData(data);
-                setInitialData(data);
             } else {
                 navigate(routes.accounts.main);
             }

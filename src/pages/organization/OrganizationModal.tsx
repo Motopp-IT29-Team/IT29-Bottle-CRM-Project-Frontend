@@ -146,7 +146,6 @@ export default function OrganizationModal(props: any) {
     const handleSaveRename = async () => {
         // Check if cancelling
         if (isCancellingRef.current) {
-            console.log('⚠️ Rename cancelled, skipping save');
             return;
         }
 
@@ -545,7 +544,7 @@ export default function OrganizationModal(props: any) {
                     )}
                 </Box>
 
-                {isAdmin && (
+                {(isAdmin || !userRole) && (
                     <>
                         <Divider />
 

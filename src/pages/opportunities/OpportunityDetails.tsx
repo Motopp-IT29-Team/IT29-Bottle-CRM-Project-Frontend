@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Box, Typography, Stack, Avatar } from '@mui/material';
-import { FaEdit, FaTrash, FaFileAlt, FaUsers } from 'react-icons/fa';
+import { Box, Typography } from '@mui/material';
+import { FaEdit, FaTrash, FaFileAlt } from 'react-icons/fa';
 import { IModernAppBar, AppBarAction, IActionModal, ILoadingState, ErrorState } from '../../components/ui';
 import { useOpportunities } from '../../api';
 import { routes } from '../../constants/routes';
@@ -19,9 +19,19 @@ export function OpportunityDetails() {
     const [opportunity, setOpportunity] = useState<IOpportunity | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
 
-    // Modal states
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const currentUserEmail = localStorage.getItem('userEmail');
+    const currentUserRole = localStorage.getItem('role');
+
+    const canModifyOpportunity = () => {
+        if (!opportunity) return false;
+        const isAdmin = currentUserRole === 'ADMIN';
+
+        const isCreator = opportunity.created_by.email === currentUserEmail;
+        return isAdmin || isCreator;
+    };
 
     useEffect(() => {
         if (!opportunityId) {
@@ -76,8 +86,18 @@ export function OpportunityDetails() {
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Opportunities', onClick: handleBack },
-        { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
-        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
+        ...(canModifyOpportunity()
+            ? [
+                  { type: 'custom' as const, label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
+                  {
+                      type: 'custom' as const,
+                      label: 'Delete',
+                      icon: <FaTrash />,
+                      onClick: handleDeleteClick,
+                      color: 'error' as const,
+                  },
+              ]
+            : []),
     ];
 
     if (isLoading) {
@@ -93,7 +113,6 @@ export function OpportunityDetails() {
             <IModernAppBar module="Opportunities" crntPage="Opportunity Details" actions={actions} />
 
             <Box sx={{ p: 3, display: 'flex', gap: 3 }}>
-                {/* Main Content - 68% */}
                 <Box sx={{ flex: '0 0 68%' }}>
                     <OpportunityHeroCard opportunity={opportunity} />
 
@@ -116,7 +135,6 @@ export function OpportunityDetails() {
                     </DetailSection>
                 </Box>
 
-                {/* Sidebar - 30% */}
                 <Box sx={{ flex: '0 0 30%' }}>
                     <AttachmentsCard
                         attachments={attachments.map((a: any) => ({
@@ -131,7 +149,6 @@ export function OpportunityDetails() {
                 </Box>
             </Box>
 
-            {/* Delete Opportunity Modal */}
             <IActionModal
                 open={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}

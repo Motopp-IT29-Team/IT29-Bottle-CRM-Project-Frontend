@@ -78,7 +78,7 @@ export const OpportunityHeroCard: React.FC<Props> = ({ opportunity }) => {
         const email = user.user_details?.email || user.email || 'U';
         return email.charAt(0).toUpperCase();
     };
-    console.log(opportunity);
+
     return (
         <Paper
             elevation={0}

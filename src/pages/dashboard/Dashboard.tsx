@@ -42,7 +42,7 @@ export const Dashboard: React.FC = () => {
     // Transform recent items to common format - API returns 'leads' array at root level
     const recentLeads = useMemo(() => {
         const leads = dashboardData?.leads || dashboardData?.recent_leads || [];
-        console.log('Processing leads for RecentList:', leads.length);
+
         return leads.slice(0, 5).map((lead: IRecentLead) => ({
             id: lead.id,
             title: lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown',

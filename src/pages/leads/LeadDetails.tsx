@@ -23,7 +23,6 @@ export function LeadDetails() {
     const [comments, setComments] = useState<any[]>([]);
     const [note, setNote] = useState('');
 
-    // Modal states
     const [deleteLeadModalOpen, setDeleteLeadModalOpen] = useState(false);
     const [deleteAttachmentModalOpen, setDeleteAttachmentModalOpen] = useState(false);
     const [deleteNoteModalOpen, setDeleteNoteModalOpen] = useState(false);
@@ -31,6 +30,16 @@ export function LeadDetails() {
     const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
     const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const currentUserEmail = localStorage.getItem('userEmail');
+    const currentUserRole = localStorage.getItem('role');
+
+    const canModifyLead = () => {
+        if (!leadDetails) return false;
+        const isAdmin = currentUserRole === 'ADMIN';
+        const isCreator = leadDetails.created_by?.email === currentUserEmail;
+        return isAdmin || isCreator;
+    };
 
     useEffect(() => {
         if (leadId) {
@@ -110,7 +119,6 @@ export function LeadDetails() {
 
         if (result.success) {
             setDeleteAttachmentModalOpen(false);
-            // Optimistically remove attachment from state
             setAttachments((prev) => prev.filter((att) => att.id !== selectedAttachmentId));
             setSelectedAttachmentId(null);
         } else {
@@ -155,7 +163,7 @@ export function LeadDetails() {
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Leads', onClick: handleBack },
-        ...(leadDetails && !leadDetails.is_converted && leadDetails.status === 'qualified'
+        ...(canModifyLead() && leadDetails && !leadDetails.is_converted && leadDetails.status === 'qualified'
             ? [
                   {
                       type: 'custom' as const,
@@ -166,8 +174,18 @@ export function LeadDetails() {
                   },
               ]
             : []),
-        { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
-        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
+        ...(canModifyLead()
+            ? [
+                  { type: 'custom' as const, label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
+                  {
+                      type: 'custom' as const,
+                      label: 'Delete',
+                      icon: <FaTrash />,
+                      onClick: handleDeleteClick,
+                      color: 'error' as const,
+                  },
+              ]
+            : []),
     ];
 
     if (isLoading) {
@@ -183,7 +201,6 @@ export function LeadDetails() {
             <IModernAppBar module="Leads" crntPage="Lead Details" actions={actions} />
 
             <Box sx={{ p: 3, display: 'flex', gap: 3 }}>
-                {/* Main Content - 68% */}
                 <Box sx={{ flex: '0 0 68%' }}>
                     <HeroCard lead={leadDetails} />
 
@@ -256,7 +273,6 @@ export function LeadDetails() {
                     </DetailSection>
                 </Box>
 
-                {/* Sidebar - 30% */}
                 <Box sx={{ flex: '0 0 30%' }}>
                     <AttachmentsCard
                         attachments={attachments}
@@ -273,7 +289,6 @@ export function LeadDetails() {
                 </Box>
             </Box>
 
-            {/* Delete Lead Modal */}
             <IActionModal
                 open={deleteLeadModalOpen}
                 onClose={() => setDeleteLeadModalOpen(false)}
@@ -286,7 +301,6 @@ export function LeadDetails() {
                 isLoading={isDeleting}
             />
 
-            {/* Delete Attachment Modal */}
             <IActionModal
                 open={deleteAttachmentModalOpen}
                 onClose={() => {
@@ -302,7 +316,6 @@ export function LeadDetails() {
                 isLoading={isDeleting}
             />
 
-            {/* Delete Note Modal */}
             <IActionModal
                 open={deleteNoteModalOpen}
                 onClose={() => {
@@ -318,7 +331,6 @@ export function LeadDetails() {
                 isLoading={isDeleting}
             />
 
-            {/* Convert Lead Modal */}
             {leadDetails && (
                 <ConvertLeadModal
                     open={convertModalOpen}

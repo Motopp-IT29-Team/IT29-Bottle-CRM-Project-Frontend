@@ -21,6 +21,17 @@ export function AccountDetails() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const currentUserEmail = localStorage.getItem('userEmail');
+    const currentUserRole = localStorage.getItem('role');
+
+    const canModifyAccount = () => {
+        if (!account) return false;
+        const isAdmin = currentUserRole === 'ADMIN';
+
+        const isCreator = account.created_by.email === currentUserEmail;
+        return isAdmin || isCreator;
+    };
+
     useEffect(() => {
         if (!accountId) {
             navigate(routes.accounts.main);
@@ -70,8 +81,18 @@ export function AccountDetails() {
 
     const actions: AppBarAction[] = [
         { type: 'back', label: 'Back To Accounts', onClick: handleBack },
-        { type: 'custom', label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
-        { type: 'custom', label: 'Delete', icon: <FaTrash />, onClick: handleDeleteClick, color: 'error' },
+        ...(canModifyAccount()
+            ? [
+                  { type: 'custom' as const, label: 'Edit', icon: <FaEdit />, onClick: handleEdit },
+                  {
+                      type: 'custom' as const,
+                      label: 'Delete',
+                      icon: <FaTrash />,
+                      onClick: handleDeleteClick,
+                      color: 'error' as const,
+                  },
+              ]
+            : []),
     ];
 
     if (isLoading || !account) {

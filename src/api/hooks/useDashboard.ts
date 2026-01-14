@@ -13,7 +13,6 @@ export const useDashboard = () => {
         setIsLoading(true);
         try {
             const data = await dashboardService.getDashboard();
-            console.log('Dashboard API response:', data);
 
             if (data && !('error' in data)) {
                 setDashboardData(data);
