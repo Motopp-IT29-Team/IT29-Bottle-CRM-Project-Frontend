@@ -21,15 +21,15 @@ import {
     CircularProgress,
 } from '@mui/material';
 import { FiFileText, FiDownload, FiSettings } from 'react-icons/fi';
-import { useReports, reportsApi } from '../../api';
+import { reportsApi } from '../../api';
 
 const REPORT_TYPES = [
-    { value: 'sales', label: 'Sales Report' },
-    { value: 'revenue', label: 'Revenue Report' },
-    { value: 'activity', label: 'Activity Report' },
-    { value: 'contact', label: 'Contact/Account Report' },
-    { value: 'case', label: 'Case/Support Report' },
-    { value: 'team', label: 'Team Performance Report' },
+    { value: 'leads', label: 'Leads Report' },
+    { value: 'accounts', label: 'Accounts Report' },
+    { value: 'contacts', label: 'Contacts Report' },
+    { value: 'opportunities', label: 'Opportunities Report' },
+    { value: 'companies', label: 'Companies Report' },
+    { value: 'activity', label: 'Activity Logs Report' },
 ];
 
 const DATE_PRESETS = [
@@ -44,23 +44,78 @@ const DATE_PRESETS = [
     { value: 'custom', label: 'Custom Range' },
 ];
 
-const GROUPING_OPTIONS = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'user', label: 'By User' },
-    { value: 'team', label: 'By Team' },
-    { value: 'status', label: 'By Status' },
-    { value: 'source', label: 'By Source' },
-];
+// Base grouping options
+const BASE_GROUPING_OPTIONS = {
+    daily: { value: 'daily', label: 'Daily' },
+    weekly: { value: 'weekly', label: 'Weekly' },
+    monthly: { value: 'monthly', label: 'Monthly' },
+    user: { value: 'user', label: 'By User' },
+    status: { value: 'status', label: 'By Status' },
+    source: { value: 'source', label: 'By Source' },
+    action: { value: 'action', label: 'By Action' },
+    stage: { value: 'stage', label: 'By Stage' },
+};
+
+// Dynamic grouping options per report type
+const GROUPING_OPTIONS_BY_REPORT_TYPE: Record<string, { value: string; label: string }[]> = {
+    leads: [
+        BASE_GROUPING_OPTIONS.daily,
+        BASE_GROUPING_OPTIONS.weekly,
+        BASE_GROUPING_OPTIONS.monthly,
+        BASE_GROUPING_OPTIONS.status,
+        BASE_GROUPING_OPTIONS.source,
+        BASE_GROUPING_OPTIONS.user,
+    ],
+    accounts: [
+        BASE_GROUPING_OPTIONS.daily,
+        BASE_GROUPING_OPTIONS.weekly,
+        BASE_GROUPING_OPTIONS.monthly,
+        BASE_GROUPING_OPTIONS.status,
+    ],
+    contacts: [
+        BASE_GROUPING_OPTIONS.daily,
+        BASE_GROUPING_OPTIONS.weekly,
+        BASE_GROUPING_OPTIONS.monthly,
+        BASE_GROUPING_OPTIONS.status,
+    ],
+    opportunities: [
+        BASE_GROUPING_OPTIONS.daily,
+        BASE_GROUPING_OPTIONS.weekly,
+        BASE_GROUPING_OPTIONS.monthly,
+        BASE_GROUPING_OPTIONS.stage,
+        BASE_GROUPING_OPTIONS.source,
+        BASE_GROUPING_OPTIONS.user,
+    ],
+    companies: [
+        BASE_GROUPING_OPTIONS.daily,
+        BASE_GROUPING_OPTIONS.weekly,
+        BASE_GROUPING_OPTIONS.monthly,
+    ],
+    activity: [
+        BASE_GROUPING_OPTIONS.daily,
+        BASE_GROUPING_OPTIONS.weekly,
+        BASE_GROUPING_OPTIONS.monthly,
+        BASE_GROUPING_OPTIONS.action,
+        BASE_GROUPING_OPTIONS.user,
+    ],
+};
+
+// Default grouping per report type
+const DEFAULT_GROUPING_BY_REPORT_TYPE: Record<string, string> = {
+    leads: 'status',
+    accounts: 'status',
+    contacts: 'status',
+    opportunities: 'stage',
+    companies: 'monthly',
+    activity: 'action',
+};
 
 export const ReportConfigure: React.FC = () => {
-    const { generateReport, downloadReport } = useReports();
-    const [reportType, setReportType] = useState('sales');
+    const [reportType, setReportType] = useState('leads');
     const [datePreset, setDatePreset] = useState('this_month');
     const [dateFrom, setDateFrom] = useState<string>('');
     const [dateTo, setDateTo] = useState<string>('');
-    const [grouping, setGrouping] = useState('monthly');
+    const [grouping, setGrouping] = useState(DEFAULT_GROUPING_BY_REPORT_TYPE['leads']);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -69,13 +124,23 @@ export const ReportConfigure: React.FC = () => {
     const [includeSummary, setIncludeSummary] = useState(true);
     const [includeCharts, setIncludeCharts] = useState(true);
     const [includeTables, setIncludeTables] = useState(true);
-    const [includeLogo, setIncludeLogo] = useState(true);
+    const [includeLogo, setIncludeLogo] = useState(false);
 
     // Graphics configuration
     const [includeGraphics, setIncludeGraphics] = useState(true);
     const [showBarChart, setShowBarChart] = useState(true);
     const [showPieChart, setShowPieChart] = useState(true);
     const [chartColors, setChartColors] = useState(['#1976d2', '#dc004e', '#f50057', '#9c27b0', '#3f51b5']);
+
+    // Get available grouping options for current report type
+    const availableGroupingOptions = GROUPING_OPTIONS_BY_REPORT_TYPE[reportType] || [];
+
+    // Handle report type change - reset grouping to default for that type
+    const handleReportTypeChange = (newReportType: string) => {
+        setReportType(newReportType);
+        const defaultGrouping = DEFAULT_GROUPING_BY_REPORT_TYPE[newReportType] || 'monthly';
+        setGrouping(defaultGrouping);
+    };
 
     const handleGenerateReport = async () => {
         setIsLoading(true);
@@ -101,16 +166,25 @@ export const ReportConfigure: React.FC = () => {
                 },
             };
 
-            const report = await generateReport(config);
+            console.log('Generating report with config:', config);
+            
+            const report = await reportsApi.generateReport(config);
+            console.log('Report generated:', report);
 
-            if (report) {
+            if (report && report.id) {
                 setSuccess('Report generated successfully! Downloading...');
                 
                 // Download the report
                 await reportsApi.triggerReportDownload(report.id.toString(), report.file_name);
+            } else {
+                setError('Unable to generate the report. Please check your settings and try again.');
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to generate report');
+            console.error('Error generating report:', err);
+            console.error('Error response:', err.response);
+            // Extract the user-friendly message from the backend
+            const errorMessage = err.response?.data?.message || err.message || 'Something went wrong while generating the report. Please try again.';
+            setError(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -167,7 +241,7 @@ export const ReportConfigure: React.FC = () => {
                                         <InputLabel>Select Report Type</InputLabel>
                                         <Select
                                             value={reportType}
-                                            onChange={(e) => setReportType(e.target.value)}
+                                            onChange={(e) => handleReportTypeChange(e.target.value)}
                                             label="Select Report Type"
                                         >
                                             {REPORT_TYPES.map((type) => (
@@ -243,7 +317,7 @@ export const ReportConfigure: React.FC = () => {
                                             onChange={(e) => setGrouping(e.target.value)}
                                             label="Group By"
                                         >
-                                            {GROUPING_OPTIONS.map((option) => (
+                                            {availableGroupingOptions.map((option) => (
                                                 <MenuItem key={option.value} value={option.value}>
                                                     {option.label}
                                                 </MenuItem>
