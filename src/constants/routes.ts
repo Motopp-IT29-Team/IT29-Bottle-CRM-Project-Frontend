@@ -50,4 +50,8 @@ export const routes = {
     activityLogs: {
         main: '/activity-logs',
     },
+    reports: {
+        main: '/reports',
+        configure: '/reports/configure',
+    },
 };

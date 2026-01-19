@@ -12,6 +12,7 @@ export * from './services/accounts.service';
 export * from './services/companies.service';
 export * from './services/cases.service';
 export * from './services/dashboard.service';
+export * from './services/reports';
 
 export * from './validations/users.validation';
 export * from './validations/leads.validation';
@@ -31,6 +32,7 @@ export * from './hooks/useCompanies';
 export * from './hooks/useCases';
 export * from './hooks/useForm';
 export * from './hooks/useDashboard';
+export * from './hooks/useReports';
 
 export * from './configs/user.config';
 export * from './configs/lead.config';

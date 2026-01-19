@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
-import { FiUsers, FiTrendingUp, FiFolder, FiPhone } from 'react-icons/fi';
+import { Box, Grid, Typography, Button } from '@mui/material';
+import { FiUsers, FiTrendingUp, FiFolder, FiPhone, FiFileText } from 'react-icons/fi';
 import { FaEuroSign } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../api';
 import { routes } from '../../constants/routes';
 import { StatCard } from './StatCard';
@@ -11,6 +12,7 @@ import { IRecentLead, IRecentOpportunity, IRecentContact } from '../../types';
 
 export const Dashboard: React.FC = () => {
     const { isLoading, dashboardData, getDashboard } = useDashboard();
+    const navigate = useNavigate();
 
     useEffect(() => {
         getDashboard();
@@ -121,25 +123,48 @@ export const Dashboard: React.FC = () => {
     return (
         <Box sx={{ p: 3, backgroundColor: '#f9fafb', minHeight: 'calc(100vh - 60px)' }}>
             {/* Welcome Section */}
-            <Box sx={{ mb: 4 }}>
-                <Typography
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                    <Typography
+                        sx={{
+                            fontSize: '24px',
+                            fontWeight: 700,
+                            color: '#111827',
+                            mb: 0.5,
+                        }}
+                    >
+                        Welcome back! 👋
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: '14px',
+                            color: '#6b7280',
+                        }}
+                    >
+                        Here's an overview of your CRM activities
+                    </Typography>
+                </Box>
+                <Button
+                    variant="contained"
+                    startIcon={<FiFileText />}
+                    onClick={() => navigate(routes.reports.configure)}
                     sx={{
-                        fontSize: '24px',
-                        fontWeight: 700,
-                        color: '#111827',
-                        mb: 0.5,
+                        backgroundColor: '#6366f1',
+                        color: 'white',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        px: 3,
+                        py: 1.5,
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)',
+                        '&:hover': {
+                            backgroundColor: '#4f46e5',
+                            boxShadow: '0 6px 16px rgba(99, 102, 241, 0.3)',
+                        },
                     }}
                 >
-                    Welcome back! 👋
-                </Typography>
-                <Typography
-                    sx={{
-                        fontSize: '14px',
-                        color: '#6b7280',
-                    }}
-                >
-                    Here's an overview of your CRM activities
-                </Typography>
+                    Generate Report
+                </Button>
             </Box>
 
             {/* Stats Cards */}

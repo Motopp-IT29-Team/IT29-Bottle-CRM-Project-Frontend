@@ -62,4 +62,11 @@ export const ENDPOINTS = {
 
     // Dashboard
     DASHBOARD: 'dashboard/',
+
+    // Reports
+    REPORTS_CONFIGURATIONS: 'reports/configurations/',
+    REPORTS_CONFIGURATION_DETAIL: (id: string) => `reports/configurations/${id}/`,
+    REPORTS_GENERATE: 'reports/generate/',
+    REPORTS_GENERATED: 'reports/generated/',
+    REPORTS_DOWNLOAD: (id: string) => `reports/download/${id}/`,
 } as const;

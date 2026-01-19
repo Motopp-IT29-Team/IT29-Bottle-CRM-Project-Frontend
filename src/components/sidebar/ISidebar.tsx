@@ -32,6 +32,7 @@ import { AddCase } from '../../pages/cases/AddCase';
 import { EditCase } from '../../pages/cases/EditCase';
 import { CaseDetails } from '../../pages/cases/CaseDetails';
 import { ActivityLogs } from '../../pages/activityLogs/ActivityLogs';
+import { ReportConfigure } from '../../pages/reports';
 import { ISidebarHeader } from './ISidebarHeader';
 import { ISidebarNavigation } from './ISidebarNavigation';
 import { ISidebarUserSection } from './ISidebarUserSection';
@@ -180,6 +181,9 @@ export const ISidebar = () => {
                         <Route path={routes.accounts.edit} element={<EditAccount />} />
 
                         <Route path={routes.activityLogs.main} element={<ActivityLogs />} />
+
+                        <Route path={routes.reports.main} element={<ReportConfigure />} />
+                        <Route path={routes.reports.configure} element={<ReportConfigure />} />
 
                         {isAdmin && (
                             <>
