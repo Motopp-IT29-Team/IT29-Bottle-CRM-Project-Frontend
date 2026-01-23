@@ -238,7 +238,7 @@ export default function OrganizationModal(props: any) {
         }
 
         onHandleClose();
-        window.location.href = routes.app.main;
+        window.location.href = routes.dashboard.main;
     };
 
     const getOrgInitial = (name: string) => {
