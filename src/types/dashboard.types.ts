@@ -10,6 +10,7 @@ export interface IDashboardStats {
 
 export interface IRecentLead {
     id: string;
+    account_name: string;
     first_name: string;
     last_name: string;
     full_name?: string;

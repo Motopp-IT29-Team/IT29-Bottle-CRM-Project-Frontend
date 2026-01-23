@@ -44,11 +44,12 @@ export const Dashboard: React.FC = () => {
     // Transform recent items to common format - API returns 'leads' array at root level
     const recentLeads = useMemo(() => {
         const leads = dashboardData?.leads || dashboardData?.recent_leads || [];
-
+        console.log(dashboardData);
         return leads.slice(0, 5).map((lead: IRecentLead) => ({
             id: lead.id,
-            title: lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown',
-            subtitle: lead.email,
+            title: lead.account_name || '',
+            name: lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown',
+            subtitle: lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown',
             status: lead.status,
             time: lead.created_on_arrow,
         }));

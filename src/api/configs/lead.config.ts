@@ -34,10 +34,10 @@ export const getLeadConfig = (params: Params = {}): IFormConfig => ({
             fields: [
                 {
                     name: 'account_name',
-                    label: 'Company Name',
+                    label: 'Lead Name',
                     type: 'text',
                     required: true,
-                    placeholder: 'Enter company name',
+                    placeholder: 'Enter lead name',
                 },
                 {
                     name: 'website',

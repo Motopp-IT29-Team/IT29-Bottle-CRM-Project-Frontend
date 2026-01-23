@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface RecentItem {
     id: string;
+    name?: string;
     title: string;
     subtitle?: string;
     status?: string;
@@ -75,11 +76,7 @@ export const RecentList: React.FC<RecentListProps> = ({
                     backgroundColor: '#fafafa',
                 }}
             >
-                {icon && (
-                    <Box sx={{ color: '#6366f1', display: 'flex' }}>
-                        {icon}
-                    </Box>
-                )}
+                {icon && <Box sx={{ color: '#6366f1', display: 'flex' }}>{icon}</Box>}
                 <Typography
                     sx={{
                         fontSize: '16px',
@@ -138,7 +135,14 @@ export const RecentList: React.FC<RecentListProps> = ({
                                     }}
                                 >
                                     <Box sx={{ width: '100%' }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                mb: 0.5,
+                                            }}
+                                        >
                                             <Typography
                                                 sx={{
                                                     fontSize: '14px',
@@ -167,7 +171,13 @@ export const RecentList: React.FC<RecentListProps> = ({
                                                 />
                                             )}
                                         </Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                            }}
+                                        >
                                             {item.subtitle && (
                                                 <Typography
                                                     sx={{
@@ -182,6 +192,7 @@ export const RecentList: React.FC<RecentListProps> = ({
                                                     {item.subtitle}
                                                 </Typography>
                                             )}
+
                                             {item.time && (
                                                 <Typography
                                                     sx={{
